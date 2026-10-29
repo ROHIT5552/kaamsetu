@@ -1,0 +1,40 @@
+{
+  "name": "kaamsetu-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KaamSetu - Marketplace for verified local skilled workers in Aurangabad",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev:all",
+    "dev:all": "concurrently -n \"shared,server,web\" -c \"cyan,green,blue\" \"npm run dev --workspace=shared\" \"npm run dev --workspace=server\" \"npm run dev --workspace=web\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:web": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=shared && npm run build --workspace=server && npm run build --workspace=web",
+    "build:shared": "npm run build --workspace=shared",
+    "build:server": "npm run build --workspace=server",
+    "build:web": "npm run build --workspace=web",
+    "seed": "npm run seed --workspace=server",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "kaamsetu",
+    "marketplace",
+    "skilled-workers",
+    "aurangabad",
+    "nextjs",
+    "express",
+    "prisma",
+    "threejs",
+    "typescript"
+  ],
+  "author": "DeepMind Advanced Agentic Engineer",
+  "license": "MIT"
+}

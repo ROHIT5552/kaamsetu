@@ -1,0 +1,173 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  WORKER
+  ADMIN
+}
+
+enum Skill {
+  plumber
+  electrician
+  carpenter
+  painter
+  mason
+  helper
+}
+
+enum Availability {
+  today
+  tomorrow
+  week
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ON_THE_WAY
+  ARRIVED
+  DONE
+  CANCELLED
+}
+
+enum OtpType {
+  PHONE
+  EMAIL
+}
+
+model User {
+  id              String         @id @default(uuid())
+  role            Role           @default(CUSTOMER)
+  name            String
+  email           String?        @unique
+  phone           String?        @unique
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  passwordHash    String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  workerProfile   WorkerProfile?
+  bookingsMade    Booking[]      @relation("CustomerBookings")
+  reviewsGiven    Review[]       @relation("CustomerReviews")
+  sessions        Session[]
+  otpCodes        OtpCode[]
+
+  @@index([role])
+}
+
+model WorkerProfile {
+  id           String       @id @default(uuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill        Skill
+  yearsExp     Int          @default(0)
+  area         String
+  ratePerDay   Int
+  visitCharge  Int          @default(0)
+  about        String
+  availability Availability @default(today)
+  verified     Boolean      @default(false)
+  ratingAvg    Float        @default(4.0)
+  jobsCount    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  photos       WorkPhoto[]
+  reviews      Review[]
+  bookings     Booking[]
+
+  @@index([skill, area, availability, verified])
+  @@index([ratePerDay])
+  @@index([ratingAvg])
+}
+
+model WorkPhoto {
+  id        String        @id @default(uuid())
+  workerId  String
+  worker    WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  url       String
+  order     Int           @default(0)
+  createdAt DateTime      @default(now())
+
+  @@index([workerId])
+}
+
+model Review {
+  id         String        @id @default(uuid())
+  workerId   String
+  worker     WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   User          @relation("CustomerReviews", fields: [customerId], references: [id], onDelete: Cascade)
+  rating     Int
+  text       String
+  createdAt  DateTime      @default(now())
+
+  @@index([workerId])
+}
+
+model Booking {
+  id         String          @id @default(uuid())
+  workerId   String
+  worker     WorkerProfile   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   User            @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  date       DateTime
+  slot       Int
+  job        String
+  status     BookingStatus   @default(PENDING)
+  address    String
+  lat        Float?
+  lng        Float?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  location   WorkerLocation?
+
+  @@index([workerId, date, slot])
+  @@index([customerId])
+  @@index([status])
+}
+
+model WorkerLocation {
+  id        String   @id @default(uuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  lat       Float
+  lng       Float
+  updatedAt DateTime @updatedAt
+}
+
+model OtpCode {
+  id         String    @id @default(uuid())
+  target     String
+  type       OtpType
+  codeHash   String
+  purpose    String    @default("LOGIN")
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([target, purpose])
+}
+
+model Session {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}

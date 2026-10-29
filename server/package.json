@@ -15,7 +15,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@kaamsetu/shared": "*",
     "@prisma/client": "^5.14.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.2.0",

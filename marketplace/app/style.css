@@ -25,7 +25,7 @@ main{max-width:1350px;margin:auto;padding:29px 32px 56px;min-height:75vh}
 h1{font-size:clamp(2.25rem,5vw,4.6rem);line-height:1.055;letter-spacing:-.04em;font-weight:850;text-wrap:balance}
 .hero h1{max-width:13ch}
 .hero p{max-width:43ch;margin:13px 0 25px;font-size:16px;line-height:1.6}
-.hero-trades{padding:clamp(22px,4vw,52px);border-left:1px solid var(--line);background:#0e1626;display:grid;align-content:center;gap:18px;min-width:0}
+.hero-trades{padding:clamp(22px,4vw,52px);border-left:1px solid var(--line);background:radial-gradient(ellipse at 54% 42%,#1c3255 0%,#0e1626 73%);display:grid;align-content:center;gap:18px;min-width:0}
 .hero-trades h2{font-size:1.32rem}
 .trade-stage{position:relative;isolation:isolate;perspective:850px}
 .trade-stage::before{content:"";position:absolute;inset:12% -4%;z-index:-1;border:1px solid #3a4e72;border-radius:50%;transform:rotate(-12deg);pointer-events:none}
@@ -118,6 +118,26 @@ summary{cursor:pointer;font-weight:750}
 .check-row details p{margin:8px 0}
 .review-case{margin:0}
 .review-case h2{font-size:1.25rem}
+.job-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.job-title h2{font-size:1.33rem}
+.job-status{display:inline-flex;align-items:center;border:1px solid #466085;border-radius:999px;padding:4px 9px;color:var(--accent);font-size:.78rem;font-weight:800;flex:none}
+.job-row details p{margin:9px 0}
+.rating{display:flex;align-items:center;gap:7px;color:var(--gold);font-weight:750}
+.booking-progress{padding:17px;background:#0f192b;border:1px solid var(--line);border-radius:12px}
+.booking-progress ol{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:14px 0 0;padding:0}
+.booking-progress li{position:relative;display:grid;align-content:start;gap:6px;color:var(--muted);font-size:.77rem;overflow-wrap:anywhere}
+.booking-progress li:not(:last-child)::after{content:"";position:absolute;top:15px;left:35px;right:0;border-top:1px solid #405274}
+.booking-progress li[data-done=true]{color:var(--ink)}
+.booking-progress li[aria-current=step]{color:var(--gold)}
+.progress-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:#253452;color:var(--accent)}
+.booking-progress li[data-done=true] .progress-icon{color:var(--mint);background:#1f3d43}
+.booking-progress li[aria-current=step] .progress-icon{color:#251700;background:var(--gold)}
+@media(max-width:620px){
+ .booking-progress ol{grid-template-columns:1fr;gap:8px}
+ .booking-progress li{grid-template-columns:32px minmax(0,1fr);align-items:center}
+ .booking-progress li:not(:last-child)::after{display:none}
+ .booking-progress small{grid-column:2}
+}
 .foot{max-width:1350px;margin:auto;display:flex;align-items:center;gap:8px;padding:18px 32px 30px;color:var(--muted);font-size:.85rem}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.top-inner{flex-wrap:wrap}.top-inner nav{order:3;width:100%}.journey{grid-template-columns:1fr;gap:12px}}
 @media(max-width:620px){main,.top-inner,.foot{padding-left:15px;padding-right:15px}main{padding-top:17px}.hero{grid-template-columns:1fr}.hero-content{padding:25px 19px}.hero h1{max-width:17ch}.hero p{font-size:15px;margin-bottom:18px}.hero-trades{border-left:0;border-top:1px solid var(--line);padding:20px 14px;gap:12px}.trade-grid{gap:7px}.trade-grid button{min-height:90px}.journey ol{grid-template-columns:1fr;gap:10px}.cards,.auth-grid,.pair,.inbox{grid-template-columns:1fr}.top-inner{gap:10px}.brand{font-size:18px}.tools{gap:5px}.tools button,.tools select{padding-inline:7px}nav button{padding-inline:8px;font-size:.86rem}.section-head{margin-top:22px}.filters select{flex:1}}

@@ -23,6 +23,12 @@ To run a production build locally, use npm run build and npm start. If a local d
 3. The worker sends an offer, or the employer invites an available worker from search using a matching open job. The employer can reply, accept it, or make a counteroffer. With a counteroffer, the worker must accept the new version.
 4. The worker marks the booking On the way and can explicitly share browser location. The employer sees recent updates in the booking conversation and can open the point in a map. The worker marks arrival, then the employer starts and completes the work.
 
+## Manage jobs and bookings
+
+Employers can open My jobs to edit a listing before its first offer, close an open listing, review incoming offers, or open its booking. Closing a listing removes it from discovery and declines pending offers in one transaction. Editing locks after the first offer so workers can rely on the scope they quoted.
+
+The booking inbox shows dated milestones from confirmation through completion. An employer can rate the worker once after completion. Discovery shows the average rating and lets visitors compare prices, ratings and approximate distance when location is available.
+
 ## Architecture
 
 - Next.js App Router serves the responsive marketplace. The Node.js route handler owns validation, sessions, permissions and transactions. PostgreSQL backs profiles, jobs, conversations, offers, bookings, verification requests and rate limits.

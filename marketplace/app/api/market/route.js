@@ -23,6 +23,8 @@ const area = z.enum(areas);
 const money = z.number().int().min(5000).max(100000000);
 const point = z.object({lat:z.number().min(-90).max(90),lng:z.number().min(-180).max(180)});
 const email = z.email().max(254).transform(s=>s.toLowerCase());
+const jobDetails=z.object({title:text(90),category,area,description:text(1400),amount:money,
+  starts:z.iso.datetime(),hours:z.number().int().min(1).max(48),point:point.optional()});
 const schemas = {
   signup:z.object({email,name:text(70),password:z.string().min(12).max(128),role:z.enum(['worker','employer'])}),
   login:z.object({email,password:z.string().min(1).max(128)}),
@@ -32,7 +34,10 @@ const schemas = {
   verify:z.object({kind:z.enum(['identity','electrical-license']),method:z.enum(['aadhaar','alternative','trade']),consent:z.literal(true),consentVersion:z.string().max(25).optional()}),
   withdrawCheck:z.object({id}),
   reviewCheck:z.object({id,decision:z.enum(['approve','reject','revoke']),reason:z.enum(rejectionReasons).optional()}),
-  job:z.object({title:text(90),category,area,description:text(1400),amount:money,starts:z.iso.datetime(),hours:z.number().int().min(1).max(48),point:point.optional()}),
+  job:jobDetails,
+  editJob:jobDetails.extend({id}),
+  closeJob:z.object({id}),
+  rate:z.object({id,score:z.number().int().min(1).max(5)}),
   apply:z.object({job:id,amount:money,note:text(500)}),
   invite:z.object({job:id,worker:id,amount:money,note:text(500)}),
   counter:z.object({id,amount:money,note:text(500),version:z.number().int().positive()}),
@@ -84,10 +89,14 @@ export async function GET(request) {
     const near=coords.has('lat') && coords.has('lng') ? point.safeParse({lat:Number(coords.get('lat')),lng:Number(coords.get('lng'))}) : null;
     const [jobs,people,profile,checks,threads,owned]=await Promise.all([
       rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,j.lat,j.lng,a.name
-        FROM jobs j JOIN accounts a ON a.id=j.employer WHERE a.demo=$1 AND j.starts>now()
+        FROM jobs j JOIN accounts a ON a.id=j.employer WHERE a.demo=$1 AND j.starts>now() AND j.closed_at IS NULL
         AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.job=j.id) ORDER BY j.created DESC LIMIT 100`,[demo()]),
-      rows(db,`SELECT a.id,a.name,p.category,p.area,p.rate,p.bio,p.lat,p.lng,a.demo
-        FROM profiles p JOIN accounts a ON a.id=p.account WHERE p.available AND a.demo=$1
+      rows(db,`SELECT a.id,a.name,p.category,p.area,p.rate,p.bio,p.lat,p.lng,a.demo,
+        ratings.score,ratings.count AS rating_count
+        FROM profiles p JOIN accounts a ON a.id=p.account
+        LEFT JOIN LATERAL (SELECT round(avg(score),1) AS score,count(*)::int AS count
+          FROM worker_ratings WHERE worker=a.id) ratings ON true
+        WHERE p.available AND a.demo=$1
         AND EXISTS (SELECT 1 FROM ${demo()?'credentials':'verification_cases'} c
           WHERE c.account=a.id AND c.kind='identity' AND ${demo()?'c.verified_at IS NOT NULL':activeCheck})
         AND (p.category<>'electrical' OR EXISTS (SELECT 1 FROM ${demo()?'credentials':'verification_cases'} c
@@ -95,26 +104,33 @@ export async function GET(request) {
       user ? one(db,'SELECT category,area,rate,bio,available,lat,lng FROM profiles WHERE account=$1',[user.id]) : null,
       workerChecks(db,user),
       user ? rows(db,`SELECT x.id,x.worker,j.employer,x.author,x.amount,x.note,x.version,x.state,
-        j.title,j.starts,w.name AS worker_name,e.name AS employer_name,b.state AS booking,
+        j.id AS job,j.title,j.starts,w.name AS worker_name,e.name AS employer_name,b.state AS booking,r.score AS rating,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lat END AS lat,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lng END AS lng,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.located_at END AS located_at
         FROM applications x JOIN jobs j ON j.id=x.job JOIN accounts w ON w.id=x.worker
         JOIN accounts e ON e.id=j.employer LEFT JOIN bookings b ON b.application=x.id
+        LEFT JOIN worker_ratings r ON r.application=x.id
         WHERE x.worker=$1 OR j.employer=$1 ORDER BY j.created DESC LIMIT 100`,[user.id]) : [],
-      user?.role==='employer' ? rows(db,`SELECT id,title,category,amount FROM jobs j WHERE employer=$1
-        AND starts>now() AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.job=j.id) ORDER BY created DESC LIMIT 100`,[user.id]) : []
+      user?.role==='employer' ? rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,
+        CASE WHEN b.state IS NOT NULL THEN b.state WHEN j.closed_at IS NOT NULL THEN 'closed'
+          WHEN j.starts<=now() THEN 'expired' ELSE 'open' END AS status,
+        count(x.id)::int AS offer_count,count(x.id) FILTER (WHERE x.state='pending')::int AS pending_count,
+        b.application AS thread
+        FROM jobs j LEFT JOIN bookings b ON b.job=j.id LEFT JOIN applications x ON x.job=j.id
+        WHERE j.employer=$1 GROUP BY j.id,b.state,b.application ORDER BY j.created DESC LIMIT 100`,[user.id]) : []
     ]);
     const thread=coords.get('thread');
     const selected=threads.find(t=>t.id===thread);
-    const [messages,offers]=selected ? await Promise.all([
+    const [messages,offers,events]=selected ? await Promise.all([
       rows(db,'SELECT * FROM (SELECT author,body,created,id FROM messages WHERE application=$1 ORDER BY id DESC LIMIT 100) m ORDER BY id',[thread]),
-      rows(db,'SELECT version,author,amount,note,created FROM offer_history WHERE application=$1 ORDER BY version DESC LIMIT 30',[thread])
-    ]) : [[],[]];
+      rows(db,'SELECT version,author,amount,note,created FROM offer_history WHERE application=$1 ORDER BY version DESC LIMIT 30',[thread]),
+      rows(db,'SELECT state,created FROM booking_events WHERE application=$1 ORDER BY id',[thread])
+    ]) : [[],[],[]];
     const publicCards = list => list.map(({lat,lng,...item})=>({...item,
       km:near?.success && lat!=null && lng!=null ? Math.round(distance(near.data,{lat,lng})*10)/10 : null
     })).sort((a,b)=>(a.km??Infinity)-(b.km??Infinity));
-    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,owned,thread:selected?.id});
+    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,events,owned,thread:selected?.id});
   } catch(error) { return failure(error); }
 }
 
@@ -187,6 +203,26 @@ export async function POST(request) {
       if (action==='verify') await submitCheck(tx,user,input);
       if (action==='withdrawCheck') await withdrawCheck(tx,user,input.id);
       if (action==='reviewCheck') await decideCheck(tx,user,input);
+      if (action==='editJob' || action==='closeJob') {
+        requireThat(user.role==='employer');
+        const current=await one(tx,'SELECT * FROM jobs WHERE id=$1 AND employer=$2 FOR UPDATE',[input.id,user.id]);
+        requireThat(current,'missing',404);
+        const booked=await one(tx,'SELECT job FROM bookings WHERE job=$1',[input.id]);
+        requireThat(!booked && !current.closed_at && current.starts>new Date(),'closed',409);
+        if (action==='closeJob') {
+          await tx.query('UPDATE jobs SET closed_at=now() WHERE id=$1',[input.id]);
+          await tx.query("UPDATE applications SET state='declined' WHERE job=$1 AND state='pending'",[input.id]);
+        } else {
+          requireThat(!(await one(tx,'SELECT id FROM applications WHERE job=$1 LIMIT 1',[input.id])),'jobHasOffers',409);
+          requireThat(Date.parse(input.starts)>Date.now(),'future',400);
+          const {title,category,area,description,amount,starts,hours,point}=input;
+          await tx.query(`UPDATE jobs SET title=$2,category=$3,area=$4,description=$5,amount=$6,starts=$7,hours=$8,
+            lat=CASE WHEN $4<>area OR $9::float8 IS NOT NULL THEN $9 ELSE lat END,
+            lng=CASE WHEN $4<>area OR $10::float8 IS NOT NULL THEN $10 ELSE lng END WHERE id=$1`,
+          [input.id,title,category,area,description,amount,starts,hours,point?.lat??null,point?.lng??null]);
+        }
+        return {};
+      }
       if (action==='job') {
         requireThat(user.role==='employer');
         requireThat(Date.parse(input.starts)>Date.now(),'future',400);
@@ -199,7 +235,7 @@ export async function POST(request) {
         if (invite) requireThat(user.role==='employer');
         const worker=invite?input.worker:user.id;
         const j=await one(tx,'SELECT * FROM jobs WHERE id=$1 FOR UPDATE',[input.job]);
-        requireThat(j && j.starts>new Date() && !(await one(tx,'SELECT job FROM bookings WHERE job=$1',[j.id])),'closed',409);
+        requireThat(j && !j.closed_at && j.starts>new Date() && !(await one(tx,'SELECT job FROM bookings WHERE job=$1',[j.id])),'closed',409);
         const employer=await one(tx,'SELECT demo FROM accounts WHERE id=$1',[j.employer]);
         requireThat(employer?.demo===user.demo && (!invite || j.employer===user.id),'missing',404);
         const p=await one(tx,`SELECT p.category FROM profiles p JOIN accounts a ON a.id=p.account
@@ -210,7 +246,7 @@ export async function POST(request) {
         await tx.query('INSERT INTO offer_history(application,version,author,amount,note) VALUES ($1,1,$2,$3,$4)',[x.id,user.id,input.amount,input.note]);
         return {thread:x.id};
       }
-      if (!['counter','decide','message','state','location'].includes(action)) return {};
+      if (!['counter','decide','message','state','location','rate'].includes(action)) return {};
       const link=await one(tx,`SELECT x.job FROM applications x JOIN jobs j ON j.id=x.job
         WHERE x.id=$1 AND (x.worker=$2 OR j.employer=$2)`,[input.id,user.id]);
       requireThat(link,'missing',404);
@@ -218,7 +254,7 @@ export async function POST(request) {
       const x=await one(tx,'SELECT * FROM applications WHERE id=$1 FOR UPDATE',[input.id]);
       const b=await one(tx,'SELECT * FROM bookings WHERE application=$1 FOR UPDATE',[x.id]);
       if (action==='counter' || action==='decide') {
-        requireThat(x.state==='pending' && j.starts>new Date(),'closed',409);
+        requireThat(x.state==='pending' && !j.closed_at && j.starts>new Date(),'closed',409);
         requireThat(x.version===input.version && x.author!==user.id,'turn',409);
       }
       if (action==='counter') {
@@ -244,6 +280,12 @@ export async function POST(request) {
         requireThat(allowed && (allowed==='either'||allowed===user.role),'transition',409);
         await tx.query('UPDATE bookings SET state=$1,lat=NULL,lng=NULL,located_at=NULL WHERE application=$2',[input.state,x.id]);
         await tx.query('INSERT INTO booking_events(application,author,state) VALUES ($1,$2,$3)',[x.id,user.id,input.state]);
+      }
+      if (action==='rate') {
+        requireThat(j.employer===user.id);
+        requireThat(b?.state==='completed','ratingUnavailable',409);
+        await tx.query('INSERT INTO worker_ratings(application,worker,score) VALUES ($1,$2,$3)',
+          [input.id,x.worker,input.score]);
       }
       if (action==='location') {
         requireThat(x.worker===user.id && b?.state==='en_route');

@@ -1,12 +1,18 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Handshake, ShieldCheck, ClipboardPlus, ClipboardList, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
+import { ArrowRight, Handshake, ShieldCheck, ClipboardPlus, ClipboardList, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
 import { areas, categories, transitions } from '../lib/domain';
 import { translate } from './copy';
+import BookingProgress from './booking-progress';
 import { WorkerVerification,VerificationReview } from './verification-panel';
 
 const icons={plumbing:Droplets,electrical:PlugZap,carpentry:Hammer,painting:PaintRoller,masonry:BrickWall,general:HardHat};
 const initial={jobs:[],people:[],threads:[],messages:[],offers:[],checks:[]};
+const localInput=value=>{
+  if(!value)return '';
+  const time=new Date(value);
+  return new Date(time.getTime()-time.getTimezoneOffset()*60000).toISOString().slice(0,16);
+};
 const pausedError=['unavailable','geoError'];
 const paise=value=>Math.round(Number(value)*100);
 const coordinates=position=>({lat:position.coords.latitude,lng:position.coords.longitude});
@@ -33,6 +39,7 @@ export default function Marketplace(){
   const [notice,setNotice]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const [loaded,setLoaded]=useState(false),[signup,setSignup]=useState(false),[sharing,setSharing]=useState(false);
   const [signupRole,setSignupRole]=useState('employer');
+  const [sort,setSort]=useState('default'),[editing,setEditing]=useState(null);
   const sharingRef=useRef(null),requestVersion=useRef(0);
   const t=key=>translate(locale,key);
   const cash=value=>new Intl.NumberFormat(locale+'-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(value)/100);
@@ -63,9 +70,10 @@ export default function Marketplace(){
     catch(err){setError(err.message);}
     finally{setBusy(false);}
   }
-  function go(next){setView(next);setError('');setNotice('');}
+  function go(next){setView(next);setError('');setNotice('');if(next!=='post')setEditing(null);}
+  function newJob(){setEditing(null);go('post');}
   function startJourney(){
-    if(role){go(role==='worker'?'profile':'post');return;}
+    if(role){if(role==='worker')go('profile');else newJob();return;}
     setSignupRole(view==='work'?'worker':'employer');
     setSignup(true);
     go('auth');
@@ -99,6 +107,10 @@ export default function Marketplace(){
     [item.name,item.title,item.area,t(item.category),item.bio,item.description].join(' ').toLowerCase().includes(search.toLowerCase()));
   const role=data.user?.role;
   const browse=view==='find'||view==='work';
+  const invites=(data.owned||[]).filter(job=>job.status==='open');
+  if(sort==='price')list.sort((a,b)=>Number(a.rate||a.amount)-Number(b.rate||b.amount));
+  if(sort==='rated'&&view==='find')list.sort((a,b)=>Number(b.score||0)-Number(a.score||0)||(b.rating_count||0)-(a.rating_count||0));
+  if(sort==='distance'&&near)list.sort((a,b)=>(a.km??Infinity)-(b.km??Infinity));
   const actions=Object.entries(transitions[selected?.booking]||{}).filter(([,who])=>who==='either'||who===role);
   const categoryField=(value)=> <label>{t('category')}<select name="category" defaultValue={value}>{categories.map(c=><option key={c} value={c}>{t(c)}</option>)}</select></label>;
   const areaField=(value)=> <label>{t('area')}<select name="area" defaultValue={value}>{areas.map(a=><option key={a}>{a}</option>)}</select></label>;
@@ -110,6 +122,8 @@ export default function Marketplace(){
       <nav aria-label={t('find')}>
         <button aria-current={view==='find'?'page':undefined} onClick={()=>go('find')}>{t('find')}</button>
         <button aria-current={view==='work'?'page':undefined} onClick={()=>go('work')}>{t('work')}</button>
+        {role==='employer'&&<button aria-current={view==='myJobs'?'page':undefined} onClick={()=>go('myJobs')}>{t('myJobs')}</button>}
+        {role==='worker'&&<button aria-current={view==='profile'?'page':undefined} onClick={()=>go('profile')}>{t('profile')}</button>}
         {role&&<button aria-current={view==='inbox'?'page':undefined} onClick={()=>go('inbox')}>{t('inbox')}</button>}
         {data.user?.reviewer_account&&<button aria-current={view==='review'?'page':undefined} onClick={()=>go('review')}>{t('review')}</button>}
       </nav>
@@ -142,7 +156,7 @@ export default function Marketplace(){
         <ol>{(view==='find'?[[ClipboardPlus,'stepPost'],[MessageSquare,'stepCompare'],[Handshake,'stepBook']]:[[ShieldCheck,'stepVerify'],[Search,'stepFind'],[Handshake,'stepAgree']]).map(([Icon,key])=>
           <li key={key}><Icon size={20} aria-hidden="true"/><div><strong>{t(key)}</strong><small>{t(key+'Detail')}</small></div></li>)}</ol>
       </section>}
-      {!browse&&<div className="page-heading"><h1>{t(view==='auth'?(signup?'signup':'login'):view)}</h1>{data.user&&<p>{data.user.name} · {t(role)}</p>}</div>}
+      {!browse&&<div className="page-heading"><h1>{t(view==='auth'?(signup?'signup':'login'):view==='post'&&editing?'editJob':view)}</h1>{data.user&&<p>{data.user.name} · {t(role)}</p>}</div>}
       {error&&<div role="alert" className="feedback error">{t(error)} {pausedError.includes(error)&&<button className="quiet" onClick={error==='geoError'?locate:refresh}>{error==='geoError'?t('nearby'):t('loading')}</button>}</div>}
       {notice&&<div role="status" className="feedback">{t(notice)}</div>}
       {!loaded&&<p role="status">{t('loading')}</p>}
@@ -150,21 +164,25 @@ export default function Marketplace(){
       {browse&&<section className="results" id="market-results">
         <div className="section-head"><div className="result-title"><h2>{t(view)}{trade?' · '+t(trade):''}</h2>
           {trade&&<button className="quiet" onClick={()=>setTrade('')}><UsersRound size={17}/>{t('all')}</button>}</div>
-          {near&&<small>{t('nearest')}</small>}</div>
+          {loaded&&<small aria-live="polite">{new Intl.NumberFormat(locale).format(list.length)} {t('resultsShown')}</small>}</div>
         <div className="filters"><label className="search"><Search size={18}/><input aria-label={t('search')} placeholder={t('search')} value={search} onChange={e=>setSearch(e.target.value)}/></label>
           <select aria-label={t('area')} value={areaFilter} onChange={e=>setAreaFilter(e.target.value)}><option value="">{t('allAreas')}</option>{areas.map(a=><option key={a}>{a}</option>)}</select>
+          <select aria-label={t('sort')} value={view==='work'&&sort==='rated'?'default':sort} onChange={e=>setSort(e.target.value)}>
+            <option value="default">{t('defaultSort')}</option><option value="price">{t('priceSort')}</option>
+            {near&&<option value="distance">{t('nearest')}</option>}{view==='find'&&<option value="rated">{t('ratingSort')}</option>}</select>
         </div>
         {loaded&&list.length===0&&<p className="empty">{t('noResults')}</p>}
         <div className="cards">{list.map(item=>{const Icon=icons[item.category];return <article className="card" key={item.id} data-trade={item.category}>
           <div className="card-top"><span className="icon"><Icon size={22}/></span><div><h3>{item.title||item.name}</h3><p>{t(item.category)} · {item.area}{item.km!=null?' · '+item.km+' km':''}</p></div></div>
           <p className="description">{item.description||item.bio}</p>
+          {item.rating_count>0&&<small className="rating"><Star size={16} aria-hidden="true"/>{item.score} · {item.rating_count} {t('ratings')}</small>}
           {item.starts&&<small>{date(item.starts)} · {item.hours} h</small>}
           <footer><div><strong>{cash(item.amount||item.rate)}</strong>{item.rate&&<small> {t('hour')}</small>}</div>
             {item.rate?<><span className="verified"><ShieldCheck size={16}/>{t(item.demo?'demoVerified':'verified')}</span>{role==='employer'&&<button className="quiet" onClick={()=>setApply(apply===item.id?'':item.id)}>{t('invite')}</button>}</>:
               role!=='employer'&&<button className="quiet" onClick={()=>role?setApply(apply===item.id?'':item.id):go('auth')}>{t('offer')}</button>}
           </footer>
           {apply===item.id&&role==='employer'&&item.rate&&<form className="stack inline" onSubmit={e=>{e.preventDefault();const f=fields(e);send('invite',{worker:item.id,job:f.job,amount:paise(f.amount),note:f.note},r=>{select(r.thread);setApply('');go('inbox');});}}>
-            {(data.owned||[]).some(j=>j.category===item.category)?<><label>{t('draft')}<select name="job">{data.owned.filter(j=>j.category===item.category).map(j=><option key={j.id} value={j.id}>{j.title}</option>)}</select></label>{quoteFields()}<button className="primary" disabled={busy}>{t('invite')}</button></>:<button type="button" className="quiet" onClick={()=>go('post')}>{t('post')}</button>}</form>}
+            {invites.some(j=>j.category===item.category)?<><label>{t('draft')}<select name="job">{invites.filter(j=>j.category===item.category).map(j=><option key={j.id} value={j.id}>{j.title}</option>)}</select></label>{quoteFields()}<button className="primary" disabled={busy}>{t('invite')}</button></>:<button type="button" className="quiet" onClick={newJob}>{t('post')}</button>}</form>}
           {apply===item.id&&role==='worker'&&<form className="stack inline" onSubmit={e=>{e.preventDefault();const f=fields(e);send('apply',{job:item.id,amount:paise(f.amount),note:f.note},r=>{select(r.thread);setApply('');go('inbox');});}}>
             {quoteFields(Number(item.amount)/100)}<button className="primary" disabled={busy}>{t('offer')}</button></form>}
         </article>;})}</div>
@@ -182,13 +200,33 @@ export default function Marketplace(){
         <div className="buttons"><button className="quiet" value="employer" disabled={busy}>{t('demoEmployer')}</button><button className="primary" value="worker" disabled={busy}>{t('demoWorker')}</button></div>
       </form>}</div>}
 
-      {view==='post'&&role==='employer'&&<form className="panel stack narrow" onSubmit={e=>{
-        e.preventDefault();const f=fields(e);send('job',{...f,amount:paise(f.amount),hours:Number(f.hours),starts:new Date(f.starts).toISOString(),...(near?{point:{lat:Number(near.lat.toFixed(2)),lng:Number(near.lng.toFixed(2))}}:{})},()=>go('work'));
+      {view==='myJobs'&&role==='employer'&&<section className="stack narrow">
+        <div className="buttons"><button className="primary" onClick={newJob}><ClipboardPlus size={17}/>{t('post')}</button></div>
+        {!(data.owned||[]).length&&<p className="empty">{t('noJobs')}</p>}
+        {(data.owned||[]).map(job=><article key={job.id} className="panel stack job-row">
+          <div className="job-title"><h2>{job.title}</h2><span className="job-status">{t(job.status==='closed'?'jobClosed':job.status)}</span></div>
+          <p>{t(job.category)} · {job.area} · {date(job.starts)} · {cash(job.amount)}</p>
+          <div className="buttons">
+            {job.status==='open'&&job.offer_count===0&&<button className="quiet" onClick={()=>{setEditing(job);go('post');}}>{t('editJob')}</button>}
+            {job.thread&&<button className="quiet" onClick={()=>{select(job.thread);go('inbox');}}>{t('booking')}</button>}
+            {!job.thread&&job.offer_count>0&&<button className="quiet" onClick={()=>{const match=data.threads.find(item=>item.job===job.id&&item.state==='pending')||data.threads.find(item=>item.job===job.id);if(match)select(match.id);go('inbox');}}>{t('inbox')} · {job.pending_count}</button>}
+          </div>
+          {job.status==='open'&&<details><summary>{t('closeJob')}</summary><p>{t('closeJobHelp')}</p>
+            <button className="quiet" disabled={busy} onClick={()=>send('closeJob',{id:job.id})}>{t('closeJob')}</button></details>}
+        </article>)}
+      </section>}
+      {view==='post'&&role==='employer'&&<form className="panel stack narrow" key={editing?.id||'new'} onSubmit={e=>{
+        e.preventDefault();const f=fields(e);send(editing?'editJob':'job',{...f,...(editing?{id:editing.id}:{}),
+          amount:paise(f.amount),hours:Number(f.hours),starts:new Date(f.starts).toISOString(),
+          ...(near?{point:{lat:Number(near.lat.toFixed(2)),lng:Number(near.lng.toFixed(2))}}:{})},()=>go('myJobs'));
       }}>
-        <label>{t('draft')}<input name="title" required maxLength={90}/></label><div className="pair">{categoryField()}{areaField()}</div>
-        <label>{t('description')}<textarea name="description" required maxLength={1400}/></label>
-        <div className="pair"><label>{t('amount')}<input required name="amount" type="number" min="50" max="1000000" step=".01"/></label><label>{t('hours')}<input required name="hours" type="number" min="1" max="48"/></label></div>
-        <label>{t('starts')}<input required name="starts" type="datetime-local"/></label><div className="buttons"><button className="primary" disabled={busy}>{t('submit')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
+        <label>{t('draft')}<input name="title" required maxLength={90} defaultValue={editing?.title}/></label>
+        <div className="pair">{categoryField(editing?.category)}{areaField(editing?.area)}</div>
+        <label>{t('description')}<textarea name="description" required maxLength={1400} defaultValue={editing?.description}/></label>
+        <div className="pair"><label>{t('amount')}<input required name="amount" type="number" min="50" max="1000000" step=".01" defaultValue={editing?Number(editing.amount)/100:''}/></label>
+          <label>{t('hours')}<input required name="hours" type="number" min="1" max="48" defaultValue={editing?.hours}/></label></div>
+        <label>{t('starts')}<input required name="starts" type="datetime-local" defaultValue={localInput(editing?.starts)}/></label>
+        <div className="buttons"><button className="primary" disabled={busy}>{t(editing?'saveJob':'submit')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
       </form>}
 
       {view==='profile'&&role==='worker'&&<div className="auth-grid">
@@ -207,6 +245,7 @@ export default function Marketplace(){
         <aside className="panel threads">{data.threads.length===0&&<p>{t('noThreads')}</p>}{data.threads.map(x=><button key={x.id} aria-pressed={x.id===thread} onClick={()=>select(x.id)}><MessageSquare size={18}/><span><strong>{x.title}</strong><small>{role==='worker'?x.employer_name:x.worker_name} · {t(x.booking||x.state)}</small></span></button>)}</aside>
         {selected?<section className="panel stack">
           <h2>{selected.title}</h2><p>{date(selected.starts)} · {t(selected.booking||selected.state)}</p>
+          {booking&&conversationCurrent&&<BookingProgress state={booking} events={data.events||[]} t={t} date={date}/>}
           <div className="quote"><strong>{cash(selected.amount)}</strong><p>{selected.note}</p></div>
           {selected.state==='pending'&&selected.author!==data.user.id&&<>
             <div className="buttons"><button className="primary" disabled={busy} onClick={()=>send('decide',{id:thread,decision:'accept',version:selected.version})}>{t('accept')}</button><button className="quiet" disabled={busy} onClick={()=>send('decide',{id:thread,decision:'decline',version:selected.version})}>{t('decline')}</button></div>
@@ -218,6 +257,10 @@ export default function Marketplace(){
             {role==='worker'&&<button className="quiet" onClick={()=>navigator.geolocation?setSharing(!sharing):setError('geoError')}><Crosshair size={17}/> {t(sharing?'stop':'share')}</button>}
             {selected.located_at?<p>{t('update')} · {date(selected.located_at)} · <a target="_blank" rel="noreferrer" href={'https://www.openstreetmap.org/?mlat='+selected.lat+'&mlon='+selected.lng+'#map=17/'+selected.lat+'/'+selected.lng}>{t('map')}</a></p>:<p>{t('waiting')}</p>}
           </div>}
+          {booking==='completed'&&(selected.rating?<p className="rating"><Star size={17}/>{t('workerRating')} · {selected.rating}/5</p>:role==='employer'&&
+            <form className="buttons" onSubmit={e=>{e.preventDefault();send('rate',{id:thread,score:Number(fields(e).score)});}}>
+              <label>{t('workerRating')}<select required name="score" defaultValue=""><option value="" disabled>{t('chooseScore')}</option>{[5,4,3,2,1].map(score=><option key={score} value={score}>{score}/5</option>)}</select></label>
+              <button className="primary" disabled={busy}>{t('submitRating')}</button></form>)}
           <h3>{t('messages')}</h3><div className="messages">{conversationCurrent&&data.messages.map(m=><p className={m.author===data.user.id?'mine':''} key={m.id}>{m.body}<small>{date(m.created)}</small></p>)}</div>
           {selected.state!=='declined'&&<form className="message-form" onSubmit={e=>{e.preventDefault();const form=e.currentTarget;send('message',{id:thread,body:fields(e).body},()=>form.reset());}}><input required name="body" maxLength={1200} aria-label={t('messages')}/><button className="primary" disabled={busy}>{t('send')}</button></form>}
         </section>:<div className="panel empty">{t('choose')}</div>}

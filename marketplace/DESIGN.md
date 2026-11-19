@@ -1,0 +1,3 @@
+# SWABHIMAN interface
+
+The marketplace uses near-black navy, softly divided blue-gray surfaces and warm ivory text. High-contrast amber marks the primary action. Cornflower blue marks active filters and focus. Six illustrated trade buttons sit alongside the hiring and worker introductions, and double as filters. On desktop the tiles sit on a perspective stage and respond to mouse movement. Touch and reduced-motion users retain the same controls with stable layouts. Short onboarding steps change with the selected hiring or worker journey. Use matching trade icons, distinct status labels and localized copy across listings, bookings and review.

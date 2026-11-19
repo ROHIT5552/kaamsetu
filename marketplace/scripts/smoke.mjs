@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+const origin=process.env.APP_ORIGIN || 'http://localhost:3000';
+const room='smoke-'+crypto.randomUUID();
+let employer='',worker='',outsider='';
+async function call(cookie,action,input,status=200) {
+  const res=await fetch(origin+'/api/market',{method:'POST',headers:{origin,cookie,'content-type':'application/json'},body:JSON.stringify({action,input})});
+  const result=await res.json();
+  assert.equal(res.status,status,action+': '+JSON.stringify(result));
+  return {result,cookie:res.headers.get('set-cookie')?.split(';')[0]};
+}
+async function view(cookie,thread='') {
+  const res=await fetch(origin+'/api/market?thread='+thread,{headers:{cookie}});
+  assert.equal(res.status,200);
+  return res.json();
+}
+employer=(await call('','demo',{role:'employer',room})).cookie;
+worker=(await call('','demo',{role:'worker',room})).cookie;
+outsider=(await call('','demo',{role:'employer',room:room+'-other'})).cookie;
+const title='Smoke job '+room;
+await call(employer,'job',{title,category:'plumbing',area:'CIDCO',description:'Repair a leaky tap',amount:60000,hours:2,starts:new Date(Date.now()+3600000).toISOString()});
+const posted=(await view(worker)).jobs.find(j=>j.title===title);
+assert.ok(posted);
+await call(worker,'profile',{category:'plumbing',area:'CIDCO',bio:'Demo plumber',rate:30000,available:true});
+const offer={job:posted.id,amount:60000,note:'Includes travel'};
+await call(worker,'apply',offer,409);
+await call(worker,'verify',{kind:'identity',method:'alternative',consent:true});
+const {result:{thread}}=await call(worker,'apply',offer);
+await call(outsider,'message',{id:thread,body:'should be denied'},404);
+await call(worker,'decide',{id:thread,decision:'accept',version:1},409);
+await call(employer,'counter',{id:thread,amount:55000,note:'Can you do this rate?',version:1});
+await call(worker,'decide',{id:thread,decision:'accept',version:1},409);
+await call(worker,'message',{id:thread,body:'That works for me'});
+await call(worker,'decide',{id:thread,decision:'accept',version:2});
+const contract=(await view(employer,thread)).threads.find(t=>t.id===thread);
+assert.equal(contract.booking,'confirmed');
+assert.equal(contract.amount,'55000');
+await call(worker,'state',{id:thread,state:'en_route'});
+await call(employer,'location',{id:thread,point:{lat:19.87,lng:75.34}},403);
+await call(worker,'location',{id:thread,point:{lat:19.87,lng:75.34}});
+assert.equal((await view(employer,thread)).threads.find(t=>t.id===thread).lat,19.87);
+assert.deepEqual((await view(outsider,thread)).messages,[]);
+await call(worker,'state',{id:thread,state:'arrived'});
+assert.equal((await view(employer,thread)).threads.find(t=>t.id===thread).lat,null);
+await call(employer,'state',{id:thread,state:'in_progress'});
+await call(employer,'state',{id:thread,state:'cancelled'},409);
+await call(employer,'state',{id:thread,state:'completed'});
+assert.equal((await view(worker,thread)).threads.find(t=>t.id===thread).booking,'completed');
+const invitedTitle='Invite '+room;
+await call(employer,'job',{title:invitedTitle,category:'plumbing',area:'CIDCO',description:'Check pipework',amount:60000,hours:2,starts:new Date(Date.now()+3600000).toISOString()});
+const invitedJob=(await view(employer)).owned.find(j=>j.title===invitedTitle);
+const workerId=(await view(worker)).user.id;
+await call(outsider,'invite',{job:invitedJob.id,worker:workerId,amount:60000,note:'Unauthorized'},404);
+const invitation=await call(employer,'invite',{job:invitedJob.id,worker:workerId,amount:61000,note:'Available tomorrow?'});
+await call(worker,'decide',{id:invitation.result.thread,decision:'accept',version:1});
+await call(worker,'profile',{category:'plumbing',area:'CIDCO',bio:'Demo plumber',rate:30000,available:false});
+console.log('Marketplace smoke test passed.');

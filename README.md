@@ -1,5 +1,10 @@
 # KaamSetu (कामसेतू)
 
+## Test SWABHIMAN
+
+The independent Next.js and PostgreSQL marketplace lives in [marketplace/](marketplace/). Its [setup guide](marketplace/README.md) covers the two-sided demo, verification reviewer queue and PostgreSQL smoke tests.
+
+
 > **Production Full-Stack Marketplace for Verified Local Skilled Workers in Aurangabad (Chhatrapati Sambhajinagar)**
 
 Built with Next.js 14 (App Router, TypeScript), Tailwind CSS, Three.js 3D isometric scenes, next-intl (English & Marathi), Zustand, Express.js API, Prisma ORM, and PostgreSQL.

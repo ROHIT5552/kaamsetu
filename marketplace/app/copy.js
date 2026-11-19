@@ -1,4 +1,13 @@
 const phrases = {
+  savedListings:['Saved listings','जतन केलेल्या जाहिराती','सहेजी गई लिस्टिंग'],
+  saveListing:['Save','जतन करा','सहेजें'],
+  unsaveListing:['Remove from saved','जतन केलेल्यातून काढा','सहेजी गई सूची से हटाएँ'],
+  noSaved:['No active saved listings match these filters.','या फिल्टरमध्ये जतन केलेल्या सक्रिय जाहिराती नाहीत.','इन फ़िल्टर में कोई सक्रिय सहेजी गई लिस्टिंग नहीं है।'],
+  unreadMessages:['Unread messages','न वाचलेले संदेश','अपठित संदेश'],
+  reviews:['Completed-job reviews','पूर्ण कामांची पुनरावलोकने','पूरे किए गए काम की समीक्षाएँ'],
+  demoReview:['Sample review','नमुना पुनरावलोकन','नमूना समीक्षा'],
+  reviewText:['Public review (optional)','सार्वजनिक पुनरावलोकन (ऐच्छिक)','सार्वजनिक समीक्षा (वैकल्पिक)'],
+  reviewHelp:['Describe the work. Leave out phone numbers and addresses.','कामाचे वर्णन करा. फोन क्रमांक आणि पत्ते टाळा.','काम का वर्णन करें। फ़ोन नंबर और पते न लिखें।'],
   myJobs:['My jobs','माझी कामे','मेरे काम'],
   noJobs:['Post your first job to start receiving offers.','प्रस्ताव मिळवण्यासाठी पहिले काम प्रकाशित करा.','प्रस्ताव पाने के लिए अपना पहला काम पोस्ट करें।'],
   editJob:['Edit job','काम संपादित करा','काम संपादित करें'],

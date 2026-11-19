@@ -15,6 +15,7 @@ p,small{color:var(--muted)}
 .top-inner{max-width:1350px;margin:auto;padding:15px 32px;display:flex;align-items:center;justify-content:space-between;gap:18px}
 .brand{border:0;background:none;padding:0;display:flex;align-items:center;gap:11px;font-size:22px;font-weight:850;letter-spacing:-.035em}
 .brand span,.icon{display:grid;place-items:center;background:var(--action);color:white;border-radius:11px;width:41px;height:41px}
+.brand span{background:var(--action) url('/swabhiman-mark.svg') center/cover no-repeat}
 nav,.buttons,.tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 nav button{border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:8px}
 nav button[aria-current],nav button:hover{background:#fae7da;color:var(--accent)}
@@ -138,8 +139,16 @@ summary{cursor:pointer;font-weight:750}
  .booking-progress li:not(:last-child)::after{display:none}
  .booking-progress small{grid-column:2}
 }
+.bookmark{margin-left:auto;display:grid;place-items:center;min-width:42px;min-height:42px;background:transparent;border:1px solid var(--line);border-radius:9px;color:var(--accent)}
+.bookmark:hover,.bookmark[aria-pressed=true],.quiet[aria-pressed=true]{background:#f9e2d1;border-color:#cc9a80}
+.bookmark[aria-pressed=true] svg{fill:currentColor}
+.unread{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 5px;margin-left:6px;border-radius:11px;background:var(--action);color:white;font-size:.72rem}
+.threads .unread{margin-left:auto}
+.reviews{font-size:.84rem}
+.reviews blockquote{margin:10px 0 0;padding:10px;background:var(--soft);border-radius:8px}
+.reviews small{display:block;margin-top:4px}
 .foot{max-width:1350px;margin:auto;display:flex;align-items:center;gap:8px;padding:18px 32px 30px;color:var(--muted);font-size:.85rem}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.top-inner{flex-wrap:wrap}.top-inner nav{order:3;width:100%}.journey{grid-template-columns:1fr;gap:12px}}
-@media(max-width:620px){main,.top-inner,.foot{padding-left:15px;padding-right:15px}main{padding-top:17px}.hero{grid-template-columns:1fr}.hero-content{padding:25px 19px}.hero h1{max-width:17ch}.hero p{font-size:15px;margin-bottom:18px}.hero-trades{border-left:0;border-top:1px solid var(--line);padding:20px 14px;gap:12px}.trade-grid{gap:7px}.trade-grid button{min-height:90px}.journey ol{grid-template-columns:1fr;gap:10px}.cards,.auth-grid,.pair,.inbox{grid-template-columns:1fr}.top-inner{gap:10px}.brand{font-size:18px}.tools{gap:5px}.tools button,.tools select{padding-inline:7px}nav button{padding-inline:8px;font-size:.86rem}.section-head{margin-top:22px}.filters select{flex:1}}
+@media(max-width:620px){main,.top-inner,.foot{padding-left:15px;padding-right:15px}main{padding-top:17px}.hero{grid-template-columns:1fr}.hero-content{padding:25px 19px}.hero h1{max-width:17ch}.hero p{font-size:15px;margin-bottom:18px}.hero-trades{border-left:0;border-top:1px solid var(--line);padding:20px 14px;gap:12px}.trade-grid{gap:7px}.trade-grid button{min-height:90px}.journey ol{grid-template-columns:1fr;gap:10px}.cards,.auth-grid,.pair,.inbox{grid-template-columns:1fr}.top-inner{gap:10px}.brand{font-size:18px}.tools{gap:5px}.tools button,.tools select{padding-inline:7px}nav button{padding-inline:8px;font-size:.86rem}.section-head{margin-top:22px}.filters .search{flex-basis:100%}.filters select{flex:1 1 130px}}
 @media(max-width:360px){.trade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}.trade-grid button:active,.trade-grid button[aria-pressed=true] .icon{transform:none}}

@@ -9,7 +9,7 @@ import { categories, areas, requiredCredential, transitions, distance } from '..
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 const hash = value => createHash('sha256').update(value).digest('hex');
-const demo = () => process.env.DEMO_MODE === 'true';
+const demo = () => process.env.DEMO_MODE==='true' && /^http:\/\/localhost:\d+$/.test(process.env.APP_ORIGIN||'');
 const reply = (data,status=200) => Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
 const one = async (db,sql,params=[]) => (await db.query(sql,params)).rows[0];
 const rows = async (db,sql,params=[]) => (await db.query(sql,params)).rows;
@@ -37,7 +37,10 @@ const schemas = {
   job:jobDetails,
   editJob:jobDetails.extend({id}),
   closeJob:z.object({id}),
-  rate:z.object({id,score:z.number().int().min(1).max(5)}),
+  rate:z.object({id,score:z.number().int().min(1).max(5),note:text(350).optional()}),
+  saveListing:z.object({id,kind:z.enum(['job','worker']),saved:z.boolean()}),
+  readThread:z.object({id,message:z.string().regex(/^[1-9][0-9]{0,18}$/)
+    .refine(value=>BigInt(value)<=9223372036854775807n)}),
   apply:z.object({job:id,amount:money,note:text(500)}),
   invite:z.object({job:id,worker:id,amount:money,note:text(500)}),
   counter:z.object({id,amount:money,note:text(500),version:z.number().int().positive()}),
@@ -87,15 +90,19 @@ export async function GET(request) {
       return reply({queue:await reviewQueue(db,status)});
     }
     const near=coords.has('lat') && coords.has('lng') ? point.safeParse({lat:Number(coords.get('lat')),lng:Number(coords.get('lng'))}) : null;
-    const [jobs,people,profile,checks,threads,owned]=await Promise.all([
+    const [jobs,people,profile,checks,threads,owned,saved]=await Promise.all([
       rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,j.lat,j.lng,a.name
         FROM jobs j JOIN accounts a ON a.id=j.employer WHERE a.demo=$1 AND j.starts>now() AND j.closed_at IS NULL
         AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.job=j.id) ORDER BY j.created DESC LIMIT 100`,[demo()]),
       rows(db,`SELECT a.id,a.name,p.category,p.area,p.rate,p.bio,p.lat,p.lng,a.demo,
-        ratings.score,ratings.count AS rating_count
+        ratings.score,ratings.count AS rating_count,recent.reviews
         FROM profiles p JOIN accounts a ON a.id=p.account
         LEFT JOIN LATERAL (SELECT round(avg(score),1) AS score,count(*)::int AS count
           FROM worker_ratings WHERE worker=a.id) ratings ON true
+        LEFT JOIN LATERAL (SELECT json_agg(entry ORDER BY entry.created_at DESC) AS reviews FROM
+          (SELECT r.score,r.note,r.created_at,j.category FROM worker_ratings r
+            JOIN bookings b ON b.application=r.application JOIN jobs j ON j.id=b.job
+            WHERE r.worker=a.id AND r.note IS NOT NULL ORDER BY r.created_at DESC,r.application DESC LIMIT 3) entry) recent ON true
         WHERE p.available AND a.demo=$1
         AND EXISTS (SELECT 1 FROM ${demo()?'credentials':'verification_cases'} c
           WHERE c.account=a.id AND c.kind='identity' AND ${demo()?'c.verified_at IS NOT NULL':activeCheck})
@@ -105,12 +112,14 @@ export async function GET(request) {
       workerChecks(db,user),
       user ? rows(db,`SELECT x.id,x.worker,j.employer,x.author,x.amount,x.note,x.version,x.state,
         j.id AS job,j.title,j.starts,w.name AS worker_name,e.name AS employer_name,b.state AS booking,r.score AS rating,
+        (SELECT count(*)::int FROM messages m WHERE m.application=x.id AND m.id>coalesce(cursor.seen_message,0) AND m.author<>$1) AS unread,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lat END AS lat,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lng END AS lng,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.located_at END AS located_at
         FROM applications x JOIN jobs j ON j.id=x.job JOIN accounts w ON w.id=x.worker
         JOIN accounts e ON e.id=j.employer LEFT JOIN bookings b ON b.application=x.id
         LEFT JOIN worker_ratings r ON r.application=x.id
+        LEFT JOIN thread_reads cursor ON cursor.application=x.id AND cursor.account=$1
         WHERE x.worker=$1 OR j.employer=$1 ORDER BY j.created DESC LIMIT 100`,[user.id]) : [],
       user?.role==='employer' ? rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,
         CASE WHEN b.state IS NOT NULL THEN b.state WHEN j.closed_at IS NOT NULL THEN 'closed'
@@ -118,7 +127,9 @@ export async function GET(request) {
         count(x.id)::int AS offer_count,count(x.id) FILTER (WHERE x.state='pending')::int AS pending_count,
         b.application AS thread
         FROM jobs j LEFT JOIN bookings b ON b.job=j.id LEFT JOIN applications x ON x.job=j.id
-        WHERE j.employer=$1 GROUP BY j.id,b.state,b.application ORDER BY j.created DESC LIMIT 100`,[user.id]) : []
+        WHERE j.employer=$1 GROUP BY j.id,b.state,b.application ORDER BY j.created DESC LIMIT 100`,[user.id]) : [],
+      user ? rows(db,`SELECT item,'job' AS kind FROM saved_jobs WHERE account=$1
+        UNION ALL SELECT item,'worker' AS kind FROM saved_workers WHERE account=$1`,[user.id]) : []
     ]);
     const thread=coords.get('thread');
     const selected=threads.find(t=>t.id===thread);
@@ -130,7 +141,7 @@ export async function GET(request) {
     const publicCards = list => list.map(({lat,lng,...item})=>({...item,
       km:near?.success && lat!=null && lng!=null ? Math.round(distance(near.data,{lat,lng})*10)/10 : null
     })).sort((a,b)=>(a.km??Infinity)-(b.km??Infinity));
-    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,events,owned,thread:selected?.id});
+    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,events,owned,saved,thread:selected?.id});
   } catch(error) { return failure(error); }
 }
 
@@ -203,6 +214,24 @@ export async function POST(request) {
       if (action==='verify') await submitCheck(tx,user,input);
       if (action==='withdrawCheck') await withdrawCheck(tx,user,input.id);
       if (action==='reviewCheck') await decideCheck(tx,user,input);
+      if (action==='saveListing') {
+        const table=input.kind==='job'?'saved_jobs':'saved_workers';
+        if (!input.saved) await tx.query(`DELETE FROM ${table} WHERE account=$1 AND item=$2`,[user.id,input.id]);
+        else {
+          if (input.kind==='job') {
+            const job=await one(tx,`SELECT j.id FROM jobs j JOIN accounts a ON a.id=j.employer
+              WHERE j.id=$1 AND a.demo=$2 AND j.closed_at IS NULL AND j.starts>now()
+              AND NOT EXISTS (SELECT 1 FROM bookings WHERE job=j.id)`,[input.id,user.demo]);
+            requireThat(job,'missing',404);
+          } else {
+            const worker=await one(tx,`SELECT p.category FROM profiles p JOIN accounts a ON a.id=p.account
+              WHERE p.account=$1 AND p.available AND a.demo=$2`,[input.id,user.demo]);
+            requireThat(worker && await qualified(tx,input.id,worker.category),'missing',404);
+          }
+          await tx.query(`INSERT INTO ${table}(account,item) VALUES ($1,$2) ON CONFLICT DO NOTHING`,[user.id,input.id]);
+        }
+        return {};
+      }
       if (action==='editJob' || action==='closeJob') {
         requireThat(user.role==='employer');
         const current=await one(tx,'SELECT * FROM jobs WHERE id=$1 AND employer=$2 FOR UPDATE',[input.id,user.id]);
@@ -246,10 +275,18 @@ export async function POST(request) {
         await tx.query('INSERT INTO offer_history(application,version,author,amount,note) VALUES ($1,1,$2,$3,$4)',[x.id,user.id,input.amount,input.note]);
         return {thread:x.id};
       }
-      if (!['counter','decide','message','state','location','rate'].includes(action)) return {};
+      if (!['counter','decide','message','state','location','rate','readThread'].includes(action)) return {};
       const link=await one(tx,`SELECT x.job FROM applications x JOIN jobs j ON j.id=x.job
         WHERE x.id=$1 AND (x.worker=$2 OR j.employer=$2)`,[input.id,user.id]);
       requireThat(link,'missing',404);
+      if (action==='readThread') {
+        const entry=await one(tx,'SELECT id FROM messages WHERE application=$1 AND id=$2',[input.id,input.message]);
+        requireThat(entry,'missing',404);
+        await tx.query(`INSERT INTO thread_reads(account,application,seen_message) VALUES ($1,$2,$3)
+          ON CONFLICT(account,application) DO UPDATE
+          SET seen_message=greatest(thread_reads.seen_message,excluded.seen_message)`,[user.id,input.id,input.message]);
+        return {};
+      }
       const j=await one(tx,'SELECT * FROM jobs WHERE id=$1 FOR UPDATE',[link.job]);
       const x=await one(tx,'SELECT * FROM applications WHERE id=$1 FOR UPDATE',[input.id]);
       const b=await one(tx,'SELECT * FROM bookings WHERE application=$1 FOR UPDATE',[x.id]);
@@ -284,8 +321,8 @@ export async function POST(request) {
       if (action==='rate') {
         requireThat(j.employer===user.id);
         requireThat(b?.state==='completed','ratingUnavailable',409);
-        await tx.query('INSERT INTO worker_ratings(application,worker,score) VALUES ($1,$2,$3)',
-          [input.id,x.worker,input.score]);
+        await tx.query('INSERT INTO worker_ratings(application,worker,score,note) VALUES ($1,$2,$3,$4)',
+          [input.id,x.worker,input.score,input.note??null]);
       }
       if (action==='location') {
         requireThat(x.worker===user.id && b?.state==='en_route');

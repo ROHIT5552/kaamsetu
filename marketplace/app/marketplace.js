@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Handshake, ShieldCheck, ClipboardPlus, ClipboardList, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
+import { ArrowRight, Bookmark, Handshake, ShieldCheck, ClipboardPlus, ClipboardList, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
 import { areas, categories, transitions } from '../lib/domain';
 import { translate } from './copy';
 import BookingProgress from './booking-progress';
@@ -40,7 +40,8 @@ export default function Marketplace(){
   const [loaded,setLoaded]=useState(false),[signup,setSignup]=useState(false),[sharing,setSharing]=useState(false);
   const [signupRole,setSignupRole]=useState('employer');
   const [sort,setSort]=useState('default'),[editing,setEditing]=useState(null);
-  const sharingRef=useRef(null),requestVersion=useRef(0);
+  const [savedOnly,setSavedOnly]=useState(false);
+  const sharingRef=useRef(null),requestVersion=useRef(0),readAttempt=useRef('');
   const t=key=>translate(locale,key);
   const cash=value=>new Intl.NumberFormat(locale+'-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(value)/100);
   const date=value=>new Intl.DateTimeFormat(locale+'-IN',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
@@ -70,7 +71,7 @@ export default function Marketplace(){
     catch(err){setError(err.message);}
     finally{setBusy(false);}
   }
-  function go(next){setView(next);setError('');setNotice('');if(next!=='post')setEditing(null);}
+  function go(next){setView(next);setError('');setNotice('');if(next!=='post')setEditing(null);setSavedOnly(false);}
   function newJob(){setEditing(null);go('post');}
   function startJourney(){
     if(role){if(role==='worker')go('profile');else newJob();return;}
@@ -86,6 +87,14 @@ export default function Marketplace(){
   const selected=data.threads.find(row=>row.id===thread);
   useEffect(()=>{setSharing(false);},[view]);
   const booking=selected?.booking;
+  const lastMessage=conversationCurrent?data.messages.at(-1)?.id:null;
+  useEffect(()=>{
+    if(view!=='inbox'||!selected?.unread||!lastMessage)return;
+    const readKey=thread+':'+lastMessage;
+    if(readAttempt.current===readKey)return;
+    readAttempt.current=readKey;
+    request('readThread',{id:thread,message:lastMessage}).then(refresh).catch(()=>{readAttempt.current='';});
+  },[view,selected?.unread,lastMessage,thread,refresh]);
   useEffect(()=>{
     if(!sharing || !thread || booking!=='en_route' || view!=='inbox')return;
     let latest=0;
@@ -102,7 +111,11 @@ export default function Marketplace(){
     };
   },[sharing,thread,booking,view]);
   function select(id){setSharing(false);setThread(id);}
+  const savedKind=view==='find'?'worker':'job';
+  const savedIds=new Set((data.saved||[]).filter(item=>item.kind===savedKind).map(item=>item.item));
+  const unread=data.threads.reduce((total,item)=>total+item.unread,0);
   const list=(view==='find'?data.people:data.jobs).filter(item=>
+    (!savedOnly||savedIds.has(item.id))&&
     (!trade||item.category===trade)&&(!areaFilter||item.area===areaFilter)&&
     [item.name,item.title,item.area,t(item.category),item.bio,item.description].join(' ').toLowerCase().includes(search.toLowerCase()));
   const role=data.user?.role;
@@ -118,13 +131,13 @@ export default function Marketplace(){
 
   return <>
     <header className="top"><div className="top-inner">
-      <button className="brand" onClick={()=>go('find')}><span><HardHat size={21}/></span>SWABHIMAN</button>
+      <button className="brand" onClick={()=>go('find')}><span aria-hidden="true"/>SWABHIMAN</button>
       <nav aria-label={t('find')}>
         <button aria-current={view==='find'?'page':undefined} onClick={()=>go('find')}>{t('find')}</button>
         <button aria-current={view==='work'?'page':undefined} onClick={()=>go('work')}>{t('work')}</button>
         {role==='employer'&&<button aria-current={view==='myJobs'?'page':undefined} onClick={()=>go('myJobs')}>{t('myJobs')}</button>}
         {role==='worker'&&<button aria-current={view==='profile'?'page':undefined} onClick={()=>go('profile')}>{t('profile')}</button>}
-        {role&&<button aria-current={view==='inbox'?'page':undefined} onClick={()=>go('inbox')}>{t('inbox')}</button>}
+        {role&&<button aria-current={view==='inbox'?'page':undefined} onClick={()=>go('inbox')}>{t('inbox')}{unread>0&&<span className="unread" aria-label={t('unreadMessages')}>{unread}</span>}</button>}
         {data.user?.reviewer_account&&<button aria-current={view==='review'?'page':undefined} onClick={()=>go('review')}>{t('review')}</button>}
       </nav>
       <div className="tools"><select aria-label="Language" value={locale} onChange={e=>setLocale(e.target.value)}><option value="mr">मराठी</option><option value="hi">हिन्दी</option><option value="en">English</option></select>
@@ -164,6 +177,7 @@ export default function Marketplace(){
       {browse&&<section className="results" id="market-results">
         <div className="section-head"><div className="result-title"><h2>{t(view)}{trade?' · '+t(trade):''}</h2>
           {trade&&<button className="quiet" onClick={()=>setTrade('')}><UsersRound size={17}/>{t('all')}</button>}</div>
+          {data.user&&<button className="quiet" aria-pressed={savedOnly} onClick={()=>setSavedOnly(!savedOnly)}><Bookmark size={16}/>{t('savedListings')}</button>}
           {loaded&&<small aria-live="polite">{new Intl.NumberFormat(locale).format(list.length)} {t('resultsShown')}</small>}</div>
         <div className="filters"><label className="search"><Search size={18}/><input aria-label={t('search')} placeholder={t('search')} value={search} onChange={e=>setSearch(e.target.value)}/></label>
           <select aria-label={t('area')} value={areaFilter} onChange={e=>setAreaFilter(e.target.value)}><option value="">{t('allAreas')}</option>{areas.map(a=><option key={a}>{a}</option>)}</select>
@@ -171,11 +185,18 @@ export default function Marketplace(){
             <option value="default">{t('defaultSort')}</option><option value="price">{t('priceSort')}</option>
             {near&&<option value="distance">{t('nearest')}</option>}{view==='find'&&<option value="rated">{t('ratingSort')}</option>}</select>
         </div>
-        {loaded&&list.length===0&&<p className="empty">{t('noResults')}</p>}
+        {loaded&&list.length===0&&<p className="empty">{t(savedOnly?'noSaved':'noResults')}</p>}
         <div className="cards">{list.map(item=>{const Icon=icons[item.category];return <article className="card" key={item.id} data-trade={item.category}>
-          <div className="card-top"><span className="icon"><Icon size={22}/></span><div><h3>{item.title||item.name}</h3><p>{t(item.category)} · {item.area}{item.km!=null?' · '+item.km+' km':''}</p></div></div>
+          <div className="card-top"><span className="icon"><Icon size={22}/></span><div><h3>{item.title||item.name}</h3><p>{t(item.category)} · {item.area}{item.km!=null?' · '+item.km+' km':''}</p></div>
+            {data.user&&<button className="bookmark" disabled={busy} aria-pressed={savedIds.has(item.id)}
+              aria-label={t(savedIds.has(item.id)?'unsaveListing':'saveListing')+' '+(item.title||item.name)}
+              onClick={()=>send('saveListing',{id:item.id,kind:savedKind,saved:!savedIds.has(item.id)})}><Bookmark size={19}/></button>}
+          </div>
           <p className="description">{item.description||item.bio}</p>
           {item.rating_count>0&&<small className="rating"><Star size={16} aria-hidden="true"/>{item.score} · {item.rating_count} {t('ratings')}</small>}
+          {item.reviews?.length>0&&<details className="reviews"><summary>{t('reviews')}</summary>
+            {item.reviews.map((review,index)=><blockquote key={review.created_at+'-'+index}><p>{review.note}</p><small>{t(review.category)} · {review.score}/5{item.demo?' · '+t('demoReview'):''}</small></blockquote>)}
+          </details>}
           {item.starts&&<small>{date(item.starts)} · {item.hours} h</small>}
           <footer><div><strong>{cash(item.amount||item.rate)}</strong>{item.rate&&<small> {t('hour')}</small>}</div>
             {item.rate?<><span className="verified"><ShieldCheck size={16}/>{t(item.demo?'demoVerified':'verified')}</span>{role==='employer'&&<button className="quiet" onClick={()=>setApply(apply===item.id?'':item.id)}>{t('invite')}</button>}</>:
@@ -242,7 +263,7 @@ export default function Marketplace(){
 
       {view==='review'&&data.user?.reviewer_account&&<VerificationReview t={t} date={date} send={send} busy={busy} reviewer={data.user.reviewer}/>}
       {view==='inbox'&&role&&<div className="inbox">
-        <aside className="panel threads">{data.threads.length===0&&<p>{t('noThreads')}</p>}{data.threads.map(x=><button key={x.id} aria-pressed={x.id===thread} onClick={()=>select(x.id)}><MessageSquare size={18}/><span><strong>{x.title}</strong><small>{role==='worker'?x.employer_name:x.worker_name} · {t(x.booking||x.state)}</small></span></button>)}</aside>
+        <aside className="panel threads">{data.threads.length===0&&<p>{t('noThreads')}</p>}{data.threads.map(x=><button key={x.id} aria-pressed={x.id===thread} onClick={()=>select(x.id)}><MessageSquare size={18}/><span><strong>{x.title}</strong><small>{role==='worker'?x.employer_name:x.worker_name} · {t(x.booking||x.state)}</small></span>{x.unread>0&&<span className="unread" aria-label={t('unreadMessages')}>{x.unread}</span>}</button>)}</aside>
         {selected?<section className="panel stack">
           <h2>{selected.title}</h2><p>{date(selected.starts)} · {t(selected.booking||selected.state)}</p>
           {booking&&conversationCurrent&&<BookingProgress state={booking} events={data.events||[]} t={t} date={date}/>}
@@ -258,9 +279,10 @@ export default function Marketplace(){
             {selected.located_at?<p>{t('update')} · {date(selected.located_at)} · <a target="_blank" rel="noreferrer" href={'https://www.openstreetmap.org/?mlat='+selected.lat+'&mlon='+selected.lng+'#map=17/'+selected.lat+'/'+selected.lng}>{t('map')}</a></p>:<p>{t('waiting')}</p>}
           </div>}
           {booking==='completed'&&(selected.rating?<p className="rating"><Star size={17}/>{t('workerRating')} · {selected.rating}/5</p>:role==='employer'&&
-            <form className="buttons" onSubmit={e=>{e.preventDefault();send('rate',{id:thread,score:Number(fields(e).score)});}}>
+            <form className="stack" onSubmit={e=>{e.preventDefault();const f=fields(e);send('rate',{id:thread,score:Number(f.score),note:f.note.trim()||undefined});}}>
               <label>{t('workerRating')}<select required name="score" defaultValue=""><option value="" disabled>{t('chooseScore')}</option>{[5,4,3,2,1].map(score=><option key={score} value={score}>{score}/5</option>)}</select></label>
-              <button className="primary" disabled={busy}>{t('submitRating')}</button></form>)}
+              <label>{t('reviewText')}<textarea name="note" maxLength={350} placeholder={t('reviewHelp')}/></label>
+              <div><button className="primary" disabled={busy}>{t('submitRating')}</button></div></form>)}
           <h3>{t('messages')}</h3><div className="messages">{conversationCurrent&&data.messages.map(m=><p className={m.author===data.user.id?'mine':''} key={m.id}>{m.body}<small>{date(m.created)}</small></p>)}</div>
           {selected.state!=='declined'&&<form className="message-form" onSubmit={e=>{e.preventDefault();const form=e.currentTarget;send('message',{id:thread,body:fields(e).body},()=>form.reset());}}><input required name="body" maxLength={1200} aria-label={t('messages')}/><button className="primary" disabled={busy}>{t('send')}</button></form>}
         </section>:<div className="panel empty">{t('choose')}</div>}

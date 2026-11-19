@@ -16,6 +16,18 @@ Open http://localhost:3000. For the demo, set DEMO_MODE=true before starting the
 
 To run a production build locally, use npm run build and npm start. If a local database is already configured, keep its PostgreSQL service running when starting the app. The smoke test runs with npm run test:smoke against the local demo and creates sample records.
 
+## Seeded demo accounts
+
+Use Sign in at localhost and enter one of the accounts below after running npm run db:seed. They are fixture accounts used only with DEMO_MODE=true. The seed command requires a localhost origin.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Employer | sample-employer@demo.invalid | HireDemo!2026 |
+| Plumbing worker | sample0@demo.invalid | TradeDemo!2026 |
+| Electrical worker | sample1@demo.invalid | ElectricDemo!2026 |
+
+The seed provides 10 open jobs, 20 worker profiles, and six written reviews associated with completed bookings. In discovery, use the bookmark icon to save active listings to your account. In the inbox, unread badges clear when you open and read the conversation. An employer can add one public review to each completed booking. Listings show up to three recent written reviews with trade and score.
+
 ## Try both sides
 
 1. Enter as a worker, save a profile with a category, and request identity verification. For Electrical, request the electrical credential as well. The local demo records these as simulated checks.
@@ -37,6 +49,12 @@ The booking inbox shows dated milestones from confirmation through completion. A
 - Public matching combines trade, locality, search and optional straight-line distance. Rounded discovery coordinates support approximate ordering. Exact booking coordinates are participant-only, visible for up to 60 seconds, overwritten on updates and cleared on arrival, cancellation or explicit stop. Browser background suspension can interrupt sharing.
 - Booking rules are role-specific. Workers mark departure and arrival, while employers mark work started and completed. Either participant can cancel before arrival or flag a dispute afterward. Booking changes are recorded, and dispute resolution currently requires a future operations workflow.
 - Passwords are salted with scrypt. Session secrets are random, stored as hashes and sent through HttpOnly SameSite cookies. Mutations check Origin, schema, role and ownership. Authentication and writes have database-backed rate limits.
+
+## Hosting the standalone app
+
+In the GitHub repository, use marketplace as the service root. For a Render Node web service, use npm ci && npm run build as the build command. Run node scripts/migrate.mjs against the new database before first launch. For a single test instance, the start command can be node scripts/migrate.mjs && npm exec -- next start --hostname 0.0.0.0. Use /api/health for the health check. On a multi-instance deployment, apply migrations once through the release process before starting instances.
+
+Set DATABASE_URL using the host's secret environment settings and APP_ORIGIN to the exact HTTPS service origin. Set DEMO_MODE=false. Set the verification adapter URLs and signing key through secret configuration as applicable. Keep database access private and run the health check after deploying. Do not run the local demo seed against a public database.
 
 ## Production boundaries
 

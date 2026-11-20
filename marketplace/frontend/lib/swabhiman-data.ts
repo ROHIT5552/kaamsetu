@@ -2,12 +2,12 @@
 import type { WorkerProfile, BookingRecord } from '../utils/types';
 
 export const SKILLS = {
-      plumber: { icon: "🔧", en: "Plumber", mr: "प्लंबर", descEn: "Leaks, pipe fittings, taps & sanitary", descMr: "गळती, पाईप जोडणी, नळ व सॅनिटरी कामे" },
-      electrician: { icon: "💡", en: "Electrician", mr: "इलेक्ट्रिशियन", descEn: "Wiring, switchboards, MCB & inverters", descMr: "वायरिंग, स्विचबोर्ड, एमसीबी व इन्व्हर्टर" },
-      carpenter: { icon: "🪚", en: "Carpenter", mr: "सुतार", descEn: "Doors, furniture repairs & locks", descMr: "दरवाजे, फर्निचर दुरुस्ती व लॉक फिटिंग" },
-      painter: { icon: "🖌️", en: "Painter", mr: "पेंटर", descEn: "Wall painting, touch-ups & waterproofing", descMr: "रंगकाम, वॉटरप्रूफिंग व टच-अप" },
-      mason: { icon: "🧱", en: "Mason", mr: "गवंडी", descEn: "Tile fixing, wall plaster & masonry", descMr: "टाईल्स, भिंत प्लास्टर व बांधकाम" },
-      helper: { icon: "🧰", en: "General Helper", mr: "मदतनीस", descEn: "Lifting, debris removal & home assistance", descMr: "वजन उचलणे, स्वच्छता व घरकाम मदत" }
+      plumber: { icon: "wrench", en: "Plumber", mr: "प्लंबर", descEn: "Leaks, pipe fittings, taps & sanitary", descMr: "गळती, पाईप जोडणी, नळ व सॅनिटरी कामे" },
+      electrician: { icon: "zap", en: "Electrician", mr: "इलेक्ट्रिशियन", descEn: "Wiring, switchboards, MCB & inverters", descMr: "वायरिंग, स्विचबोर्ड, एमसीबी व इन्व्हर्टर" },
+      carpenter: { icon: "hammer", en: "Carpenter", mr: "सुतार", descEn: "Doors, furniture repairs & locks", descMr: "दरवाजे, फर्निचर दुरुस्ती व लॉक फिटिंग" },
+      painter: { icon: "paintbrush", en: "Painter", mr: "पेंटर", descEn: "Wall painting, touch-ups & waterproofing", descMr: "रंगकाम, वॉटरप्रूफिंग व टच-अप" },
+      mason: { icon: "brickwall", en: "Mason", mr: "गवंडी", descEn: "Tile fixing, wall plaster & masonry", descMr: "टाईल्स, भिंत प्लास्टर व बांधकाम" },
+      helper: { icon: "briefcase", en: "General Helper", mr: "मदतनीस", descEn: "Lifting, debris removal & home assistance", descMr: "वजन उचलणे, स्वच्छता व घरकाम मदत" }
     };
 
     export const LOCALITIES = [
@@ -17,33 +17,33 @@ export const SKILLS = {
 
     export const DIAGNOSTIC_ISSUES = {
       plumber: [
-        { id: "p1", titleEn: "Leaking Tap / Faucet Dripping", titleMr: "नळ गळती व पाणी टपकणे", duration: "45 mins", labor: 250, parts: 120, icon: "🚰", descEn: "Continuous dripping, washer replacement, internal spindle fix", descMr: "नळ गळती दुरुस्ती, वॉशर बदलणे व स्पिंडल सेट करणे" },
-        { id: "p2", titleEn: "Flush Tank / Cistern Fault", titleMr: "फ्लश टँक ओव्हरफ्लो व बिघाड", duration: "1 hr", labor: 350, parts: 220, icon: "🚽", descEn: "Water overflowing constantly, ball valve stuck, siphon leak", descMr: "पाणी सतत वाया जाणे, बॉल व्हॉल्व्ह व सायफन दुरुस्ती" },
-        { id: "p3", titleEn: "Kitchen Sink / Drain Choke-Up", titleMr: "किचन सिंक व ड्रेनेज चोक-अप", duration: "1.5 hrs", labor: 450, parts: 80, icon: "🚿", descEn: "Deep drain blockage clear, grease removal, trap cleaning", descMr: "पाईपमधील घाण साफ करणे, ड्रेन ओपनिंग व पाणी मोकळे करणे" },
-        { id: "p4", titleEn: "New Geyser / Motor Pipe Fitting", titleMr: "नवीन गिझर किंवा मोटर जोडणी", duration: "2 hrs", labor: 550, parts: 450, icon: "♨️", descEn: "Wall bracket mounting, high pressure connectors, brass valves", descMr: "गिझर फिटिंग, अँगल व्हॉल्व्ह व इनलेट-आउटलेट पाईप" }
+        { id: "p1", titleEn: "Leaking Tap / Faucet Dripping", titleMr: "नळ गळती व पाणी टपकणे", duration: "45 mins", labor: 250, parts: 120, icon: "wrench", descEn: "Continuous dripping, washer replacement, internal spindle fix", descMr: "नळ गळती दुरुस्ती, वॉशर बदलणे व स्पिंडल सेट करणे" },
+        { id: "p2", titleEn: "Flush Tank / Cistern Fault", titleMr: "फ्लश टँक ओव्हरफ्लो व बिघाड", duration: "1 hr", labor: 350, parts: 220, icon: "wrench", descEn: "Water overflowing constantly, ball valve stuck, siphon leak", descMr: "पाणी सतत वाया जाणे, बॉल व्हॉल्व्ह व सायफन दुरुस्ती" },
+        { id: "p3", titleEn: "Kitchen Sink / Drain Choke-Up", titleMr: "किचन सिंक व ड्रेनेज चोक-अप", duration: "1.5 hrs", labor: 450, parts: 80, icon: "wrench", descEn: "Deep drain blockage clear, grease removal, trap cleaning", descMr: "पाईपमधील घाण साफ करणे, ड्रेन ओपनिंग व पाणी मोकळे करणे" },
+        { id: "p4", titleEn: "New Geyser / Motor Pipe Fitting", titleMr: "नवीन गिझर किंवा मोटर जोडणी", duration: "2 hrs", labor: 550, parts: 450, icon: "wrench", descEn: "Wall bracket mounting, high pressure connectors, brass valves", descMr: "गिझर फिटिंग, अँगल व्हॉल्व्ह व इनलेट-आउटलेट पाईप" }
       ],
       electrician: [
-        { id: "e1", titleEn: "Ceiling Fan Repair / Regulating", titleMr: "सिलिंग फॅन दुरुस्ती व वेग वाढवणे", duration: "45 mins", labor: 300, parts: 90, icon: "🌀", descEn: "Fan running slow, capacitor replacement, wiring inspection", descMr: "फॅन हळू चालणे, कपॅसिटर बदलणे व कनेक्शन तपासणी" },
-        { id: "e2", titleEn: "Switchboard Spark / Socket Burned", titleMr: "स्विचबोर्ड स्पार्क व सॉकेट जळणे", duration: "1 hr", labor: 350, parts: 160, icon: "🔌", descEn: "Anchor/Havells switch change, short circuit fix, earthing test", descMr: "नवीन स्विच व सॉकेट बसवणे, शॉर्ट सर्किट तपासणे" },
-        { id: "e3", titleEn: "MCB / Main Breaker Frequent Trip", titleMr: "मुख्य एमसीबी वारंवार ट्रिप होणे", duration: "1.5 hrs", labor: 450, parts: 350, icon: "⚡", descEn: "Load balancing check, overload isolation, 32A MCB replacement", descMr: "न्यूट्रल फॉल्ट शोधणे व योग्य क्षमतेचा एमसीबी बसवणे" },
-        { id: "e4", titleEn: "Inverter Battery Setup & Rewiring", titleMr: "इन्व्हर्टर व बॅटरी वायरिंग जोडणी", duration: "2 hrs", labor: 650, parts: 280, icon: "🔋", descEn: "Bypass switch cabling, acid check, heavy duty lug crimping", descMr: "इन्व्हर्टर बायपास स्विच, पॉवर केबल व बॅटरी सेटअप" }
+        { id: "e1", titleEn: "Ceiling Fan Repair / Regulating", titleMr: "सिलिंग फॅन दुरुस्ती व वेग वाढवणे", duration: "45 mins", labor: 300, parts: 90, icon: "zap", descEn: "Fan running slow, capacitor replacement, wiring inspection", descMr: "फॅन हळू चालणे, कपॅसिटर बदलणे व कनेक्शन तपासणी" },
+        { id: "e2", titleEn: "Switchboard Spark / Socket Burned", titleMr: "स्विचबोर्ड स्पार्क व सॉकेट जळणे", duration: "1 hr", labor: 350, parts: 160, icon: "zap", descEn: "Anchor/Havells switch change, short circuit fix, earthing test", descMr: "नवीन स्विच व सॉकेट बसवणे, शॉर्ट सर्किट तपासणे" },
+        { id: "e3", titleEn: "MCB / Main Breaker Frequent Trip", titleMr: "मुख्य एमसीबी वारंवार ट्रिप होणे", duration: "1.5 hrs", labor: 450, parts: 350, icon: "zap", descEn: "Load balancing check, overload isolation, 32A MCB replacement", descMr: "न्यूट्रल फॉल्ट शोधणे व योग्य क्षमतेचा एमसीबी बसवणे" },
+        { id: "e4", titleEn: "Inverter Battery Setup & Rewiring", titleMr: "इन्व्हर्टर व बॅटरी वायरिंग जोडणी", duration: "2 hrs", labor: 650, parts: 280, icon: "zap", descEn: "Bypass switch cabling, acid check, heavy duty lug crimping", descMr: "इन्व्हर्टर बायपास स्विच, पॉवर केबल व बॅटरी सेटअप" }
       ],
       carpenter: [
-        { id: "c1", titleEn: "Main Door Godrej Lock Installation", titleMr: "मुख्य दरवाजा गोडरेज लॉक बसवणे", duration: "1.5 hrs", labor: 450, parts: 1100, icon: "🔐", descEn: "Mortise lock grooving, deadbolt alignment, safety keys", descMr: "दरवाजा कोरून लॉक बसवणे व लॅच स्मूथ करणे" },
-        { id: "c2", titleEn: "Wardrobe / Hydraulic Hinge Repair", titleMr: "कपाटाचे दरवाजे व हायड्रॉलिक बिजागरी", duration: "1 hr", labor: 350, parts: 220, icon: "🚪", descEn: "Auto soft-close hinges replace, misaligned door leveling", descMr: "नवीन सॉफ्ट क्लोज बिजागरी व लेव्हलिंग दुरुस्ती" },
-        { id: "c3", titleEn: "Bed / Dining Table Joint Tightening", titleMr: "खाट, डायनिंग टेबल व फर्निचर जोड", duration: "1.5 hrs", labor: 400, parts: 150, icon: "🛏️", descEn: "Squeak noise elimination, heavy steel L-brackets, dowel fix", descMr: "आवाज बंद करणे, स्क्रू व एल-पट्टी लावून मजबूत करणे" }
+        { id: "c1", titleEn: "Main Door Godrej Lock Installation", titleMr: "मुख्य दरवाजा गोडरेज लॉक बसवणे", duration: "1.5 hrs", labor: 450, parts: 1100, icon: "hammer", descEn: "Mortise lock grooving, deadbolt alignment, safety keys", descMr: "दरवाजा कोरून लॉक बसवणे व लॅच स्मूथ करणे" },
+        { id: "c2", titleEn: "Wardrobe / Hydraulic Hinge Repair", titleMr: "कपाटाचे दरवाजे व हायड्रॉलिक बिजागरी", duration: "1 hr", labor: 350, parts: 220, icon: "hammer", descEn: "Auto soft-close hinges replace, misaligned door leveling", descMr: "नवीन सॉफ्ट क्लोज बिजागरी व लेव्हलिंग दुरुस्ती" },
+        { id: "c3", titleEn: "Bed / Dining Table Joint Tightening", titleMr: "खाट, डायनिंग टेबल व फर्निचर जोड", duration: "1.5 hrs", labor: 400, parts: 150, icon: "hammer", descEn: "Squeak noise elimination, heavy steel L-brackets, dowel fix", descMr: "आवाज बंद करणे, स्क्रू व एल-पट्टी लावून मजबूत करणे" }
       ],
       painter: [
-        { id: "pt1", titleEn: "Single Room Touchup & Damp Repair", titleMr: "एका खोलीचे टच-अप व ओलसरपणा", duration: "3 hrs", labor: 850, parts: 500, icon: "🖌️", descEn: "Scraping peeling paint, anti-fungal treatment, putty + paint", descMr: "खपली निघालेला रंग घासणे, पुट्टी भरणे व २ कोट रंग" },
-        { id: "pt2", titleEn: "Balcony / Wall Water Repellent Coat", titleMr: "बाल्कनी व बाहेरील भिंत वॉटरप्रूफिंग", duration: "4 hrs", labor: 1300, parts: 900, icon: "🌧️", descEn: "Silicone crack seal, rain guard elastomeric waterproof coat", descMr: "क्रॅक भरणे व पाऊसरोधक वॉटरप्रूफ कोटिंग लावणे" }
+        { id: "pt1", titleEn: "Single Room Touchup & Damp Repair", titleMr: "एका खोलीचे टच-अप व ओलसरपणा", duration: "3 hrs", labor: 850, parts: 500, icon: "paintbrush", descEn: "Scraping peeling paint, anti-fungal treatment, putty + paint", descMr: "खपली निघालेला रंग घासणे, पुट्टी भरणे व २ कोट रंग" },
+        { id: "pt2", titleEn: "Balcony / Wall Water Repellent Coat", titleMr: "बाल्कनी व बाहेरील भिंत वॉटरप्रूफिंग", duration: "4 hrs", labor: 1300, parts: 900, icon: "paintbrush", descEn: "Silicone crack seal, rain guard elastomeric waterproof coat", descMr: "क्रॅक भरणे व पाऊसरोधक वॉटरप्रूफ कोटिंग लावणे" }
       ],
       mason: [
-        { id: "m1", titleEn: "Loose / Cracked Tile Re-fixing", titleMr: "निघालेली फरशी पुन्हा मजबूत बसवणे", duration: "2 hrs", labor: 500, parts: 250, icon: "🧱", descEn: "Roff tile adhesive bonding, hollow void filling, joint grouting", descMr: "फरशी चिकटवणे, पोकळी भरणे व व्हाईट सिमेंट ग्राउट" },
-        { id: "m2", titleEn: "Plaster Patch & Wall Crack Repair", titleMr: "भिंतीचा पडलेला गिलावा व प्लास्टर", duration: "3 hrs", labor: 750, parts: 350, icon: "🏗️", descEn: "Cement-sand mortar, chipping surface, smooth sponge finish", descMr: "सिमेंट-वाळू प्लास्टर दुरुस्ती व गुळगुळीत फिनिशिंग" }
+        { id: "m1", titleEn: "Loose / Cracked Tile Re-fixing", titleMr: "निघालेली फरशी पुन्हा मजबूत बसवणे", duration: "2 hrs", labor: 500, parts: 250, icon: "brickwall", descEn: "Roff tile adhesive bonding, hollow void filling, joint grouting", descMr: "फरशी चिकटवणे, पोकळी भरणे व व्हाईट सिमेंट ग्राउट" },
+        { id: "m2", titleEn: "Plaster Patch & Wall Crack Repair", titleMr: "भिंतीचा पडलेला गिलावा व प्लास्टर", duration: "3 hrs", labor: 750, parts: 350, icon: "brickwall", descEn: "Cement-sand mortar, chipping surface, smooth sponge finish", descMr: "सिमेंट-वाळू प्लास्टर दुरुस्ती व गुळगुळीत फिनिशिंग" }
       ],
       helper: [
-        { id: "h1", titleEn: "Home Shifting & Furniture Loading", titleMr: "घर सामान शिफ्टिंग व टेम्पो लोडिंग", duration: "2.5 hrs", labor: 550, parts: 0, icon: "📦", descEn: "Sofa/fridge carrying, staircase lifting, careful loading", descMr: "जड वस्तू, सोफा, फ्रीज उचलणे व सुरक्षित हलवणे" },
-        { id: "h2", titleEn: "Garden & Terrace Rubble Cleanup", titleMr: "गच्ची व बागकाम स्वच्छता कचरा विल्हेवाट", duration: "2 hrs", labor: 450, parts: 60, icon: "🧹", descEn: "Leaves raking, construction debris sacking, disposal assist", descMr: "सुका कचरा, माती, डेब्रिज पोत्यात भरणे व साफसफाई" }
+        { id: "h1", titleEn: "Home Shifting & Furniture Loading", titleMr: "घर सामान शिफ्टिंग व टेम्पो लोडिंग", duration: "2.5 hrs", labor: 550, parts: 0, icon: "briefcase", descEn: "Sofa/fridge carrying, staircase lifting, careful loading", descMr: "जड वस्तू, सोफा, फ्रीज उचलणे व सुरक्षित हलवणे" },
+        { id: "h2", titleEn: "Garden & Terrace Rubble Cleanup", titleMr: "गच्ची व बागकाम स्वच्छता कचरा विल्हेवाट", duration: "2 hrs", labor: 450, parts: 60, icon: "briefcase", descEn: "Leaves raking, construction debris sacking, disposal assist", descMr: "सुका कचरा, माती, डेब्रिज पोत्यात भरणे व साफसफाई" }
       ]
     };
 
@@ -201,14 +201,41 @@ export const SKILLS = {
       en: {
         brand: "SWABHI",
         brandHighlight: "MAN",
-        tagline: "Verified Neighborhood Craftsmen, On-Demand",
-        subtitle: "Direct access to Chhatrapati Sambhajinagar's skilled plumbers, electricians, carpenters, painters & helpers. Upfront visiting charges, fair hourly rates, zero middleman commissions.",
-        navFind: "Find Workers",
-        navEmergency: "Emergency 15-Min",
-        navBookings: "My Bookings",
-        navJoin: "Join as Worker",
-        navAdmin: "Admin Console",
-        allCategories: "All Trades",
+        tagline: "Verified local workers, on demand.",
+        heroH1Main: "Verified local workers,",
+        heroH1Accent: "on demand.",
+        subtitle: "Skilled people for any kind of work in your locality, from repairs and installation to everyday help. Upfront visiting charges, fair hourly rates, no middleman commission.",
+        navFind: "Find workers",
+        navEmergency: "Emergency, 15 min",
+        navBookings: "My bookings",
+        navJoin: "Join as worker",
+        navAdmin: "Admin console",
+        navDuty: "Duty switch",
+        navVerifiedPros: "Verified pros",
+        navMore: "More",
+        typeOfWorkLabel: "Type of work",
+        allWork: "All work",
+        allCategories: "All work",
+        browseByTypeTitle: "Browse by type of work",
+        browseAllCategories: "Browse all categories",
+        categoriesSubtext: "Repairs, installation, daily help and more. Any kind of work, one place.",
+        whyNeighboursTitle: "WHY NEIGHBOURS BOOK HERE",
+        whyNeighboursHead: "Someone you can call directly, who is already vetted.",
+        trust1Title: "100% verified profiles",
+        trust1Desc: "Every worker is checked before listing.",
+        trust2Title: "Direct phone and WhatsApp",
+        trust2Desc: "Talk to the worker, not a call centre.",
+        trust3Title: "Zero middleman markup",
+        trust3Desc: "The rate you see is the rate you pay.",
+        emergency15Min: "Emergency, 15 min",
+        emergencyUrgentLine: "Need someone urgently? Get help now.",
+        emergency24x7: "24/7 Emergency Support",
+        nightSurgeNotice: "Night hours (10:00 PM – 6:00 AM): Nominal +₹150 night surge directly to the technician for immediate night response.",
+        footerMapTitle: "Chhatrapati Sambhajinagar Service Coverage Map",
+        footerMapSub: "10 Active Local Service Hubs across Sambhajinagar with rapid 15-minute emergency technician dispatch.",
+        filterBottomSheetTitle: "Filter Workers",
+        applyFilters: "Apply Filters",
+        resetFilters: "Reset Filters",
         localityLabel: "Locality",
         allAreas: "All Localities",
         availLabel: "Availability",
@@ -288,7 +315,7 @@ export const SKILLS = {
         joinPhone: "Mobile Phone Number",
         joinBio: "Short Bio / Specialities",
         joinSubmit: "Submit & Start Receiving Work",
-        joinSuccess: "🎉 Profile created! Sent to Admin verification queue.",
+        joinSuccess: "Profile created! Sent to Admin verification queue.",
         previewCard: "Live Preview of Your Profile Card",
         chatModalTitle: "Direct Chat with",
         typeMessage: "Type your message or landmark info...",
@@ -321,7 +348,7 @@ export const SKILLS = {
         reviewerNameLabel: "Your Name",
         submitReviewBtn: "Submit Rating & Review",
         reviewSuccess: "Thank you! Your rating and review have been published.",
-        ratingLabels: ["", "Poor ⚠️", "Fair 😐", "Good 👍", "Very Good ⭐", "Excellent & Recommended! 🌟"],
+        ratingLabels: ["", "Poor", "Fair", "Good", "Very Good", "Excellent & Recommended!"],
         dutySwitch: "Duty Switch",
         dutyModalTitle: "Worker Partner Duty Console",
         dutyModalSubtitle: "Set your live availability for on-demand customer bookings across Aurangabad.",
@@ -424,14 +451,41 @@ export const SKILLS = {
       mr: {
         brand: "स्वाभि",
         brandHighlight: "मान",
-        tagline: "छत्रपती संभाजीनगरमधील विश्वासू आणि कुशल स्थानिक कारागीर",
-        subtitle: "प्लंबर, इलेक्ट्रिशियन, सुतार, पेंटर व मदतनीस थेट तुमच्या सेवेत. पारदर्शक तपासणी फी, रास्त दर आणि शून्य मध्यस्थ कमिशन.",
-        navFind: "कारागीर शोधा",
-        navEmergency: "तातडीची सेवा (१५ मिनिटे)",
+        tagline: "स्थानिक पडताळणी झालेले कामगार, थेट मागणीनुसार.",
+        heroH1Main: "स्थानिक पडताळणी झालेले कामगार,",
+        heroH1Accent: "थेट मागणीनुसार.",
+        subtitle: "तुमच्या परिसरातील कोणत्याही प्रकारच्या कामासाठी कुशल व्यक्ती, दुरुस्ती आणि स्थापनेपासून ते रोजच्या मदतीपर्यंत. पारदर्शक भेट शुल्क, रास्त तासिका दर, शून्य मध्यस्थ कमिशन.",
+        navFind: "कामगार शोधा",
+        navEmergency: "Emergency, 15 min",
         navBookings: "माझी बुकिंग्स",
-        navJoin: "कामगार म्हणून नोंदणी करा",
-        navAdmin: "अ‍ॅडमिन पॅनेल",
+        navJoin: "कामगार म्हणून जुडा",
+        navAdmin: "अ‍ॅडमिन कन्सोल",
+        navDuty: "ड्युटी स्विच",
+        navVerifiedPros: "तपासलेले कामगार",
+        navMore: "अधिक",
+        typeOfWorkLabel: "कामाचा प्रकार",
+        allWork: "सर्व कामे",
         allCategories: "सर्व कामे",
+        browseByTypeTitle: "कामाच्या प्रकारानुसार शोधा",
+        browseAllCategories: "सर्व प्रकार पहा",
+        categoriesSubtext: "दुरुस्ती, फिटिंग, घरकाम व इतर मदत. कोणत्याही प्रकारची कामे एकाच जागी.",
+        whyNeighboursTitle: "परिसरातील नागरिक येथून का बुक करतात?",
+        whyNeighboursHead: "ज्यांना तुम्ही थेट कॉल करू शकता, जे आधीच पडताळलेले आहेत.",
+        trust1Title: "१००% पडताळणी झालेले प्रोफाईल्स",
+        trust1Desc: "नोंदणीपूर्वी प्रत्येक कामगाराची संपूर्ण पडताळणी.",
+        trust2Title: "थेट फोन व व्हॉट्सअ‍ॅप",
+        trust2Desc: "कॉल सेंटरऐवजी थेट कामगाराशी थेट संवाद.",
+        trust3Title: "शून्य मध्यस्थ कमिशन",
+        trust3Desc: "जे दर दिसतील, तेच थेट दिले जातात.",
+        emergency15Min: "Emergency, 15 min",
+        emergencyUrgentLine: "तातडीने कामगाराची गरज आहे का? आत्ताच मदत मिळवा.",
+        emergency24x7: "२४/७ तातडीची सेवा",
+        nightSurgeNotice: "रात्रीची वेळ (१०:०० PM ते ६:०० AM): मध्यरात्रीच्या तातडीच्या प्रवासासाठी कामगाराला नाममात्र +₹१५० अतिरिक्त नाईट चार्ज देय असेल.",
+        footerMapTitle: "छत्रपती संभाजीनगर सेवा कव्हरेज नकाशा",
+        footerMapSub: "संभाजीनगरमधील १० सक्रिय स्थानिक सेवा केंद्रे व १५ मिनिटांत तातडीची सेवा पोहच.",
+        filterBottomSheetTitle: "फिल्टर्स निवडा",
+        applyFilters: "फिल्टर लागू करा",
+        resetFilters: "फिल्टर रीसेट करा",
         localityLabel: "परिसर / भाग",
         allAreas: "सर्व भाग",
         availLabel: "उपलब्धता",
@@ -511,7 +565,7 @@ export const SKILLS = {
         joinPhone: "मोबाईल नंबर",
         joinBio: "कामाबद्दल थोडक्यात माहिती",
         joinSubmit: "नोंदणी करा व कामे मिळवा",
-        joinSuccess: "🎉 नोंदणी झाली! प्रोफाईल अ‍ॅडमिन पडताळणीकडे पाठवले आहे.",
+        joinSuccess: "नोंदणी झाली! प्रोफाईल अ‍ॅडमिन पडताळणीकडे पाठवले आहे.",
         previewCard: "तुमचे प्रोफाईल कार्ड कसे दिसेल",
         chatModalTitle: "थेट संदेश –",
         typeMessage: "येथे तुमचा संदेश किंवा पत्त्याचा लँडमार्क टाका...",
@@ -544,7 +598,7 @@ export const SKILLS = {
         reviewerNameLabel: "तुमचे नाव",
         submitReviewBtn: "अभिप्राय सबमिट करा",
         reviewSuccess: "धन्यवाद! तुमचा अभिप्राय व रेटिंग जोडले गेले आहे.",
-        ratingLabels: ["", "असमाधानकारक ⚠️", "साधारण 😐", "चांगले 👍", "खूप छान ⭐", "उत्कृष्ट व विश्वासू! 🌟"],
+        ratingLabels: ["", "असमाधानकारक", "साधारण", "चांगले", "खूप छान", "उत्कृष्ट व विश्वासू!"],
         dutySwitch: "ड्युटी स्विच",
         dutyModalTitle: "कामगार भागीदार ड्युटी नियंत्रण",
         dutyModalSubtitle: "ग्राहकांच्या थेट बुकिंगसाठी तुमची लाईव्ह उपलब्धता (ऑनलाईन/ऑफलाईन) सेट करा.",

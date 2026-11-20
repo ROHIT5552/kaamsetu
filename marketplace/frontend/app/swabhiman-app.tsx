@@ -11,6 +11,68 @@ import {
 } from "../lib/swabhiman-data";
 import Toaster from "../components/Toaster";
 import { ToastNotification, ToastType, WorkerProfile, BookingRecord, LedgerItem } from "../utils";
+import {
+  Wrench,
+  Zap,
+  Hammer,
+  Paintbrush,
+  BrickWall,
+  Briefcase,
+  ShieldCheck,
+  Check,
+  Phone,
+  MessageCircle,
+  Volume2,
+  Heart,
+  SlidersHorizontal,
+  ChevronDown,
+  Moon,
+  Sun,
+  Menu,
+  X,
+  ExternalLink,
+  Clock,
+  MapPin,
+  LayoutGrid,
+  Search,
+  ChevronRight,
+  Filter,
+  CheckCircle2,
+  RotateCcw,
+  Sparkles,
+  ArrowRight,
+  Shield,
+  Layers,
+  Star,
+} from "lucide-react";
+
+// Dynamic stroke icon resolver for any category (supports arbitrary type of work)
+const getCategoryIcon = (key: string, className = "w-6 h-6") => {
+  switch (key) {
+    case "plumber":
+      return <Wrench className={className} />;
+    case "electrician":
+      return <Zap className={className} />;
+    case "carpenter":
+      return <Hammer className={className} />;
+    case "painter":
+      return <Paintbrush className={className} />;
+    case "mason":
+      return <BrickWall className={className} />;
+    case "helper":
+      return <Briefcase className={className} />;
+    default:
+      return <Briefcase className={className} />;
+  }
+};
+
+// Helper for 56px Avatar Initials
+const getInitials = (name: string) => {
+  if (!name) return "W";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 // React Error Boundary for isolated modal/widget protection
 class SafeBoundary extends React.Component<{ children?: React.ReactNode }, { hasError: boolean; error: any }> {
@@ -216,6 +278,21 @@ export default function SwabhimanApp() {
       // Navigation View: 'find' | 'emergency' | 'bookings' | 'join' | 'admin'
       const [activeTab, setActiveTab] = useState("find");
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+      const [isMoreOpen, setIsMoreOpen] = useState(false);
+      const [showFilterSheet, setShowFilterSheet] = useState(false);
+      const [showAllCategoriesModal, setShowAllCategoriesModal] = useState(false);
+      const [activeMapLocality, setActiveMapLocality] = useState("all");
+      const moreMenuRef = useRef<HTMLDivElement>(null);
+
+      useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+          if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+            setIsMoreOpen(false);
+          }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
 
       // App Data State
       const [workers, setWorkers] = useState<any[]>(INITIAL_WORKERS as any[]);
@@ -891,780 +968,825 @@ export default function SwabhimanApp() {
           {/* TOASTER NOTIFICATIONS */}
           <Toaster toasts={toasts} onDismiss={dismissToast} />
 
-          {/* HEADER / NAVIGATION (PREMIER REDESIGNED NAVBAR) */}
-          <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-[0_4px_24px_rgb(0,0,0,0.03)] transition-all">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between h-18 sm:h-20 gap-4">
-                
-                {/* Brand Logo & City Hub */}
-                <div className="flex items-center gap-3">
-                  <div 
-                    onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); }}
-                    className="flex items-center gap-2 cursor-pointer select-none group py-1"
-                  >
-                    <img
-                      src="/swabhiman-logo.png"
-                      alt="SWABHIMAN"
-                      className="h-9 sm:h-11 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
-                    />
-                    {lang === "mr" && (
-                      <span className="font-display font-bold text-base sm:text-lg text-amber-600 dark:text-amber-400 hidden xs:inline-block">
-                        (स्वाभिमान)
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Locality Live Pill */}
-                  <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Chhatrapati Sambhajinagar</span>
-                  </div>
-                </div>
-
-                {/* Center: Floating Capsule Segmented Navigation */}
-                <nav className="hidden lg:flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1.5 rounded-full border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
-                  <button
-                    onClick={() => setActiveTab("find")}
-                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
-                      activeTab === "find"
-                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
-                    }`}
-                  >
-                    <span>🔍</span>
-                    <span>{t.navFind}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("emergency")}
-                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
-                      activeTab === "emergency"
-                        ? "bg-rose-500 text-white shadow-md shadow-rose-500/25 scale-102"
-                        : "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                    }`}
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                    </span>
-                    <span>{t.navEmergency}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("bookings")}
-                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
-                      activeTab === "bookings"
-                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
-                    }`}
-                  >
-                    <span>📋</span>
-                    <span>{t.navBookings}</span>
-                    {bookings.length > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500 text-white font-extrabold shadow-xs">
-                        {bookings.length}
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("join")}
-                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
-                      activeTab === "join"
-                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
-                    }`}
-                  >
-                    <span>👷</span>
-                    <span>{t.navJoin}</span>
-                  </button>
-                </nav>
-
-                {/* Right: Actions, Language, Theme & Admin Console */}
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                  {/* Admin Console Pill (Desktop) */}
-                  <button
-                    onClick={() => setActiveTab("admin")}
-                    className={`hidden xl:flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all border ${
-                      activeTab === "admin"
-                        ? "bg-slate-900 text-amber-400 border-slate-900 dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400 shadow-md"
-                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-amber-400"
-                    }`}
-                  >
-                    <span>🛡️</span>
-                    <span>{t.navAdmin}</span>
-                    {adminStats.pendingW > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-black animate-pulse">
-                        {adminStats.pendingW}
-                      </span>
-                    )}
-                  </button>
-
-                  {/* Worker Duty Quick Switch */}
-                  <button
-                    onClick={() => setShowDutyModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold shadow-xs hover:border-emerald-500 transition-colors"
-                    title={t.dutySwitch}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="hidden sm:inline">{t.dutySwitch}</span>
-                  </button>
-
-                  {/* PWA Install */}
-                  {!isAppInstalled && (
-                    <button
-                      onClick={handleTriggerInstall}
-                      className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-xs transition-transform active:scale-95"
-                      title={t.installApp}
-                    >
-                      <span>📲</span>
-                      <span>{t.installApp}</span>
-                    </button>
-                  )}
-
-                  {/* Language Toggle Pill */}
-                  <button
-                    onClick={() => setLang(l => l === "en" ? "mr" : "en")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold hover:border-amber-400 transition-colors"
-                    title="Toggle Language / भाषा बदला"
-                  >
-                    <span className="text-sm">{lang === "en" ? "🇮🇳" : "🇬🇧"}</span>
-                    <span className="font-semibold">{lang === "en" ? "मराठी" : "English"}</span>
-                  </button>
-
-                  {/* Theme Switcher */}
-                  <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm hover:border-amber-400 transition-colors"
-                    title="Toggle Theme"
-                  >
-                    {darkMode ? "☀️" : "🌙"}
-                  </button>
-
-                  {/* Mobile Hamburger Toggle Button */}
-                  <button
-                    onClick={() => setIsMobileMenuOpen(prev => !prev)}
-                    className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-lg font-bold shadow-xs active:scale-95 transition-transform"
-                    aria-label="Toggle Navigation Menu"
-                  >
-                    {isMobileMenuOpen ? "✕" : "☰"}
-                  </button>
-                </div>
+          {/* HEADER / NAVIGATION (CLEAN CALM MOBILE-FIRST, 72PX MIN HEIGHT) */}
+          <header className="sticky top-0 z-50 bg-white dark:bg-[#131C2E] border-b border-[#E8E2D6] dark:border-[#24304A] min-h-[72px] h-[72px] sm:h-20 flex items-center transition-colors">
+            <div className="max-w-[1200px] w-full mx-auto px-6 flex items-center justify-between gap-4">
+              
+              {/* Left: Brand Logo */}
+              <div
+                onClick={() => { setActiveTab("find"); setSelectedSkill("all"); setIsMobileMenuOpen(false); }}
+                className="flex items-center gap-3 cursor-pointer select-none py-1 group"
+                role="button"
+                tabIndex={0}
+                aria-label="SWABHIMAN Home"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setActiveTab("find"); setSelectedSkill("all"); } }}
+              >
+                <img
+                  src="/swabhiman-logo.png"
+                  alt="SWABHIMAN"
+                  className="h-9 sm:h-10 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102"
+                />
               </div>
-            </div>
 
-            {/* MOBILE SLIDE-DOWN DRAWER MENU (PREMIER DESIGN) */}
-            {isMobileMenuOpen && (
-              <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl px-4 py-5 shadow-2xl space-y-4 animate-in slide-in-from-top-3 duration-200">
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); }}
-                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
-                      activeTab === "find"
-                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
-                    }`}
-                  >
-                    <span className="text-2xl mb-1">🔍</span>
-                    <span className="font-bold text-sm">{t.navFind}</span>
-                    <span className="text-[11px] opacity-80">Browse Sambhajinagar Pros</span>
-                  </button>
+              {/* Center Nav: Find workers (active pill), My bookings (count badge), Verified pros */}
+              <nav className="hidden md:flex items-center gap-2" aria-label="Main Navigation">
+                <button
+                  onClick={() => { setActiveTab("find"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all min-h-[44px] ${
+                    activeTab === "find"
+                      ? "bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold"
+                      : "text-[#5A5448] dark:text-[#A7B1C4] hover:text-[#1B1A17] dark:hover:text-[#F3F5F9] hover:bg-[#F4EEE0]/60 dark:hover:bg-[#1F2A44]/60"
+                  }`}
+                >
+                  {t.navFind}
+                </button>
 
-                  <button
-                    onClick={() => { setActiveTab("emergency"); setIsMobileMenuOpen(false); }}
-                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
-                      activeTab === "emergency"
-                        ? "bg-rose-500 text-white font-bold border-rose-500 shadow-sm"
-                        : "bg-rose-50/70 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900"
-                    }`}
-                  >
-                    <span className="text-2xl mb-1">⚡</span>
-                    <span className="font-bold text-sm">{t.navEmergency}</span>
-                    <span className="text-[11px] opacity-80">15-Min Fast Dispatch</span>
-                  </button>
-
-                  <button
-                    onClick={() => { setActiveTab("bookings"); setIsMobileMenuOpen(false); }}
-                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
-                      activeTab === "bookings"
-                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl mb-1">📋</span>
-                      {bookings.length > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500 text-white font-black">
-                          {bookings.length}
-                        </span>
-                      )}
-                    </div>
-                    <span className="font-bold text-sm">{t.navBookings}</span>
-                    <span className="text-[11px] opacity-80">Track Orders & Slips</span>
-                  </button>
-
-                  <button
-                    onClick={() => { setActiveTab("join"); setIsMobileMenuOpen(false); }}
-                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
-                      activeTab === "join"
-                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
-                    }`}
-                  >
-                    <span className="text-2xl mb-1">👷</span>
-                    <span className="font-bold text-sm">{t.navJoin}</span>
-                    <span className="text-[11px] opacity-80">Partner Onboarding</span>
-                  </button>
-                </div>
-
-                {/* Admin Console & Tools Row */}
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
-                  <button
-                    onClick={() => { setActiveTab("admin"); setIsMobileMenuOpen(false); }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-amber-400 dark:bg-amber-400 dark:text-slate-950 font-bold text-xs flex items-center justify-between shadow-sm"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>🛡️</span> {t.navAdmin}
+                <button
+                  onClick={() => setActiveTab("bookings")}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 min-h-[44px] ${
+                    activeTab === "bookings"
+                      ? "bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold"
+                      : "text-[#5A5448] dark:text-[#A7B1C4] hover:text-[#1B1A17] dark:hover:text-[#F3F5F9] hover:bg-[#F4EEE0]/60 dark:hover:bg-[#1F2A44]/60"
+                  }`}
+                >
+                  <span>{t.navBookings}</span>
+                  {bookings.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-[#1B1A17] text-white dark:bg-[#F2A900] dark:text-[#1B1A17] font-bold">
+                      {bookings.length}
                     </span>
-                    {adminStats.pendingW > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-black animate-pulse">
-                        {adminStats.pendingW} Pending
-                      </span>
-                    )}
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (activeTab !== "find") setActiveTab("find");
+                    setTimeout(() => {
+                      const el = document.getElementById("verified-pros");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                  }}
+                  className="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold text-[#5A5448] dark:text-[#A7B1C4] hover:text-[#1B1A17] dark:hover:text-[#F3F5F9] hover:bg-[#F4EEE0]/60 dark:hover:bg-[#1F2A44]/60 transition-all min-h-[44px]"
+                >
+                  {t.navVerifiedPros}
+                </button>
+              </nav>
+
+              {/* Right: Solid Red Emergency Button, Language Toggle & More Dropdown */}
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                {/* Emergency Button (solid red, bolt icon - the only red element) */}
+                <button
+                  onClick={() => setActiveTab("emergency")}
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-[#C2331F] hover:bg-[#a52a18] active:scale-98 text-white font-bold text-xs sm:text-sm rounded-[13px] shadow-sm transition-all min-h-[44px]"
+                  aria-label="15-minute emergency assistance"
+                >
+                  <Zap className="w-4 h-4 fill-white text-white" />
+                  <span>{t.emergency15Min}</span>
+                </button>
+
+                {/* Language Toggle (मराठी / English) */}
+                <button
+                  onClick={() => setLang(prev => (prev === "en" ? "mr" : "en"))}
+                  className="px-3.5 py-2 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
+                  aria-label="Switch language"
+                >
+                  {lang === "en" ? "मराठी" : "English"}
+                </button>
+
+                {/* Accessible More Dropdown */}
+                <div className="relative" ref={moreMenuRef}>
+                  <button
+                    onClick={() => setIsMoreOpen(prev => !prev)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-xs sm:text-sm transition-colors min-h-[44px]"
+                    aria-haspopup="menu"
+                    aria-expanded={isMoreOpen}
+                    aria-label="More options menu"
+                  >
+                    <span>{t.navMore}</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""}`} />
                   </button>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => { setShowDutyModal(true); setIsMobileMenuOpen(false); }}
-                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-emerald-300 dark:border-emerald-800"
+                  {isMoreOpen && (
+                    <div
+                      role="menu"
+                      className="absolute right-0 mt-2 w-56 rounded-[18px] bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                     >
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span>{t.dutySwitch}</span>
-                    </button>
-
-                    {!isAppInstalled && (
                       <button
-                        onClick={() => { handleTriggerInstall(); setIsMobileMenuOpen(false); }}
-                        className="flex-1 py-2 px-3 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                        onClick={() => { setActiveTab("join"); setIsMoreOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs sm:text-sm font-medium text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] rounded-[11px] transition-colors text-left"
+                        role="menuitem"
                       >
-                        <span>📲</span>
+                        <Briefcase className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                        <span>{t.navJoin}</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveTab("admin"); setIsMoreOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs sm:text-sm font-medium text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] rounded-[11px] transition-colors text-left"
+                        role="menuitem"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                        <span>{t.navAdmin}</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setShowDutyModal(true); setIsMoreOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs sm:text-sm font-medium text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] rounded-[11px] transition-colors text-left"
+                        role="menuitem"
+                      >
+                        <SlidersHorizontal className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                        <span>{t.dutySwitch}</span>
+                      </button>
+
+                      <button
+                        onClick={() => { handleTriggerInstall(); setIsMoreOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs sm:text-sm font-medium text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] rounded-[11px] transition-colors text-left"
+                        role="menuitem"
+                      >
+                        <ExternalLink className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
                         <span>{t.installApp}</span>
                       </button>
-                    )}
-                  </div>
+
+                      <div className="h-px bg-[#E8E2D6] dark:bg-[#24304A] my-1.5" />
+
+                      {/* Dark / Light Toggle */}
+                      <button
+                        onClick={() => setDarkMode(prev => !prev)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm font-medium text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] rounded-[11px] transition-colors text-left"
+                        role="menuitem"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          {darkMode ? <Sun className="w-4 h-4 text-[#F2A900]" /> : <Moon className="w-4 h-4 text-[#5A5448]" />}
+                          <span>{darkMode ? "Light mode" : "Dark mode"}</span>
+                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#5A5448] dark:text-[#A7B1C4] font-bold">
+                          {darkMode ? "ON" : "OFF"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* 24/7 Support Helpline Direct Call */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-center text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  <span className="block font-medium">Worker & Employer Helpline:</span>
-                  <a href="tel:+919822011223" className="font-bold text-amber-600 dark:text-amber-400 hover:underline text-sm">
-                    📞 +91 98220 11223
-                  </a>
-                </div>
+                {/* Mobile Menu Button (<= 640px) */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                  className="sm:hidden p-2 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] text-[#1B1A17] dark:text-[#F3F5F9] min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Toggle menu"
+                >
+                  {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+              </div>
+
+            </div>
+
+            {/* Mobile Slide-down Menu Sheet */}
+            {isMobileMenuOpen && (
+              <div className="sm:hidden absolute top-[72px] left-0 right-0 bg-white dark:bg-[#131C2E] border-b border-[#E8E2D6] dark:border-[#24304A] shadow-2xl p-4 z-40 space-y-2 animate-in slide-in-from-top-2 duration-150">
+                <button
+                  onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-sm text-left"
+                >
+                  <LayoutGrid className="w-4 h-4 text-[#F2A900]" />
+                  <span>{t.navFind}</span>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab("bookings"); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center justify-between p-3 rounded-[13px] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-sm text-left"
+                >
+                  <span className="flex items-center gap-3">
+                    <Clock className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                    <span>{t.navBookings}</span>
+                  </span>
+                  {bookings.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs bg-[#1B1A17] text-white font-bold">
+                      {bookings.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab("emergency"); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] bg-[#C2331F] text-white font-bold text-sm text-left"
+                >
+                  <Zap className="w-4 h-4 fill-white" />
+                  <span>{t.emergency15Min}</span>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab("join"); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-sm text-left"
+                >
+                  <Briefcase className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                  <span>{t.navJoin}</span>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab("admin"); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-sm text-left"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                  <span>{t.navAdmin}</span>
+                </button>
+
+                <button
+                  onClick={() => { setShowDutyModal(true); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-sm text-left"
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                  <span>{t.dutySwitch}</span>
+                </button>
+
+                <button
+                  onClick={() => { handleTriggerInstall(); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[13px] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-sm text-left"
+                >
+                  <ExternalLink className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4]" />
+                  <span>{t.installApp}</span>
+                </button>
               </div>
             )}
           </header>
 
+
           {/* VIEW: FIND WORKERS */}
           {activeTab === "find" && (
-            <main className="flex-1 pb-24">
-              {/* HERO SECTION */}
-              <div className="bg-gradient-to-b from-slate-900 to-[#14232b] text-white pt-10 pb-16 px-4 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffc21a_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                
-                <div className="max-w-6xl mx-auto relative z-10 text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-semibold mb-4">
-                    <span>⚡ Chhatrapati Sambhaji Nagar (Aurangabad) Service Network</span>
-                  </div>
-                  
-                  <h1 className="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight leading-tight max-w-4xl mx-auto">
-                    {t.tagline}
-                  </h1>
-                  <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-normal">
-                    {t.subtitle}
-                  </p>
-
-                  {/* QUICK SEARCH & FILTER BAR */}
-                  <div className="mt-8 bg-white dark:bg-[#1a2c36] text-slate-800 dark:text-slate-100 p-4 sm:p-5 rounded-2xl shadow-2xl border border-slate-200 dark:border-[#293d49] text-left max-w-5xl mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      
-                      {/* Locality Selector */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          📍 {t.localityLabel}
-                        </label>
-                        <select
-                          value={selectedArea}
-                          onChange={(e) => setSelectedArea(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
-                        >
-                          <option value="all">{t.allAreas}</option>
-                          {LOCALITIES.map(area => (
-                            <option key={area} value={area}>{area}</option>
-                          ))}
-                        </select>
+            <main className="flex-1 pb-28 sm:pb-20">
+              {/* HERO SECTION (TWO COLUMNS, DESKTOP CONTAINER MAX-WIDTH 1200PX, 24PX PADDING) */}
+              <section className="pt-8 sm:pt-12 pb-10">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left Column (Hero Copy & Search Card) */}
+                    <div className="lg:col-span-7 xl:col-span-7">
+                      {/* Locality Live Pill */}
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] border border-[#E8E2D6] dark:border-[#24304A] text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-3">
+                        <MapPin className="w-3.5 h-3.5 text-[#F2A900]" />
+                        <span>Chhatrapati Sambhajinagar (Aurangabad)</span>
                       </div>
 
-                      {/* Availability */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          ⏱️ {t.availLabel}
-                        </label>
-                        <select
-                          value={selectedAvail}
-                          onChange={(e) => setSelectedAvail(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
-                        >
-                          <option value="all">{t.allAvail}</option>
-                          <option value="now">{t.availNow}</option>
-                          <option value="today">{t.availToday}</option>
-                          <option value="week">{t.availWeek}</option>
-                        </select>
-                      </div>
+                      {/* H1 with accent underline on "on demand." */}
+                      <h1 className="text-3xl sm:text-5xl lg:text-[46px] font-extrabold tracking-tight text-[#1B1A17] dark:text-[#F3F5F9] leading-tight">
+                        {t.heroH1Main}{" "}
+                        <span className="relative inline-block ml-0.5">
+                          {t.heroH1Accent}
+                          <span className="absolute left-0 bottom-1 w-full h-3 bg-[#F2A900] -z-10 rounded-xs opacity-90"></span>
+                        </span>
+                      </h1>
 
-                      {/* Max Rate */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          💰 {t.maxPriceLabel}
-                        </label>
-                        <input
-                          type="number"
-                          value={maxPrice}
-                          onChange={(e) => setMaxPrice(e.target.value)}
-                          placeholder="₹ Any"
-                          className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
-                        />
-                      </div>
+                      {/* Subtext */}
+                      <p className="mt-4 text-sm sm:text-base text-[#5A5448] dark:text-[#A7B1C4] leading-relaxed max-w-xl">
+                        {t.subtitle}
+                      </p>
 
-                      {/* Keyword Search */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          🔎 Keyword
-                        </label>
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={t.searchPlaceholder}
-                          className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
-                        />
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* TRUST BULLETS */}
-                  <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-medium">
-                    <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> 100% Verified Profiles</span>
-                    <span className="flex items-center gap-1.5"><span className="text-amber-400">★</span> Direct Phone & WhatsApp</span>
-                    <span className="flex items-center gap-1.5"><span className="text-blue-400">🛡️</span> Zero Middleman Markup</span>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* STRIPE ACCENT */}
-              <div className="h-2 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500"></div>
-
-              {/* CONTENT CONTAINER */}
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-
-                {/* TRADE QUICK FILTER PILLS */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-3 custom-scrollbar">
-                  <button
-                    onClick={() => setSelectedSkill("all")}
-                    className={`flex-none px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                      selectedSkill === "all"
-                        ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400"
-                    }`}
-                  >
-                    🛠️ {t.allCategories}
-                  </button>
-                  {Object.entries(SKILLS).map(([key, item]) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedSkill(key)}
-                      className={`flex-none px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                        selectedSkill === key
-                          ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400"
-                      }`}
-                    >
-                      <span>{item.icon}</span>
-                      <span>{lang === "en" ? item.en : item.mr}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* COUNT & SORT & TOOLS BAR */}
-                <div className="flex flex-wrap items-center justify-between gap-3 my-4 pt-2 border-t border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                      <span className="text-slate-900 dark:text-white font-bold">{filteredWorkers.length}</span> {t.workersCount}
-                    </div>
-
-                    {/* Saved Favorites Filter Toggle */}
-                    <button
-                      onClick={() => setShowOnlyFavorites(prev => !prev)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
-                        showOnlyFavorites
-                          ? "bg-rose-500 text-white shadow-sm ring-2 ring-rose-300"
-                          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-rose-400"
-                      }`}
-                    >
-                      <span>❤️</span> {t.savedFavorites} ({favorites.length})
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    {/* Diagnostic Cost Estimator Trigger Button */}
-                    <button
-                      onClick={() => setShowEstimatorModal(true)}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95"
-                    >
-                      <span>🧮</span> {t.calcCostBtn}
-                    </button>
-
-                    <div className="flex items-center gap-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t.sortBy}:</label>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-medium focus:outline-none focus:border-amber-400"
-                      >
-                        <option value="rating">{t.sortRating}</option>
-                        <option value="priceLow">{t.sortPriceLow}</option>
-                        <option value="experience">{t.sortExperience}</option>
-                        <option value="jobs">{t.sortJobs}</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* WORKERS GRID */}
-                {filteredWorkers.length === 0 ? (
-                  <div className="text-center py-16 bg-white dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 my-6">
-                    <div className="text-4xl mb-2">🔍</div>
-                    <div className="font-bold text-lg text-slate-700 dark:text-slate-200">No professionals matched your exact filters</div>
-                    <p className="text-slate-500 text-sm mt-1">Try clearing some filters or searching with a different term.</p>
-                    <button
-                      onClick={() => { setSelectedSkill("all"); setSelectedArea("all"); setSelectedAvail("all"); setMaxPrice(""); setSearchQuery(""); }}
-                      className="mt-4 px-4 py-2 bg-amber-400 text-slate-950 font-semibold text-xs rounded-lg hover:bg-amber-300"
-                    >
-                      Reset All Filters
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {filteredWorkers.map(w => {
-                      const skillObj = SKILLS[w.skill] || SKILLS.helper;
-                      const isComparing = compareList.includes(w.id);
-
-                      return (
+                      {/* Mobile Emergency Card (directly under search copy on <= 640px) */}
+                      <div className="sm:hidden mt-5">
                         <div
-                          key={w.id}
-                          className="bg-white dark:bg-[#1a2c36] rounded-2xl border border-slate-200 dark:border-[#293d49] hover:border-amber-400/80 dark:hover:border-amber-400/80 transition-all p-5 shadow-sm hover:shadow-md flex flex-col justify-between group"
+                          onClick={() => setActiveTab("emergency")}
+                          className="w-full bg-[#C2331F] text-white rounded-[18px] p-4 shadow-sm flex items-center justify-between cursor-pointer active:scale-98 transition-transform"
+                          role="button"
+                          tabIndex={0}
                         >
-                          <div>
-                            {/* Card Top: Avatar, Name, Verification, Trade */}
-                            <div className="flex items-start gap-3.5">
-                              <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-2xl flex items-center justify-center font-bold flex-none shadow-inner border border-amber-300 dark:border-amber-600">
-                                {skillObj.icon}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white truncate">
-                                    {lang === "en" ? w.name : (w.nameMr || w.name)}
-                                  </h3>
-                                  {w.verified && (
-                                    <span className="text-blue-500 text-xs flex-none" title={t.verifiedBadge}>
-                                      ✓
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 mt-0.5">
-                                  <span className="font-semibold text-amber-600 dark:text-amber-400">
-                                    {lang === "en" ? skillObj.en : skillObj.mr}
-                                  </span>
-                                  <span>•</span>
-                                  <span>{w.area}</span>
-                                </div>
-                              </div>
-
-                              {/* Availability Badge & Favorite Heart */}
-                              <div className="flex items-center gap-1.5 flex-none">
-                                <button
-                                  onClick={(e) => handleToggleFavorite(w.id, e)}
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-colors ${
-                                    favorites.includes(w.id)
-                                      ? "bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
-                                      : "bg-slate-100 text-slate-400 hover:text-rose-500 dark:bg-slate-800"
-                                  }`}
-                                  title={favorites.includes(w.id) ? "Remove from Favorites" : "Add to Favorites"}
-                                >
-                                  {favorites.includes(w.id) ? "❤️" : "🤍"}
-                                </button>
-
-                                {w.avail === "now" ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    {t.dutyOnline.split(" ")[0]}
-                                  </span>
-                                ) : w.avail === "busy" ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    {t.dutyBusy.split(" ")[0]}
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                    {t.dutyOffline.split(" ")[0]}
-                                  </span>
-                                )}
-                              </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-none">
+                              <Zap className="w-5 h-5 text-white fill-white" />
                             </div>
-
-                            {/* Ratings, Jobs, Exp & Audio Readout */}
-                            <div className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 rounded-xl px-3 py-2 my-3.5 border border-slate-100 dark:border-slate-800">
-                              <span className="flex items-center gap-1 text-amber-500 font-bold">
-                                ★ {w.rating} <span className="text-slate-400 font-normal">({w.reviews.length})</span>
-                              </span>
-                              <span>•</span>
-                              <span>{w.exp} {t.experience}</span>
-                              <span>•</span>
-                              <button
-                                onClick={(e) => handleToggleVoice(w, e)}
-                                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 ${
-                                  speakingWorkerId === w.id
-                                    ? "bg-amber-400 text-slate-950 animate-pulse shadow-sm"
-                                    : "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:border-amber-400"
-                                }`}
-                                title="Listen to profile details via voice audio"
-                              >
-                                <span>{speakingWorkerId === w.id ? "🔊" : "🔈"}</span>
-                                <span>{speakingWorkerId === w.id ? t.speakingNow : t.listenVoice}</span>
-                              </button>
+                            <div>
+                              <div className="font-extrabold text-sm">{t.emergency15Min}</div>
+                              <div className="text-[11px] text-white/90">{t.emergencyUrgentLine}</div>
                             </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-white/80" />
+                        </div>
+                      </div>
 
-                            {/* Short Bio */}
-                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
-                              {lang === "en" ? w.bio : (w.bioMr || w.bio)}
-                            </p>
-
-                            {/* Work Samples Thumbnails */}
-                            {w.workSamples && w.workSamples.length > 0 && (
-                              <div className="mt-3 flex items-center gap-2">
-                                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Samples:</span>
-                                <div className="flex gap-1.5 overflow-hidden">
-                                  {w.workSamples.slice(0, 2).map((imgUrl, i) => (
-                                    <img
-                                      key={i}
-                                      src={imgUrl}
-                                      alt="sample"
-                                      onClick={() => setDetailWorker(w)}
-                                      className="w-10 h-10 object-cover rounded-lg border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform cursor-pointer"
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                      {/* White Search Card */}
+                      <div className="mt-6 bg-white dark:bg-[#131C2E] rounded-[22px] border border-[#E8E2D6] dark:border-[#24304A] p-5 sm:p-6 shadow-[0_4px_24px_rgb(0,0,0,0.03)]">
+                        {/* Mobile Single Search + Filters Button (<= 640px) */}
+                        <div className="sm:hidden space-y-3">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder={t.searchPlaceholder}
+                              className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                            />
+                            <Search className="w-4 h-4 text-[#5A5448] dark:text-[#A7B1C4] absolute left-3.5 top-3.5" />
                           </div>
 
-                          {/* Card Bottom: Rates & Actions */}
-                          <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/80">
-                            <div className="flex items-baseline justify-between mb-3">
-                              <div>
-                                <span className="text-xs text-slate-400 block">{t.hourlyRate}</span>
-                                <span className="font-display font-extrabold text-2xl text-slate-900 dark:text-white">
-                                  ₹{w.rate}
-                                </span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-xs text-slate-400 block">{t.visitingFee}</span>
-                                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                  ₹{w.visit}
-                                </span>
-                              </div>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setShowFilterSheet(true)}
+                              className="flex-1 min-h-[44px] px-4 py-2.5 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-xs flex items-center justify-center gap-2"
+                            >
+                              <SlidersHorizontal className="w-4 h-4" />
+                              <span>{t.filterBottomSheetTitle}</span>
+                              {(selectedArea !== "all" || selectedAvail !== "all" || maxPrice) && (
+                                <span className="w-2 h-2 rounded-full bg-[#F2A900]"></span>
+                              )}
+                            </button>
 
-                            {/* Buttons */}
-                            <div className="grid grid-cols-2 gap-2">
-                              <button
-                                onClick={() => setBookingWorker(w)}
-                                className="w-full py-2 bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-colors text-center"
-                              >
-                                {t.bookNow}
-                              </button>
-                              <button
-                                onClick={() => setDetailWorker(w)}
-                                className="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-colors text-center"
-                              >
-                                {t.viewProfile}
-                              </button>
-                            </div>
-
-                            {/* Compare Checkbox & Direct Chat / WhatsApp */}
-                            <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                              <label className="flex items-center gap-1.5 cursor-pointer select-none">
-                                <input
-                                  type="checkbox"
-                                  checked={isComparing}
-                                  onChange={() => toggleCompare(w.id)}
-                                  className="w-3.5 h-3.5 text-amber-500 rounded border-slate-300 focus:ring-amber-400"
-                                />
-                                <span>{t.compare}</span>
-                              </label>
-
-                              <div className="flex items-center gap-2.5">
-                                <a
-                                  href={getWorkerInquiryWhatsAppUrl(w)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1"
-                                  title="WhatsApp Inquiry"
-                                >
-                                  <span>💬</span> {t.whatsappChat}
-                                </a>
-                                <span>•</span>
-                                <button
-                                  onClick={() => setChatWorker(w)}
-                                  className="text-amber-600 dark:text-amber-400 font-semibold hover:underline flex items-center gap-1"
-                                >
-                                  ⚡ Chat
-                                </button>
-                              </div>
-                            </div>
-
+                            <button
+                              onClick={() => {
+                                const el = document.getElementById("verified-pros");
+                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                              }}
+                              className="min-h-[44px] px-5 py-2.5 rounded-[13px] bg-[#F2A900] text-[#1B1A17] font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                            >
+                              <Search className="w-4 h-4" />
+                              <span>{t.navFind}</span>
+                            </button>
                           </div>
                         </div>
+
+                        {/* Desktop 2x2 Grid of Real <label> + <select>/<input> (> 640px) */}
+                        <div className="hidden sm:grid sm:grid-cols-2 gap-4">
+                          {/* Locality */}
+                          <div>
+                            <label htmlFor="hero-locality" className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                              {t.localityLabel}
+                            </label>
+                            <select
+                              id="hero-locality"
+                              value={selectedArea}
+                              onChange={(e) => setSelectedArea(e.target.value)}
+                              className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                            >
+                              <option value="all">{t.allAreas}</option>
+                              {LOCALITIES.map((loc) => (
+                                <option key={loc} value={loc}>
+                                  {loc}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Availability */}
+                          <div>
+                            <label htmlFor="hero-avail" className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                              {t.availLabel}
+                            </label>
+                            <select
+                              id="hero-avail"
+                              value={selectedAvail}
+                              onChange={(e) => setSelectedAvail(e.target.value)}
+                              className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                            >
+                              <option value="all">{t.allAvail}</option>
+                              <option value="now">{t.availNow}</option>
+                              <option value="today">{t.availToday}</option>
+                              <option value="week">{t.availWeek}</option>
+                            </select>
+                          </div>
+
+                          {/* Max rate per hour */}
+                          <div>
+                            <label htmlFor="hero-rate" className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                              {t.maxPriceLabel}
+                            </label>
+                            <input
+                              id="hero-rate"
+                              type="number"
+                              value={maxPrice}
+                              onChange={(e) => setMaxPrice(e.target.value)}
+                              placeholder="Any"
+                              className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                            />
+                          </div>
+
+                          {/* Keyword Search */}
+                          <div>
+                            <label htmlFor="hero-keyword" className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                              Keyword
+                            </label>
+                            <input
+                              id="hero-keyword"
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder={t.searchPlaceholder}
+                              className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Full-width Accent "Find workers" button (Desktop) */}
+                        <button
+                          onClick={() => {
+                            const el = document.getElementById("verified-pros");
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                          }}
+                          className="hidden sm:flex w-full mt-4 h-12 min-h-[44px] bg-[#F2A900] hover:bg-[#e09c00] active:scale-[0.99] text-[#1B1A17] font-bold rounded-[13px] text-sm sm:text-base shadow-sm transition-all items-center justify-center gap-2"
+                        >
+                          <Search className="w-4 h-4 text-[#1B1A17]" />
+                          <span>{t.navFind}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Right Column (Dark Ink Card + 3 Small White Cards) */}
+                    <div className="lg:col-span-5 xl:col-span-5 space-y-3">
+                      {/* Dark Ink Card */}
+                      <div className="bg-[#1B1A17] dark:bg-[#131C2E] text-white rounded-[22px] p-6 shadow-md border border-black/10 dark:border-[#24304A]">
+                        <div className="text-[11px] font-extrabold uppercase tracking-wider text-[#F2A900] mb-2">
+                          {t.whyNeighboursTitle}
+                        </div>
+                        <h2 className="text-xl sm:text-2xl font-bold leading-snug text-white">
+                          {t.whyNeighboursHead}
+                        </h2>
+                      </div>
+
+                      {/* 3 Trust Cards with Stroke Icons */}
+                      <div className="space-y-3">
+                        {/* Trust Card 1 */}
+                        <div className="bg-white dark:bg-[#131C2E] rounded-[18px] border border-[#E8E2D6] dark:border-[#24304A] p-4 flex items-start gap-3.5 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-[#E3F4EA] dark:bg-[#12351F] text-[#0B6B3A] dark:text-[#6EE7A0] flex items-center justify-center flex-none">
+                            <Check className="w-5 h-5 stroke-[2.5]" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                              {t.trust1Title}
+                            </h3>
+                            <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                              {t.trust1Desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Trust Card 2 */}
+                        <div className="bg-white dark:bg-[#131C2E] rounded-[18px] border border-[#E8E2D6] dark:border-[#24304A] p-4 flex items-start gap-3.5 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F2A900] flex items-center justify-center flex-none">
+                            <Phone className="w-4 h-4 stroke-[2.2]" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                              {t.trust2Title}
+                            </h3>
+                            <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                              {t.trust2Desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Trust Card 3 */}
+                        <div className="bg-white dark:bg-[#131C2E] rounded-[18px] border border-[#E8E2D6] dark:border-[#24304A] p-4 flex items-start gap-3.5 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F2A900] flex items-center justify-center flex-none">
+                            <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                              {t.trust3Title}
+                            </h3>
+                            <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                              {t.trust3Desc}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </section>
+
+              {/* CATEGORY TILES: BROWSE BY TYPE OF WORK (DYNAMIC FROM DATA) */}
+              <section className="py-6 border-t border-[#E8E2D6] dark:border-[#24304A]">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#1B1A17] dark:text-[#F3F5F9]">
+                      {t.browseByTypeTitle}
+                    </h2>
+                  </div>
+
+                  {/* 6-Column Grid (3 on tablet, 2 on mobile) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+                    {/* First Tile: "All work" (Ink / Dark with Accent Icon, default selected) */}
+                    <button
+                      onClick={() => setSelectedSkill("all")}
+                      className={`rounded-[22px] p-5 flex flex-col items-center justify-center min-h-[120px] transition-all text-center group cursor-pointer ${
+                        selectedSkill === "all"
+                          ? "bg-[#1B1A17] dark:bg-[#131C2E] text-white ring-2 ring-[#F2A900] shadow-md"
+                          : "bg-[#1B1A17]/90 dark:bg-[#131C2E]/80 text-white/90 hover:bg-[#1B1A17]"
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-2.5 text-[#F2A900]">
+                        <LayoutGrid className="w-6 h-6 stroke-[2]" />
+                      </div>
+                      <span className="font-bold text-sm text-white">{t.allWork}</span>
+                    </button>
+
+                    {/* Dynamic Category Tiles rendered from SKILLS config */}
+                    {Object.entries(SKILLS).map(([key, item]: [string, any]) => {
+                      const isSelected = selectedSkill === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setSelectedSkill(key)}
+                          className={`rounded-[22px] p-5 flex flex-col items-center justify-center min-h-[120px] transition-all text-center group cursor-pointer border ${
+                            isSelected
+                              ? "bg-[#F4EEE0] dark:bg-[#1F2A44] border-2 border-[#1B1A17] dark:border-[#F2A900] shadow-sm text-[#1B1A17] dark:text-[#F3F5F9]"
+                              : "bg-white dark:bg-[#131C2E] border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] text-[#1B1A17] dark:text-[#F3F5F9]"
+                          }`}
+                        >
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2.5 transition-colors ${
+                            isSelected
+                              ? "bg-[#F2A900] text-[#1B1A17]"
+                              : "bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#5A5448] dark:text-[#A7B1C4] group-hover:text-[#1B1A17] dark:group-hover:text-white"
+                          }`}>
+                            {getCategoryIcon(key, "w-5 h-5 stroke-[2]")}
+                          </div>
+                          <span className="font-semibold text-sm">
+                            {lang === "en" ? item.en : item.mr}
+                          </span>
+                        </button>
                       );
                     })}
                   </div>
-                )}
 
-                {/* --- SECTION: HOW HIRING ON SWABHIMAN WORKS (AMAZON / NOBROKER GRADE) --- */}
-                <section aria-label="How Hiring Works" className="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
+                  {/* Below Tiles: "Browse all categories" button + Subtext */}
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-5">
+                    <button
+                      onClick={() => setShowAllCategoriesModal(true)}
+                      className="px-5 py-2.5 rounded-full border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:border-[#1B1A17] dark:hover:border-white font-semibold text-xs sm:text-sm text-[#1B1A17] dark:text-[#F3F5F9] transition-colors shadow-2xs min-h-[44px]"
+                    >
+                      {t.browseAllCategories}
+                    </button>
+                    <span className="text-xs sm:text-sm text-[#5A5448] dark:text-[#A7B1C4]">
+                      {t.categoriesSubtext}
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              {/* RESULTS SECTION */}
+              <section id="verified-pros" className="py-6">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  {/* Results Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-5 mb-6 border-b border-[#E8E2D6] dark:border-[#24304A]">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="text-lg sm:text-xl font-bold text-[#1B1A17] dark:text-[#F3F5F9]">
+                        {filteredWorkers.length} {t.workersCount}
+                      </h3>
+
+                      {/* Saved pros (N) pill button */}
+                      <button
+                        onClick={() => setShowOnlyFavorites(prev => !prev)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 min-h-[38px] ${
+                          showOnlyFavorites
+                            ? "bg-rose-500 text-white shadow-xs"
+                            : "bg-white dark:bg-[#131C2E] text-[#5A5448] dark:text-[#A7B1C4] border border-[#E8E2D6] dark:border-[#24304A] hover:border-rose-400"
+                        }`}
+                      >
+                        <Heart className={`w-3.5 h-3.5 ${showOnlyFavorites ? "fill-white text-white" : "text-rose-500 fill-rose-500"}`} />
+                        <span>{t.savedFavorites} ({favorites.length})</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {/* Estimate repair cost button */}
+                      <button
+                        onClick={() => setShowEstimatorModal(true)}
+                        className="px-4 py-2 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:border-[#1B1A17] dark:hover:border-white font-semibold text-xs sm:text-sm text-[#1B1A17] dark:text-[#F3F5F9] transition-colors shadow-2xs min-h-[44px]"
+                      >
+                        {t.calcCostBtn}
+                      </button>
+
+                      {/* Sort by dropdown */}
+                      <div className="flex items-center gap-2">
+                        <label htmlFor="sort-select" className="text-xs font-medium text-[#5A5448] dark:text-[#A7B1C4] whitespace-nowrap">
+                          {t.sortBy}
+                        </label>
+                        <select
+                          id="sort-select"
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3 py-2 text-xs sm:text-sm font-medium focus:outline-none focus:border-[#F2A900] min-h-[44px]"
+                        >
+                          <option value="rating">{t.sortRating}</option>
+                          <option value="priceLow">{t.sortPriceLow}</option>
+                          <option value="experience">{t.sortExperience}</option>
+                          <option value="jobs">{t.sortJobs}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Worker Cards Grid (3 cols desktop, 2 cols tablet, 1 col mobile) */}
+                  {filteredWorkers.length === 0 ? (
+                    <div className="text-center py-16 bg-white dark:bg-[#131C2E] rounded-[22px] border border-dashed border-[#E8E2D6] dark:border-[#24304A] my-6 p-6">
+                      <Search className="w-10 h-10 mx-auto text-[#5A5448] dark:text-[#A7B1C4] mb-3" />
+                      <h4 className="font-bold text-lg text-[#1B1A17] dark:text-[#F3F5F9]">
+                        No verified professionals match your current filters
+                      </h4>
+                      <p className="text-sm text-[#5A5448] dark:text-[#A7B1C4] mt-1">
+                        Try clearing filters or search by a different term or locality.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedSkill("all");
+                          setSelectedArea("all");
+                          setSelectedAvail("all");
+                          setMaxPrice("");
+                          setSearchQuery("");
+                          setShowOnlyFavorites(false);
+                        }}
+                        className="mt-4 px-5 py-2.5 bg-[#F2A900] text-[#1B1A17] font-bold text-xs sm:text-sm rounded-[13px] shadow-xs"
+                      >
+                        {t.resetFilters}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredWorkers.map((w) => {
+                        const skillObj = SKILLS[w.skill] || { en: w.skill, mr: w.skill, icon: "briefcase" };
+                        const isFav = favorites.includes(w.id);
+                        const isOnline = w.avail === "now";
+
+                        return (
+                          <div
+                            key={w.id}
+                            className="bg-white dark:bg-[#131C2E] rounded-[22px] border border-[#E8E2D6] dark:border-[#24304A] p-5 sm:p-6 shadow-[0_2px_12px_rgb(0,0,0,0.02)] hover:shadow-md transition-shadow flex flex-col justify-between"
+                          >
+                            <div>
+                              {/* Card Top: 56px Avatar, Name, Category · Locality, Status Pill & Heart */}
+                              <div className="flex items-start gap-3.5">
+                                <div className="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-base flex items-center justify-center flex-none border border-[#E8E2D6] dark:border-[#24304A]">
+                                  {getInitials(lang === "en" ? w.name : (w.nameMr || w.name))}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-bold text-base text-[#1B1A17] dark:text-[#F3F5F9] truncate">
+                                      {lang === "en" ? w.name : (w.nameMr || w.name)}
+                                    </h4>
+                                    {w.verified && (
+                                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[3] flex-none" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] font-medium mt-0.5 truncate">
+                                    {lang === "en" ? skillObj.en : skillObj.mr} · {w.area}
+                                  </p>
+                                </div>
+
+                                {/* Status Pill & Heart Button */}
+                                <div className="flex items-center gap-2 flex-none">
+                                  <button
+                                    onClick={(e) => handleToggleFavorite(w.id, e)}
+                                    aria-label={isFav ? "Remove from saved" : "Save professional"}
+                                    className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-colors ${
+                                      isFav
+                                        ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
+                                        : "bg-[#F4EEE0] text-[#5A5448] dark:bg-[#1F2A44] dark:text-[#A7B1C4] hover:text-rose-500"
+                                    }`}
+                                  >
+                                    <Heart className={`w-4 h-4 ${isFav ? "fill-rose-500 text-rose-500" : ""}`} />
+                                  </button>
+
+                                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                                    isOnline
+                                      ? "bg-[#E3F4EA] text-[#0B6B3A] dark:bg-[#12351F] dark:text-[#6EE7A0]"
+                                      : "bg-[#EFEBE2] text-[#5A5448] dark:bg-[#1F2A44] dark:text-[#A7B1C4]"
+                                  }`}>
+                                    {isOnline ? "Online" : "Offline"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Rating, Experience, Rate Meta Row */}
+                              <div className="flex items-center gap-3 text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mt-4 pt-3 border-t border-[#E8E2D6]/60 dark:border-[#24304A]/60">
+                                <span className="flex items-center gap-1 text-[#1B1A17] dark:text-[#F3F5F9] font-bold">
+                                  <span className="text-[#F2A900]">★</span> {w.rating}{" "}
+                                  <span className="text-[#5A5448] dark:text-[#A7B1C4] font-normal">
+                                    ({w.reviews.length})
+                                  </span>
+                                </span>
+                                <span>·</span>
+                                <span>{w.exp} yrs experience</span>
+                                {w.rate > 0 && (
+                                  <>
+                                    <span>·</span>
+                                    <span className="font-extrabold text-[#1B1A17] dark:text-[#F3F5F9]">
+                                      ₹{w.rate}/hr
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* 2-line Description Clamp */}
+                              <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] line-clamp-2 leading-relaxed mt-2.5">
+                                {lang === "en" ? w.bio : (w.bioMr || w.bio)}
+                              </p>
+                            </div>
+
+                            {/* Bottom Actions Row: Primary Accent "Book now" + 48px Square Icon Buttons */}
+                            <div className="mt-5 pt-4 border-t border-[#E8E2D6] dark:border-[#24304A] flex items-center gap-2">
+                              <button
+                                onClick={() => setBookingWorker(w)}
+                                className="flex-1 min-h-[48px] h-12 bg-[#F2A900] hover:bg-[#e09c00] active:scale-98 text-[#1B1A17] font-bold rounded-[13px] text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center text-center"
+                              >
+                                {t.bookNow}
+                              </button>
+
+                              {/* Call Icon Button (48px square) */}
+                              <a
+                                href={`tel:${w.phone}`}
+                                aria-label={`Call ${w.name}`}
+                                className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] flex items-center justify-center text-[#1B1A17] dark:text-[#F3F5F9] transition-colors"
+                              >
+                                <Phone className="w-5 h-5 stroke-[2]" />
+                              </a>
+
+                              {/* WhatsApp Icon Button (48px square) */}
+                              <a
+                                href={getWorkerInquiryWhatsAppUrl(w)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`WhatsApp ${w.name}`}
+                                className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] flex items-center justify-center text-[#0B6B3A] dark:text-[#6EE7A0] transition-colors"
+                              >
+                                <MessageCircle className="w-5 h-5 stroke-[2]" />
+                              </a>
+
+                              {/* Listen Voice Icon Button (48px square) */}
+                              <button
+                                onClick={(e) => handleToggleVoice(w, e)}
+                                aria-label={`Listen to ${w.name}'s profile details`}
+                                className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] flex items-center justify-center transition-colors ${
+                                  speakingWorkerId === w.id
+                                    ? "bg-[#F2A900] text-[#1B1A17] animate-pulse"
+                                    : "bg-white dark:bg-[#131C2E] text-[#1B1A17] dark:text-[#F3F5F9] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44]"
+                                }`}
+                              >
+                                <Volume2 className="w-5 h-5 stroke-[2]" />
+                              </button>
+                            </div>
+
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* --- SECTION: HOW HIRING ON SWABHIMAN WORKS (AMAZON / NOBROKER GRADE) --- */}
+              <section aria-label="How Hiring Works" className="mt-12 py-10 border-t border-[#E8E2D6] dark:border-[#24304A]">
+                <div className="max-w-[1200px] mx-auto px-6">
                   <div className="text-center max-w-3xl mx-auto mb-10">
-                    <span className="px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
+                    <span className="px-3.5 py-1 rounded-full bg-[#F4EEE0] text-[#1B1A17] dark:bg-[#1F2A44] dark:text-[#F2A900] text-xs font-bold uppercase tracking-wider">
                       {lang === 'mr' ? 'सोपी व पारदर्शक पद्धत' : 'Simple & Transparent Process'}
                     </span>
-                    <h2 className="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3">
+                    <h2 className="text-2xl sm:text-4xl font-bold text-[#1B1A17] dark:text-[#F3F5F9] mt-3">
                       {t.howItWorksTitle}
                     </h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-2">
+                    <p className="text-[#5A5448] dark:text-[#A7B1C4] text-sm sm:text-base mt-2">
                       {t.howItWorksSubtitle}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Step 1 */}
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-700 dark:text-amber-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-amber-300/50">
+                    <div className="bg-white dark:bg-[#131C2E] rounded-[22px] p-6 border border-[#E8E2D6] dark:border-[#24304A] shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#F2A900] flex items-center justify-center font-black text-xl mb-4 border border-[#E8E2D6] dark:border-[#24304A]">
                         01
                       </div>
-                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                      <h3 className="font-bold text-lg text-[#1B1A17] dark:text-[#F3F5F9] mb-2">
                         {t.step1Title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#5A5448] dark:text-[#A7B1C4] leading-relaxed">
                         {t.step1Desc}
                       </p>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-400/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-emerald-300/50">
+                    <div className="bg-white dark:bg-[#131C2E] rounded-[22px] p-6 border border-[#E8E2D6] dark:border-[#24304A] shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-[#E3F4EA] dark:bg-[#12351F] text-[#0B6B3A] dark:text-[#6EE7A0] flex items-center justify-center font-black text-xl mb-4 border border-[#E8E2D6] dark:border-[#24304A]">
                         02
                       </div>
-                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                      <h3 className="font-bold text-lg text-[#1B1A17] dark:text-[#F3F5F9] mb-2">
                         {t.step2Title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#5A5448] dark:text-[#A7B1C4] leading-relaxed">
                         {t.step2Desc}
                       </p>
                     </div>
 
                     {/* Step 3 */}
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-400/20 text-blue-700 dark:text-blue-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-blue-300/50">
+                    <div className="bg-white dark:bg-[#131C2E] rounded-[22px] p-6 border border-[#E8E2D6] dark:border-[#24304A] shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F2A900] flex items-center justify-center font-black text-xl mb-4 border border-[#E8E2D6] dark:border-[#24304A]">
                         03
                       </div>
-                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                      <h3 className="font-bold text-lg text-[#1B1A17] dark:text-[#F3F5F9] mb-2">
                         {t.step3Title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#5A5448] dark:text-[#A7B1C4] leading-relaxed">
                         {t.step3Desc}
                       </p>
                     </div>
                   </div>
-                </section>
+                </div>
+              </section>
 
-                {/* --- SECTION: WHY CHHATRAPATI SAMBHAJINAGAR TRUSTS SWABHIMAN --- */}
-                <section aria-label="Why Choose Swabhiman" className="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
-                  <div className="text-center max-w-3xl mx-auto mb-10">
-                    <span className="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
-                      {lang === 'mr' ? 'विश्वास व सुरक्षितता' : 'Trust & Safety Standards'}
-                    </span>
-                    <h2 className="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3">
-                      {t.whySwabhimanTitle}
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
-                      <div className="text-3xl mb-3">🛡️</div>
-                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why1Title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why1Desc}</p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
-                      <div className="text-3xl mb-3">💰</div>
-                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why2Title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why2Desc}</p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
-                      <div className="text-3xl mb-3">⚡</div>
-                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why3Title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why3Desc}</p>
-                    </div>
-
-                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
-                      <div className="text-3xl mb-3">🧾</div>
-                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why4Title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why4Desc}</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* --- SECTION: LOCALITY COVERAGE PILLS --- */}
-                <section aria-label="City Coverage" className="mt-14 p-6 sm:p-8 bg-amber-50/70 dark:bg-amber-950/20 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 text-center">
-                  <h3 className="font-display font-bold text-lg text-amber-950 dark:text-amber-200 mb-2">
-                    📍 {lang === 'mr' ? 'छत्रपती संभाजीनगरमधील सेवा क्षेत्र' : 'Covered Localities Across Chhatrapati Sambhajinagar'}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-4">
-                    {lang === 'mr'
-                      ? 'सिडको, गारखेडा, उस्मानपुरा, बीड बायपास आणि वाळूजसह शहरातील सर्व भागांत कुशल कारागीर उपलब्ध.'
-                      : 'Verified local technicians dispatched across CIDCO, Cannaught, Garkheda, Osmanpura, Beed Bypass, Samarth Nagar, and Waluj.'}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    {LOCALITIES.map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => setSelectedArea(loc)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                          selectedArea === loc
-                            ? 'bg-amber-500 text-slate-950 shadow-md scale-105'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-amber-200 dark:border-slate-700 hover:border-amber-400'
-                        }`}
-                      >
-                        📍 {loc}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-              </div>
             </main>
           )}
 
@@ -4078,10 +4200,101 @@ export default function SwabhimanApp() {
             </div>
           )}
 
-          {/* PREMIER MULTI-COLUMN ENTERPRISE FOOTER */}
-          <footer className="bg-slate-950 text-slate-400 text-xs pt-16 pb-12 border-t border-slate-800/80 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800/60">
+          {/* PREMIER FOOTER WITH CHHATRAPATI SAMBHAJINAGAR MAP & 24/7 SUPPORT */}
+          <footer className="bg-[#0B1220] text-slate-400 text-xs pt-16 pb-28 sm:pb-14 border-t border-[#24304A] mt-auto">
+            <div className="max-w-[1200px] mx-auto px-6">
+              
+              {/* CHHATRAPATI SAMBHAJINAGAR SERVICE COVERAGE MAP SECTION */}
+              <div className="pb-12 border-b border-[#24304A]/70 mb-12">
+                <div className="flex flex-col lg:flex-row items-start justify-between gap-6 mb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1F2A44] border border-[#24304A] text-[11px] font-bold text-[#F2A900] uppercase tracking-wider mb-2">
+                      <MapPin className="w-3 h-3 text-[#F2A900]" />
+                      <span>Chhatrapati Sambhajinagar Network</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">
+                      {t.footerMapTitle}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+                      {t.footerMapSub}
+                    </p>
+                  </div>
+
+                  {/* 24/7 & Night Extra Charges Policy Card */}
+                  <div className="bg-[#131C2E] border border-[#24304A] rounded-[18px] p-4 max-w-md w-full">
+                    <div className="flex items-center gap-2 text-white font-bold text-xs sm:text-sm mb-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span>{t.emergency24x7}</span>
+                      <span className="text-slate-400 font-normal">· Rapid 15-min dispatch</span>
+                    </div>
+                    <p className="text-[11px] text-amber-300/90 leading-relaxed">
+                      {t.nightSurgeNotice}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Map Grid: Embedded Interactive Map + Locality Hub Selector */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                  {/* Embedded OpenStreetMap of Sambhajinagar */}
+                  <div className="lg:col-span-8 rounded-[22px] overflow-hidden border border-[#24304A] shadow-inner bg-[#070C15] relative min-h-[300px]">
+                    <iframe
+                      title="Chhatrapati Sambhajinagar Service Hubs Map"
+                      src="https://www.openstreetmap.org/export/embed.html?bbox=75.25%2C19.83%2C75.44%2C19.92&amp;layer=mapnik&amp;marker=19.8762%2C75.3433"
+                      className="w-full h-full min-h-[300px] border-0"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-3 left-3 bg-[#0B1220]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#24304A] text-[11px] text-white font-semibold flex items-center gap-2 shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-[#F2A900]"></span>
+                      <span>Central Hub: Chhatrapati Sambhajinagar (19.87° N, 75.34° E)</span>
+                    </div>
+                  </div>
+
+                  {/* Locality Hubs Sidebar */}
+                  <div className="lg:col-span-4 bg-[#131C2E] rounded-[22px] border border-[#24304A] p-4 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F2A900] mb-3">
+                        10 Active Dispatch Hubs
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {LOCALITIES.map((loc) => (
+                          <button
+                            key={loc}
+                            onClick={() => {
+                              setSelectedArea(loc);
+                              setActiveTab("find");
+                              setTimeout(() => {
+                                const el = document.getElementById("verified-pros");
+                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                              }, 100);
+                            }}
+                            className={`p-2 rounded-[11px] text-xs font-semibold text-left transition-all border ${
+                              selectedArea === loc
+                                ? "bg-[#F2A900] text-[#1B1A17] border-[#F2A900] font-bold"
+                                : "bg-[#0B1220] text-slate-300 border-[#24304A] hover:border-[#F2A900]"
+                            }`}
+                          >
+                            <div className="truncate">📍 {loc}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">15-min ETA</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-[#24304A] flex items-center justify-between text-[11px] text-slate-400">
+                      <span>Emergency Dispatch: 24 Hours</span>
+                      <button
+                        onClick={() => { setSelectedArea("all"); setActiveTab("find"); }}
+                        className="text-[#F2A900] hover:underline font-semibold"
+                      >
+                        View all hubs
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Four Columns Footer Links */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#24304A]/60">
                 {/* Col 1: Brand & Mission */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
@@ -4104,19 +4317,19 @@ export default function SwabhimanApp() {
                   </div>
                 </div>
 
-                {/* Col 2: Verified Trades */}
+                {/* Col 2: Verified Categories */}
                 <div>
-                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
-                    {lang === 'mr' ? 'कुशल कामे' : 'Verified Trades'}
+                  <h4 className="font-bold text-sm text-white mb-3 tracking-wide uppercase text-[#F2A900]">
+                    {lang === 'mr' ? 'कुशल कामे' : 'Types of Work'}
                   </h4>
                   <ul className="space-y-2 text-slate-400 text-xs">
-                    {Object.entries(SKILLS).map(([key, item]) => (
+                    {Object.entries(SKILLS).map(([key, item]: [string, any]) => (
                       <li key={key}>
                         <button
                           onClick={() => { setSelectedSkill(key); setActiveTab('find'); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
-                          className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                          className="hover:text-[#F2A900] transition-colors flex items-center gap-2"
                         >
-                          <span>{item.icon}</span>
+                          <span>{getCategoryIcon(key, "w-4 h-4")}</span>
                           <span>{lang === 'mr' ? item.mr : item.en}</span>
                         </button>
                       </li>
@@ -4124,9 +4337,9 @@ export default function SwabhimanApp() {
                   </ul>
                 </div>
 
-                {/* Col 3: Localities */}
+                {/* Col 3: Service Localities */}
                 <div>
-                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
+                  <h4 className="font-bold text-sm text-white mb-3 tracking-wide uppercase text-[#F2A900]">
                     {lang === 'mr' ? 'सेवा क्षेत्र' : 'Service Areas'}
                   </h4>
                   <ul className="grid grid-cols-2 gap-x-2 gap-y-2 text-slate-400 text-xs">
@@ -4134,7 +4347,7 @@ export default function SwabhimanApp() {
                       <li key={loc}>
                         <button
                           onClick={() => { setSelectedArea(loc); setActiveTab('find'); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
-                          className="hover:text-amber-400 transition-colors truncate text-left"
+                          className="hover:text-[#F2A900] transition-colors truncate text-left"
                         >
                           • {loc}
                         </button>
@@ -4145,7 +4358,7 @@ export default function SwabhimanApp() {
 
                 {/* Col 4: Trust, Security & Compliance */}
                 <div className="space-y-3">
-                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
+                  <h4 className="font-bold text-sm text-white mb-3 tracking-wide uppercase text-[#F2A900]">
                     {lang === 'mr' ? 'सुरक्षितता व नियम' : 'Trust & Compliance'}
                   </h4>
                   <div className="space-y-2 text-xs text-slate-400">
@@ -4165,15 +4378,16 @@ export default function SwabhimanApp() {
                   <div className="pt-2">
                     <button
                       onClick={handleTriggerInstall}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs flex items-center gap-1.5 border border-slate-700"
+                      className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-[#F2A900] font-bold text-xs flex items-center gap-1.5 border border-slate-700 min-h-[44px]"
                     >
-                      <span>📲</span> Install SWABHIMAN App
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Install SWABHIMAN App</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Copyright & Ledger Link */}
+              {/* Bottom Copyright & Admin Link */}
               <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
                 <div className="flex items-center gap-3">
                   <span>© 2026 SWABHIMAN Technologies Pvt Ltd. All rights reserved.</span>
@@ -4183,9 +4397,10 @@ export default function SwabhimanApp() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setActiveTab("admin")}
-                    className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1.5 transition-colors"
+                    className="text-[#F2A900] hover:underline font-semibold flex items-center gap-1.5 transition-colors"
                   >
-                    🛡️ {t.navAdmin}
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>{t.navAdmin}</span>
                   </button>
                   <span>•</span>
                   <a href="/sitemap.xml" className="hover:text-slate-300 transition-colors">
@@ -4197,80 +4412,252 @@ export default function SwabhimanApp() {
                   </a>
                 </div>
               </div>
+
             </div>
           </footer>
 
-          {/* FLOATING MOBILE BOTTOM APP BAR (THUMB-ACCESSIBLE) */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-4px_20px_rgb(0,0,0,0.06)] px-2 py-1.5 flex items-center justify-around">
-            <button
-              onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
-                activeTab === "find"
-                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <span className="text-lg">🔍</span>
-              <span>{t.navFind.split(" ")[0]}</span>
-            </button>
+          {/* FIXED BOTTOM TAB BAR (MOBILE <= 640px) */}
+          <nav
+            aria-label="Mobile Bottom Navigation"
+            className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#131C2E]/95 backdrop-blur-md border-t border-[#E8E2D6] dark:border-[#24304A] px-2 py-1.5 shadow-[0_-4px_20px_rgb(0,0,0,0.06)]"
+          >
+            <div className="grid grid-cols-4 gap-1">
+              <button
+                onClick={() => { setActiveTab("find"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className={`min-h-[44px] flex flex-col items-center justify-center py-1 rounded-[13px] transition-colors ${
+                  activeTab === "find"
+                    ? "text-[#1B1A17] dark:text-[#F2A900] font-bold"
+                    : "text-[#5A5448] dark:text-[#A7B1C4]"
+                }`}
+              >
+                <LayoutGrid className="w-5 h-5 mb-0.5" />
+                <span className="text-[11px]">{lang === "mr" ? "शोधा" : "Find"}</span>
+              </button>
 
-            <button
-              onClick={() => { setActiveTab("emergency"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
-                activeTab === "emergency"
-                  ? "text-rose-600 dark:text-rose-400 font-extrabold"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <span className="text-lg">⚡</span>
-              <span>{t.navEmergency.split(" ")[0]}</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveTab("bookings"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all relative ${
-                activeTab === "bookings"
-                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <div className="relative">
-                <span className="text-lg">📋</span>
+              <button
+                onClick={() => setActiveTab("bookings")}
+                className={`min-h-[44px] flex flex-col items-center justify-center py-1 rounded-[13px] relative transition-colors ${
+                  activeTab === "bookings"
+                    ? "text-[#1B1A17] dark:text-[#F2A900] font-bold"
+                    : "text-[#5A5448] dark:text-[#A7B1C4]"
+                }`}
+              >
+                <Clock className="w-5 h-5 mb-0.5" />
+                <span className="text-[11px]">{lang === "mr" ? "बुकिंग्स" : "Bookings"}</span>
                 {bookings.length > 0 && (
-                  <span className="absolute -top-1 -right-2 px-1 rounded-full text-[9px] bg-emerald-500 text-white font-black">
+                  <span className="absolute top-1 right-5 px-1.5 py-0.2 bg-[#1B1A17] text-white dark:bg-[#F2A900] dark:text-[#1B1A17] text-[10px] font-extrabold rounded-full">
                     {bookings.length}
                   </span>
                 )}
+              </button>
+
+              <button
+                onClick={() => { setShowOnlyFavorites(prev => !prev); if (activeTab !== "find") setActiveTab("find"); }}
+                className={`min-h-[44px] flex flex-col items-center justify-center py-1 rounded-[13px] relative transition-colors ${
+                  showOnlyFavorites
+                    ? "text-rose-600 font-bold"
+                    : "text-[#5A5448] dark:text-[#A7B1C4]"
+                }`}
+              >
+                <Heart className={`w-5 h-5 mb-0.5 ${showOnlyFavorites ? "fill-rose-500 text-rose-500" : ""}`} />
+                <span className="text-[11px]">{lang === "mr" ? "आवडते" : "Saved"}</span>
+                {favorites.length > 0 && (
+                  <span className="absolute top-1 right-5 px-1.5 py-0.2 bg-rose-500 text-white text-[10px] font-bold rounded-full">
+                    {favorites.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                className="min-h-[44px] flex flex-col items-center justify-center py-1 rounded-[13px] text-[#5A5448] dark:text-[#A7B1C4]"
+              >
+                <Menu className="w-5 h-5 mb-0.5" />
+                <span className="text-[11px]">{t.navMore}</span>
+              </button>
+            </div>
+          </nav>
+
+          {/* MOBILE FILTER BOTTOM SHEET MODAL */}
+          {showFilterSheet && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:hidden">
+              <div className="bg-white dark:bg-[#131C2E] w-full rounded-t-[24px] p-6 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 border-t border-[#E8E2D6] dark:border-[#24304A]">
+                <div className="flex items-center justify-between pb-4 border-b border-[#E8E2D6] dark:border-[#24304A] mb-5">
+                  <h3 className="font-bold text-base text-[#1B1A17] dark:text-[#F3F5F9]">
+                    {t.filterBottomSheetTitle}
+                  </h3>
+                  <button
+                    onClick={() => setShowFilterSheet(false)}
+                    className="p-1 rounded-full text-[#5A5448] dark:text-[#A7B1C4] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44]"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Locality */}
+                  <div>
+                    <label className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                      {t.localityLabel}
+                    </label>
+                    <select
+                      value={selectedArea}
+                      onChange={(e) => setSelectedArea(e.target.value)}
+                      className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm"
+                    >
+                      <option value="all">{t.allAreas}</option>
+                      {LOCALITIES.map((loc) => (
+                        <option key={loc} value={loc}>
+                          {loc}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Availability */}
+                  <div>
+                    <label className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                      {t.availLabel}
+                    </label>
+                    <select
+                      value={selectedAvail}
+                      onChange={(e) => setSelectedAvail(e.target.value)}
+                      className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm"
+                    >
+                      <option value="all">{t.allAvail}</option>
+                      <option value="now">{t.availNow}</option>
+                      <option value="today">{t.availToday}</option>
+                      <option value="week">{t.availWeek}</option>
+                    </select>
+                  </div>
+
+                  {/* Max Rate */}
+                  <div>
+                    <label className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                      {t.maxPriceLabel}
+                    </label>
+                    <input
+                      type="number"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      placeholder="Any"
+                      className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  {/* Keyword */}
+                  <div>
+                    <label className="block text-xs font-semibold text-[#5A5448] dark:text-[#A7B1C4] mb-1.5">
+                      Keyword
+                    </label>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={t.searchPlaceholder}
+                      className="w-full bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-4 flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setSelectedArea("all");
+                        setSelectedAvail("all");
+                        setMaxPrice("");
+                        setSearchQuery("");
+                      }}
+                      className="flex-1 py-3 rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-xs"
+                    >
+                      {t.resetFilters}
+                    </button>
+                    <button
+                      onClick={() => setShowFilterSheet(false)}
+                      className="flex-1 py-3 rounded-[13px] bg-[#F2A900] text-[#1B1A17] font-bold text-xs shadow-sm"
+                    >
+                      {t.applyFilters}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <span>{t.navBookings.split(" ")[0]}</span>
-            </button>
+            </div>
+          )}
 
-            <button
-              onClick={() => { setActiveTab("join"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
-                activeTab === "join"
-                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <span className="text-lg">👷</span>
-              <span>{t.navJoin.split(" ")[0]}</span>
-            </button>
+          {/* BROWSE ALL CATEGORIES MODAL */}
+          {showAllCategoriesModal && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-[#131C2E] max-w-2xl w-full rounded-[22px] p-6 shadow-2xl border border-[#E8E2D6] dark:border-[#24304A] max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between pb-4 border-b border-[#E8E2D6] dark:border-[#24304A] mb-5">
+                  <div>
+                    <h3 className="font-bold text-lg text-[#1B1A17] dark:text-[#F3F5F9]">
+                      {t.browseByTypeTitle}
+                    </h3>
+                    <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                      {t.categoriesSubtext}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAllCategoriesModal(false)}
+                    className="p-1 rounded-full text-[#5A5448] dark:text-[#A7B1C4] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44]"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-            <button
-              onClick={() => setIsMobileMenuOpen(prev => !prev)}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
-                isMobileMenuOpen
-                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <span className="text-lg">{isMobileMenuOpen ? "✕" : "☰"}</span>
-              <span>Menu</span>
-            </button>
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <button
+                    onClick={() => {
+                      setSelectedSkill("all");
+                      setShowAllCategoriesModal(false);
+                      const el = document.getElementById("verified-pros");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className={`p-4 rounded-[18px] border text-left flex items-start gap-3 transition-colors ${
+                      selectedSkill === "all"
+                        ? "bg-[#1B1A17] text-white border-[#1B1A17]"
+                        : "bg-white dark:bg-[#131C2E] border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900]"
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-none text-[#F2A900]">
+                      <LayoutGrid className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">{t.allWork}</div>
+                      <div className="text-xs opacity-80 mt-0.5">View all verified professionals across every category</div>
+                    </div>
+                  </button>
 
-
+                  {Object.entries(SKILLS).map(([key, item]: [string, any]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setSelectedSkill(key);
+                        setShowAllCategoriesModal(false);
+                        const el = document.getElementById("verified-pros");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`p-4 rounded-[18px] border text-left flex items-start gap-3 transition-colors ${
+                        selectedSkill === key
+                          ? "bg-[#F4EEE0] dark:bg-[#1F2A44] border-2 border-[#1B1A17] dark:border-[#F2A900] text-[#1B1A17] dark:text-[#F3F5F9]"
+                          : "bg-white dark:bg-[#131C2E] border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] text-[#1B1A17] dark:text-[#F3F5F9]"
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-[#F4EEE0] dark:bg-[#1F2A44] flex items-center justify-center flex-none text-[#F2A900]">
+                        {getCategoryIcon(key, "w-5 h-5")}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm">{lang === "en" ? item.en : item.mr}</div>
+                        <div className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5 leading-snug">
+                          {lang === "en" ? item.descEn : item.descMr}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }

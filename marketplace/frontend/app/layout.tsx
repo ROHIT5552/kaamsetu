@@ -1,4 +1,12 @@
 import './style.css';
+import { Plus_Jakarta_Sans } from 'next/font/google';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 export const viewport = {
   themeColor: '#ffc21a',
@@ -156,7 +164,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-[#faf9f5] text-slate-900 antialiased min-h-screen selection:bg-amber-200">
+      <body className={`${plusJakartaSans.variable} font-sans bg-[#FBF8F2] dark:bg-[#0B1220] text-[#1B1A17] dark:text-[#F3F5F9] antialiased min-h-screen selection:bg-amber-200`}>
         {children}
       </body>
     </html>

@@ -1,0 +1,19 @@
+{
+  "name": "KaamSetu – Skilled Workers for Small Jobs",
+  "short_name": "KaamSetu",
+  "description": "On-demand local plumbers, electricians, carpenters, painters & helpers in Aurangabad.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f191e",
+  "theme_color": "#ffc21a",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities", "business"]
+}

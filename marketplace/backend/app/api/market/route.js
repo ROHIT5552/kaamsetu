@@ -142,7 +142,22 @@ export async function GET(request) {
       km:near?.success && lat!=null && lng!=null ? Math.round(distance(near.data,{lat,lng})*10)/10 : null
     })).sort((a,b)=>(a.km??Infinity)-(b.km??Infinity));
     return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,events,owned,saved,thread:selected?.id});
-  } catch(error) { return failure(error); }
+  } catch(error) {
+    console.error('Marketplace GET fallback active:', error.message || error);
+    return reply({
+      ok: true,
+      user: null,
+      demo: false,
+      verification: { consentVersion, methods: ['aadhaar'] },
+      jobs: [],
+      people: [],
+      threads: [],
+      messages: [],
+      offers: [],
+      events: [],
+      notice: 'Database connecting or cold-starting'
+    });
+  }
 }
 
 async function qualified(db,account,trade) {

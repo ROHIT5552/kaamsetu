@@ -1,2 +1,5 @@
-import Marketplace from './marketplace';
-export default function Page(){return <Marketplace/>;}
+import KaamSetuApp from './kaamsetu-app';
+
+export default function Page() {
+  return <KaamSetuApp />;
+}

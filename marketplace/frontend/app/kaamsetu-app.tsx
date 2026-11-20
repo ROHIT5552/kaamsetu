@@ -10,6 +10,19 @@ import {
   INITIAL_BOOKINGS,
 } from "../lib/swabhiman-data";
 import Toaster from "../components/Toaster";
+import SafeImage from "../components/SafeImage";
+import {
+  getVisualCatalog,
+  saveVisualCatalog,
+  resetVisualCatalogToDefaults,
+  DEFAULT_UNIVERSAL_CATEGORIES,
+  DEFAULT_TASK_TYPES,
+  HERO_VISUAL_ASSETS,
+  FEATURED_LOCAL_JOBS,
+  CategoryAsset,
+  TaskTypeAsset,
+  JobOpportunityAsset,
+} from "../lib/visual-library";
 import { ToastNotification, ToastType, WorkerProfile, BookingRecord, LedgerItem } from "../utils";
 import {
   Wrench,
@@ -45,23 +58,88 @@ import {
   Shield,
   Layers,
   Star,
+  Users,
+  Wallet,
+  ClipboardList,
+  BarChart3,
+  Image as ImageIcon,
+  Camera,
+  Code,
+  Sprout,
+  HardHat,
+  Utensils,
+  Truck,
+  Laptop,
+  GraduationCap,
+  HeartHandshake,
+  ShoppingBag,
+  Upload,
+  RefreshCw,
+  Eye,
+  Plus,
+  FileText,
+  Calendar,
+  CalendarDays,
+  CheckSquare,
+  UserCheck,
+  AlertTriangle,
+  Tag,
+  FolderKanban,
 } from "lucide-react";
 
 // Dynamic stroke icon resolver for any category (supports arbitrary type of work)
 const getCategoryIcon = (key: string, className = "w-6 h-6") => {
-  switch (key) {
+  switch (key?.toLowerCase()) {
     case "plumber":
+    case "wrench":
       return <Wrench className={className} />;
     case "electrician":
+    case "zap":
       return <Zap className={className} />;
     case "carpenter":
+    case "hammer":
       return <Hammer className={className} />;
     case "painter":
+    case "paintbrush":
       return <Paintbrush className={className} />;
     case "mason":
+    case "brickwall":
       return <BrickWall className={className} />;
     case "helper":
+    case "briefcase":
       return <Briefcase className={className} />;
+    case "home-services":
+    case "home":
+      return <Briefcase className={className} />;
+    case "construction":
+    case "hardhat":
+      return <HardHat className={className} />;
+    case "hospitality":
+    case "utensils":
+      return <Utensils className={className} />;
+    case "transport":
+    case "truck":
+      return <Truck className={className} />;
+    case "agriculture":
+    case "sprout":
+      return <Sprout className={className} />;
+    case "office-admin":
+      return <Briefcase className={className} />;
+    case "digital-it":
+    case "digital":
+    case "laptop":
+      return <Laptop className={className} />;
+    case "education":
+    case "graduationcap":
+      return <GraduationCap className={className} />;
+    case "care-personal":
+    case "care":
+    case "hearthandshake":
+      return <HeartHandshake className={className} />;
+    case "retail-sales":
+    case "retail":
+    case "shoppingbag":
+      return <ShoppingBag className={className} />;
     default:
       return <Briefcase className={className} />;
   }
@@ -403,6 +481,24 @@ export default function SwabhimanApp() {
       const [adminSubTab, setAdminSubTab] = useState("workers");
       const [adminBookingFilter, setAdminBookingFilter] = useState("all");
       const [adminSearch, setAdminSearch] = useState("");
+  const [visualCatalog, setVisualCatalog] = useState(() => getVisualCatalog());
+  const [selectedAdminCategory, setSelectedAdminCategory] = useState<CategoryAsset | null>(null);
+  const [editingImageUrl, setEditingImageUrl] = useState("");
+  const [editingAltText, setEditingAltText] = useState("");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [adminCategoryTab, setAdminCategoryTab] = useState<"categories" | "tasks">("categories");
+
+  useEffect(() => {
+    const handleCatalogUpdate = (e: any) => {
+      if (e.detail) {
+        setVisualCatalog(e.detail);
+      } else {
+        setVisualCatalog(getVisualCatalog());
+      }
+    };
+    window.addEventListener("kaamsetu:catalog-updated", handleCatalogUpdate);
+    return () => window.removeEventListener("kaamsetu:catalog-updated", handleCatalogUpdate);
+  }, []);
 
       // Interactive Modals State
       const [compareList, setCompareList] = useState<number[]>([]);
@@ -985,7 +1081,7 @@ export default function SwabhimanApp() {
                 <img
                   src="/swabhiman-logo.png"
                   alt="SWABHIMAN"
-                  className="h-9 sm:h-10 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102"
+                  className="h-11 sm:h-12 md:h-13 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102"
                 />
               </div>
 
@@ -1397,6 +1493,38 @@ export default function SwabhimanApp() {
                         </h2>
                       </div>
 
+                      {/* 4-Pillar Universal Work Visual Grid (Authentic Indian Workplace Photography) */}
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {Object.entries(visualCatalog.hero || HERO_VISUAL_ASSETS).map(([key, item]: [string, any]) => (
+                          <div
+                            key={key}
+                            onClick={() => {
+                              if (key === "skilled") setSelectedSkill("electrician");
+                              else if (key === "agriculture") setSelectedSkill("helper");
+                              else if (key === "localServices") setSelectedSkill("carpenter");
+                              const el = document.getElementById("verified-pros");
+                              if (el) el.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="group relative rounded-[18px] overflow-hidden border border-[#E8E2D6] dark:border-[#24304A] bg-slate-900 cursor-pointer shadow-2xs hover:shadow-md transition-all h-[110px] sm:h-[125px]"
+                          >
+                            <SafeImage
+                              src={item.image}
+                              alt={item.alt}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-2.5 sm:p-3 text-white">
+                              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#F2A900] line-clamp-1">
+                                {lang === "en" ? item.labelEn : item.labelMr}
+                              </span>
+                              <span className="text-[11px] font-bold leading-tight line-clamp-1 text-white">
+                                {lang === "en" ? item.subEn : item.subMr}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
                       {/* 3 Trust Cards with Stroke Icons */}
                       <div className="space-y-3">
                         {/* Trust Card 1 */}
@@ -1519,6 +1647,276 @@ export default function SwabhimanApp() {
                 </div>
               </section>
 
+              {/* 10 UNIVERSAL WORK CATEGORIES VISUAL SHOWCASE */}
+              <section className="py-10 border-t border-[#E8E2D6] dark:border-[#24304A] bg-[#FBF8F2]/60 dark:bg-[#0B1220]/40">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] mb-2 border border-[#E8E2D6] dark:border-[#24304A]">
+                        <Layers className="w-3.5 h-3.5 text-[#F2A900]" />
+                        <span>{lang === "en" ? "Universal Work Ecosystem" : "सर्वसमावेशक कार्य मंच"}</span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B1A17] dark:text-[#F3F5F9]">
+                        {t.universalCategoriesTitle}
+                      </h2>
+                      <p className="text-sm text-[#5A5448] dark:text-[#A7B1C4] mt-1 max-w-2xl">
+                        {t.universalCategoriesSub}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setShowAllCategoriesModal(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E2D6] dark:border-[#24304A] bg-white dark:bg-[#131C2E] text-xs font-bold text-[#1B1A17] dark:text-[#F3F5F9] hover:border-[#F2A900] transition-colors self-start sm:self-auto shadow-2xs"
+                    >
+                      <FolderKanban className="w-3.5 h-3.5 text-[#F2A900]" />
+                      <span>{t.browseAllCategories}</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* 10 Categories Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {visualCatalog.categories.filter((c: any) => c.visible !== false).map((cat: any) => (
+                      <div
+                        key={cat.id}
+                        onClick={() => {
+                          if (cat.id === "home-services") setSelectedSkill("plumber");
+                          else if (cat.id === "construction") setSelectedSkill("mason");
+                          else setSelectedSkill("all");
+                          const el = document.getElementById("verified-pros");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className="group rounded-[22px] overflow-hidden bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] dark:hover:border-[#F2A900] transition-all duration-300 hover:shadow-lg flex flex-col cursor-pointer"
+                      >
+                        {/* Category Image Header */}
+                        <div className="relative h-36 w-full overflow-hidden bg-slate-900">
+                          <SafeImage
+                            src={cat.heroImage}
+                            alt={cat.alt}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                            categoryIcon={cat.icon}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          
+                          {/* Badge */}
+                          <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/75 backdrop-blur-xs px-2.5 py-1 rounded-full text-[10px] font-bold text-[#1B1A17] dark:text-[#F3F5F9] shadow-2xs flex items-center gap-1 border border-white/20">
+                            <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                            <span>{lang === "en" ? cat.badgeEn : cat.badgeMr}</span>
+                          </div>
+
+                          {/* Icon Pill */}
+                          <div className="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-[#F2A900] text-[#1B1A17] flex items-center justify-center shadow-md">
+                            {getCategoryIcon(cat.icon, "w-4 h-4")}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9] group-hover:text-[#F2A900] transition-colors line-clamp-1">
+                              {lang === "en" ? cat.nameEn : cat.nameMr}
+                            </h3>
+                            <p className="text-[11px] text-[#5A5448] dark:text-[#A7B1C4] mt-1 line-clamp-2 leading-relaxed">
+                              {lang === "en" ? cat.descriptionEn : cat.descriptionMr}
+                            </p>
+                          </div>
+
+                          {/* Subcategories pill tags preview */}
+                          <div className="mt-3 pt-2.5 border-t border-[#E8E2D6]/60 dark:border-[#24304A]/60 flex flex-wrap gap-1">
+                            {cat.subcategories.slice(0, 2).map((sub: any) => (
+                              <span
+                                key={sub.id}
+                                className="px-2 py-0.5 rounded-md text-[10px] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-medium"
+                              >
+                                {lang === "en" ? sub.nameEn : sub.nameMr}
+                              </span>
+                            ))}
+                            {cat.subcategories.length > 2 && (
+                              <span className="px-1.5 py-0.5 text-[10px] text-[#5A5448] dark:text-[#A7B1C4] font-medium">
+                                +{cat.subcategories.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* WAYS TO WORK & HIRE (UNIVERSAL TASK TYPES) */}
+              <section className="py-10 border-t border-[#E8E2D6] dark:border-[#24304A]">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  <div className="text-center max-w-2xl mx-auto mb-8">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] mb-2 border border-[#E8E2D6] dark:border-[#24304A]">
+                      <Clock className="w-3.5 h-3.5 text-[#F2A900]" />
+                      <span>{lang === "en" ? "Flexible Work Models" : "लवचिक कार्य स्वरूप"}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B1A17] dark:text-[#F3F5F9]">
+                      {t.waysToWorkTitle}
+                    </h2>
+                    <p className="text-sm text-[#5A5448] dark:text-[#A7B1C4] mt-1.5">
+                      {t.waysToWorkSub}
+                    </p>
+                  </div>
+
+                  {/* Task Types 3x3 Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {visualCatalog.taskTypes.map((task: any) => (
+                      <div
+                        key={task.id}
+                        className="rounded-[22px] overflow-hidden bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] transition-all p-4 flex gap-4 items-start shadow-2xs hover:shadow-md group"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-24 h-24 rounded-[16px] overflow-hidden flex-none bg-slate-900 border border-[#E8E2D6] dark:border-[#24304A]">
+                          <SafeImage
+                            src={task.image}
+                            alt={task.alt}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            categoryIcon={task.icon}
+                          />
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] border border-[#E8E2D6] dark:border-[#24304A]">
+                              {lang === "en" ? task.tagEn : task.tagMr}
+                            </span>
+                            <span className="text-[10px] font-bold text-[#F2A900] truncate">
+                              {lang === "en" ? task.billingEn : task.billingMr}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9] leading-snug">
+                            {lang === "en" ? task.titleEn : task.titleMr}
+                          </h3>
+                          <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-1 line-clamp-2 leading-relaxed">
+                            {lang === "en" ? task.descEn : task.descMr}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* FEATURED LOCAL WORK OPPORTUNITIES */}
+              <section className="py-10 border-t border-[#E8E2D6] dark:border-[#24304A] bg-[#FBF8F2]/60 dark:bg-[#0B1220]/40">
+                <div className="max-w-[1200px] mx-auto px-6">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#E3F4EA] dark:bg-[#12351F] text-[#0B6B3A] dark:text-[#6EE7A0] mb-2 border border-[#0B6B3A]/20">
+                        <Briefcase className="w-3.5 h-3.5" />
+                        <span>{lang === "en" ? "Live Local Openings" : "थेट स्थानिक नोकऱ्या"}</span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B1A17] dark:text-[#F3F5F9]">
+                        {t.featuredJobsTitle}
+                      </h2>
+                      <p className="text-sm text-[#5A5448] dark:text-[#A7B1C4] mt-1">
+                        {t.featuredJobsSub}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("join");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1B1A17] dark:bg-[#F2A900] text-white dark:text-[#1B1A17] text-xs font-bold hover:shadow-md transition-all self-start sm:self-auto"
+                    >
+                      <span>{lang === "en" ? "Post a Job or Find Work" : "काम पोस्ट करा किंवा काम शोधा"}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Job Cards Carousel / Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {FEATURED_LOCAL_JOBS.map((job) => (
+                      <div
+                        key={job.id}
+                        className="rounded-[22px] bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] p-5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          {/* Top row */}
+                          <div className="flex items-start gap-3.5 mb-3">
+                            <div className="relative w-14 h-14 rounded-[14px] overflow-hidden flex-none bg-slate-900 border border-[#E8E2D6] dark:border-[#24304A]">
+                              <SafeImage
+                                src={job.image}
+                                alt={job.titleEn}
+                                fill
+                                className="object-cover"
+                                categoryIcon={job.categoryId}
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9]">
+                                  {lang === "en" ? job.jobTypeEn : job.jobTypeMr}
+                                </span>
+                                <span className="text-[11px] text-[#5A5448] dark:text-[#A7B1C4] ml-auto">
+                                  {lang === "en" ? job.postedDateEn : job.postedDateMr}
+                                </span>
+                              </div>
+                              <h3 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9] line-clamp-1">
+                                {lang === "en" ? job.titleEn : job.titleMr}
+                              </h3>
+                              <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-[#F2A900]" />
+                                <span>{job.locality}</span>
+                                <span>·</span>
+                                <span className="font-semibold">{job.hirerName}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] line-clamp-2 leading-relaxed">
+                            {lang === "en" ? job.descriptionEn : job.descriptionMr}
+                          </p>
+
+                          {/* Skills required */}
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {job.skills.map((s, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded text-[10px] bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A] text-[#5A5448] dark:text-[#A7B1C4]"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom row: Pay + Apply */}
+                        <div className="pt-4 mt-4 border-t border-[#E8E2D6]/60 dark:border-[#24304A]/60 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-[#5A5448] dark:text-[#A7B1C4] block uppercase font-bold">
+                              {lang === "en" ? "Offered Pay" : "प्रस्तावित मानधन"}
+                            </span>
+                            <span className="font-extrabold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                              {lang === "en" ? job.payEn : job.payMr}
+                            </span>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              showToast(`Application interest logged for ${job.titleEn}`, "success");
+                            }}
+                            className="px-4 py-2 rounded-[12px] bg-[#F2A900] text-[#1B1A17] font-bold text-xs hover:bg-[#e09b00] transition-colors shadow-2xs"
+                          >
+                            {lang === "en" ? "Apply Now" : "अर्ज करा"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
               {/* RESULTS SECTION */}
               <section id="verified-pros" className="py-6">
                 <div className="max-w-[1200px] mx-auto px-6">
@@ -1611,8 +2009,21 @@ export default function SwabhimanApp() {
                             <div>
                               {/* Card Top: 56px Avatar, Name, Category · Locality, Status Pill & Heart */}
                               <div className="flex items-start gap-3.5">
-                                <div className="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-base flex items-center justify-center flex-none border border-[#E8E2D6] dark:border-[#24304A]">
-                                  {getInitials(lang === "en" ? w.name : (w.nameMr || w.name))}
+                                <div className="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full overflow-hidden flex-none border-2 border-[#E8E2D6] dark:border-[#24304A] relative shadow-2xs">
+                                  {w.avatar ? (
+                                    <SafeImage
+                                      src={w.avatar}
+                                      alt={lang === "en" ? w.name : (w.nameMr || w.name)}
+                                      fill
+                                      className="object-cover"
+                                      fallbackText={getInitials(lang === "en" ? w.name : (w.nameMr || w.name))}
+                                      categoryIcon={w.skill}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-base flex items-center justify-center">
+                                      {getInitials(lang === "en" ? w.name : (w.nameMr || w.name))}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
@@ -1677,6 +2088,30 @@ export default function SwabhimanApp() {
                               <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] line-clamp-2 leading-relaxed mt-2.5">
                                 {lang === "en" ? w.bio : (w.bioMr || w.bio)}
                               </p>
+
+                              {/* Work samples thumbnail preview strip */}
+                              {w.workSamples && w.workSamples.length > 0 && (
+                                <div className="mt-3 pt-2.5 border-t border-[#E8E2D6]/60 dark:border-[#24304A]/60 flex items-center gap-2">
+                                  <span className="text-[10px] uppercase font-bold text-[#5A5448] dark:text-[#A7B1C4] flex items-center gap-1">
+                                    <Briefcase className="w-3 h-3 text-[#F2A900]" />
+                                    <span>{lang === "en" ? "Recent work" : "काम नमुने"}</span>
+                                  </span>
+                                  <div className="flex items-center gap-1.5 ml-auto">
+                                    {w.workSamples.slice(0, 2).map((s: string, idx: number) => (
+                                      <div key={idx} className="w-8 h-8 rounded-lg overflow-hidden border border-[#E8E2D6] dark:border-[#24304A] relative">
+                                        <SafeImage src={s} alt="Work sample" fill className="object-cover" categoryIcon={w.skill} />
+                                      </div>
+                                    ))}
+                                    <button
+                                      type="button"
+                                      onClick={() => setDetailWorker(w)}
+                                      className="text-[11px] text-[#F2A900] font-bold hover:underline ml-1"
+                                    >
+                                      +{w.workSamples.length}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Bottom Actions Row: Primary Accent "Book now" + 48px Square Icon Buttons */}
@@ -4611,24 +5046,17 @@ export default function SwabhimanApp() {
 
               {/* Four Columns Footer Links */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#24304A]/60">
-                {/* Col 1: Brand & Mission with Swabhiman Suit Guy Logo */}
+                {/* Col 1: Brand & Mission with Swabhiman Logo (Same as Navbar) */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <img
-                      src="/swabhiman-suit-guy.png"
-                      alt="SWABHIMAN - Local Pride"
-                      className="w-14 h-14 rounded-[16px] object-cover border-2 border-[#F2A900] shadow-md flex-none"
+                      src="/swabhiman-logo.png"
+                      alt="SWABHIMAN"
+                      className="h-11 sm:h-12 w-auto object-contain drop-shadow-xs"
                     />
-                    <div>
-                      <img
-                        src="/swabhiman-logo.png"
-                        alt="SWABHIMAN"
-                        className="h-7 sm:h-8 w-auto object-contain brightness-0 invert opacity-95"
-                      />
-                      <div className="text-[11px] text-[#F2A900] font-bold tracking-wider uppercase mt-1">
-                        छत्रपती संभाजीनगर • Aurangabad
-                      </div>
-                    </div>
+                  </div>
+                  <div className="text-[11px] text-[#F2A900] font-bold tracking-wider uppercase">
+                    छत्रपती संभाजीनगर • Aurangabad
                   </div>
                   <p className="text-slate-400 text-xs leading-relaxed">
                     Chhatrapati Sambhajinagar's dedicated peer-to-peer network connecting households with certified local craftsmen. Upfront rates, zero middleman commission.
@@ -4931,7 +5359,8 @@ export default function SwabhimanApp() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* All 10 Universal Categories with dedicated photography */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     onClick={() => {
                       setSelectedSkill("all");
@@ -4939,47 +5368,78 @@ export default function SwabhimanApp() {
                       const el = document.getElementById("verified-pros");
                       if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className={`p-4 rounded-[18px] border text-left flex items-start gap-3 transition-colors ${
+                    className={`p-4 rounded-[20px] border text-left flex items-start gap-3.5 transition-all ${
                       selectedSkill === "all"
-                        ? "bg-[#1B1A17] text-white border-[#1B1A17]"
+                        ? "bg-[#1B1A17] text-white border-[#1B1A17] ring-2 ring-[#F2A900]"
                         : "bg-white dark:bg-[#131C2E] border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900]"
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-none text-[#F2A900]">
-                      <LayoutGrid className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-xl bg-[#F2A900] text-[#1B1A17] flex items-center justify-center flex-none shadow-sm">
+                      <LayoutGrid className="w-6 h-6 stroke-[2]" />
                     </div>
                     <div>
-                      <div className="font-bold text-sm">{t.allWork}</div>
-                      <div className="text-xs opacity-80 mt-0.5">View all verified professionals across every category</div>
+                      <div className="font-bold text-base">{t.allWork}</div>
+                      <div className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-1">
+                        {t.categoriesSubtext}
+                      </div>
                     </div>
                   </button>
 
-                  {Object.entries(SKILLS).map(([key, item]: [string, any]) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        setSelectedSkill(key);
-                        setShowAllCategoriesModal(false);
-                        const el = document.getElementById("verified-pros");
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className={`p-4 rounded-[18px] border text-left flex items-start gap-3 transition-colors ${
-                        selectedSkill === key
-                          ? "bg-[#F4EEE0] dark:bg-[#1F2A44] border-2 border-[#1B1A17] dark:border-[#F2A900] text-[#1B1A17] dark:text-[#F3F5F9]"
-                          : "bg-white dark:bg-[#131C2E] border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] text-[#1B1A17] dark:text-[#F3F5F9]"
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-[#F4EEE0] dark:bg-[#1F2A44] flex items-center justify-center flex-none text-[#F2A900]">
-                        {getCategoryIcon(key, "w-5 h-5")}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm">{lang === "en" ? item.en : item.mr}</div>
-                        <div className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5 leading-snug">
-                          {lang === "en" ? item.descEn : item.descMr}
+                  {visualCatalog.categories.map((cat: any) => {
+                    const isSelected = selectedSkill === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          if (cat.id === "home-services") setSelectedSkill("plumber");
+                          else if (cat.id === "construction") setSelectedSkill("mason");
+                          else setSelectedSkill("all");
+                          setShowAllCategoriesModal(false);
+                          const el = document.getElementById("verified-pros");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className={`rounded-[20px] border text-left overflow-hidden transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? "border-2 border-[#F2A900] shadow-md bg-white dark:bg-[#131C2E]"
+                            : "border-[#E8E2D6] dark:border-[#24304A] hover:border-[#F2A900] bg-white dark:bg-[#131C2E]"
+                        }`}
+                      >
+                        <div className="relative h-28 w-full overflow-hidden bg-slate-900">
+                          <SafeImage
+                            src={cat.heroImage}
+                            alt={cat.alt}
+                            fill
+                            className="object-cover"
+                            categoryIcon={cat.icon}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                          <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-xs px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white flex items-center gap-1">
+                            <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                            <span>{lang === "en" ? cat.badgeEn : cat.badgeMr}</span>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+
+                        <div className="p-3.5">
+                          <h4 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                            {lang === "en" ? cat.nameEn : cat.nameMr}
+                          </h4>
+                          <p className="text-[11px] text-[#5A5448] dark:text-[#A7B1C4] mt-1 line-clamp-1">
+                            {lang === "en" ? cat.descriptionEn : cat.descriptionMr}
+                          </p>
+                          <div className="mt-2.5 flex flex-wrap gap-1">
+                            {cat.subcategories.slice(0, 3).map((sub: any) => (
+                              <span
+                                key={sub.id}
+                                className="px-2 py-0.5 rounded text-[10px] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-medium"
+                              >
+                                {lang === "en" ? sub.nameEn : sub.nameMr}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

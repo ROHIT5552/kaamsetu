@@ -268,6 +268,113 @@ summary{cursor:pointer;font-weight:750}
   transform: rotateX(47deg) rotateY(57deg) translateZ(88px);
 }
 .motion-orbit[data-paused=true] { animation-play-state: paused; }
+
+/* 3D Floating Worker Tools */
+.tool-3d-node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  transform-style: preserve-3d;
+  transform: rotate(var(--orbit-angle)) translateX(var(--orbit-dist)) rotate(calc(-1 * var(--orbit-angle))) translateZ(var(--z-depth));
+  animation: tool-bob 7s ease-in-out infinite alternate;
+}
+.tool-3d-node:nth-child(4) { animation-delay: -0.5s; }
+.tool-3d-node:nth-child(5) { animation-delay: -1.8s; }
+.tool-3d-node:nth-child(6) { animation-delay: -3.2s; }
+.tool-3d-node:nth-child(7) { animation-delay: -4.5s; }
+.tool-3d-node:nth-child(8) { animation-delay: -5.7s; }
+.tool-3d-node:nth-child(9) { animation-delay: -2.3s; }
+
+.tool-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 30px rgba(10, 16, 50, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: #fff;
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tool-carpentry .tool-badge {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.38), rgba(194, 65, 12, 0.16));
+  border-color: rgba(251, 146, 60, 0.7);
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.35), 0 0 16px rgba(251, 146, 60, 0.45);
+  color: #ffedd5;
+}
+.tool-electrical .tool-badge {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.42), rgba(202, 138, 4, 0.18));
+  border-color: rgba(250, 204, 21, 0.75);
+  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.4), 0 0 18px rgba(250, 204, 21, 0.55);
+  color: #fef08a;
+}
+.tool-plumbing .tool-badge {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.38), rgba(2, 132, 199, 0.16));
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35), 0 0 16px rgba(56, 189, 248, 0.45);
+  color: #e0f2fe;
+}
+.tool-painting .tool-badge {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.38), rgba(126, 34, 206, 0.16));
+  border-color: rgba(192, 132, 252, 0.7);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.35), 0 0 16px rgba(192, 132, 252, 0.45);
+  color: #fae8ff;
+}
+.tool-masonry .tool-badge {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.38), rgba(185, 28, 28, 0.16));
+  border-color: rgba(248, 113, 113, 0.7);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35), 0 0 16px rgba(248, 113, 113, 0.45);
+  color: #fee2e2;
+}
+.tool-general .tool-badge {
+  background: linear-gradient(135deg, rgba(230, 250, 131, 0.4), rgba(132, 204, 22, 0.18));
+  border-color: rgba(230, 250, 131, 0.75);
+  box-shadow: 0 8px 24px rgba(132, 204, 22, 0.35), 0 0 18px rgba(230, 250, 131, 0.5);
+  color: #f7fee7;
+}
+
+@keyframes tool-bob {
+  0% { transform: translateZ(0) rotateX(0deg) rotateY(0deg); }
+  50% { transform: translateZ(32px) rotateX(15deg) rotateY(-12deg) scale(1.1); }
+  100% { transform: translateZ(-22px) rotateX(-12deg) rotateY(16deg) scale(0.94); }
+}
+
+.motion-orbit[data-paused=true] .tool-3d-node {
+  animation-play-state: paused;
+}
+
+/* Enhanced overall app theme: Trade accents on cards & grid */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(26, 35, 65, 0.08);
+  border-color: #b7c4ed;
+}
+
+[data-trade=plumbing] .icon { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
+[data-trade=electrical] .icon { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+[data-trade=carpentry] .icon { background: linear-gradient(135deg, #ea580c, #c2410c); color: white; }
+[data-trade=painting] .icon { background: linear-gradient(135deg, #9333ea, #7e22ce); color: white; }
+[data-trade=masonry] .icon { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+[data-trade=general] .icon { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
+
+.trade-grid button[data-trade=plumbing]:hover { background: linear-gradient(155deg, #0369a1, #1e3a8a); border-color: #38bdf8; }
+.trade-grid button[data-trade=electrical]:hover { background: linear-gradient(155deg, #b45309, #1e3a8a); border-color: #fde047; }
+.trade-grid button[data-trade=carpentry]:hover { background: linear-gradient(155deg, #c2410c, #1e3a8a); border-color: #fb923c; }
+.trade-grid button[data-trade=painting]:hover { background: linear-gradient(155deg, #7e22ce, #1e3a8a); border-color: #c084fc; }
+.trade-grid button[data-trade=masonry]:hover { background: linear-gradient(155deg, #b91c1c, #1e3a8a); border-color: #f87171; }
+.trade-grid button[data-trade=general]:hover { background: linear-gradient(155deg, #15803d, #1e3a8a); border-color: #4ade80; }
 @keyframes orbit-drift {
   0%, 100% { transform: translate3d(-54%, -50%, 0) rotateX(13deg) rotateY(-22deg) rotateZ(-33deg); }
   50% { transform: translate3d(-47%, -55%, 32px) rotateX(-19deg) rotateY(23deg) rotateZ(36deg); }

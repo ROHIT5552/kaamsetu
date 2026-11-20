@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, ArrowUp, ChevronRight, Pause, Play, Bookmark, Handshake, ShieldCheck, ClipboardPlus, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
+import { ArrowRight, ArrowUp, ChevronRight, Pause, Play, Bookmark, Handshake, ShieldCheck, ClipboardPlus, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall, Wrench } from 'lucide-react';
 import { areas, categories, transitions } from '../lib/domain';
 import { translate } from './copy';
 import BookingProgress from './booking-progress';
@@ -27,6 +27,24 @@ function MotionBackdrop({paused}){
   return <div className="motion-backdrop" aria-hidden="true">
     <div className="motion-orbit" data-paused={paused}>
       <span className="motion-ring"/><span className="motion-ring"/><span className="motion-ring"/>
+      <div className="tool-3d-node tool-carpentry" style={{'--orbit-angle':'0deg', '--orbit-dist':'48%', '--z-depth':'60px'}}>
+        <div className="tool-badge" title="Carpentry"><Hammer size={22} strokeWidth={2.2}/></div>
+      </div>
+      <div className="tool-3d-node tool-electrical" style={{'--orbit-angle':'60deg', '--orbit-dist':'52%', '--z-depth':'-40px'}}>
+        <div className="tool-badge" title="Electrical"><PlugZap size={22} strokeWidth={2.2}/></div>
+      </div>
+      <div className="tool-3d-node tool-plumbing" style={{'--orbit-angle':'120deg', '--orbit-dist':'46%', '--z-depth':'75px'}}>
+        <div className="tool-badge" title="Plumbing"><Wrench size={22} strokeWidth={2.2}/></div>
+      </div>
+      <div className="tool-3d-node tool-painting" style={{'--orbit-angle':'180deg', '--orbit-dist':'50%', '--z-depth':'-30px'}}>
+        <div className="tool-badge" title="Painting"><PaintRoller size={22} strokeWidth={2.2}/></div>
+      </div>
+      <div className="tool-3d-node tool-masonry" style={{'--orbit-angle':'240deg', '--orbit-dist':'44%', '--z-depth':'50px'}}>
+        <div className="tool-badge" title="Masonry"><BrickWall size={22} strokeWidth={2.2}/></div>
+      </div>
+      <div className="tool-3d-node tool-general" style={{'--orbit-angle':'300deg', '--orbit-dist':'54%', '--z-depth':'-60px'}}>
+        <div className="tool-badge" title="General Help"><HardHat size={22} strokeWidth={2.2}/></div>
+      </div>
     </div>
   </div>;
 }

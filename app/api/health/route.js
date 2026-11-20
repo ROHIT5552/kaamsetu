@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await pool().query('SELECT 1');
     return Response.json({ok:true},{headers});
-  } catch {
-    return Response.json({ok:false},{status:503,headers});
+  } catch (err) {
+    return Response.json({ok:false, error: err?.message || String(err)},{status:503,headers});
   }
 }

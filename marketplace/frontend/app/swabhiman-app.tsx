@@ -2325,24 +2325,26 @@ export default function SwabhimanApp() {
               <div className="flex items-center gap-2 border-b border-amber-200/60 pb-3 mb-6 overflow-x-auto custom-scrollbar">
                 <button
                   onClick={() => setAdminSubTab("workers")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     adminSubTab === "workers"
                       ? "bg-amber-400 text-slate-950 shadow-xs"
                       : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  👷 Craftsmen Roster ({workers.length})
+                  <Users className="w-4 h-4" />
+                  <span>Craftsmen Roster ({workers.length})</span>
                 </button>
 
                 <button
                   onClick={() => setAdminSubTab("bookings")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     adminSubTab === "bookings"
                       ? "bg-amber-400 text-slate-950 shadow-xs"
                       : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  📋 Dispatch Board ({bookings.length})
+                  <ClipboardList className="w-4 h-4" />
+                  <span>Dispatch Board ({bookings.length})</span>
                 </button>
 
                 <button
@@ -2353,7 +2355,8 @@ export default function SwabhimanApp() {
                       : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  <span>💰</span> UPI Earnings Ledger
+                  <Wallet className="w-4 h-4" />
+                  <span>UPI Earnings Ledger</span>
                   {ledgerTotals.totalPending > 0 && (
                     <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-extrabold shadow-xs animate-pulse">
                       ₹{ledgerTotals.totalPending.toLocaleString()}
@@ -2363,13 +2366,26 @@ export default function SwabhimanApp() {
 
                 <button
                   onClick={() => setAdminSubTab("analytics")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     adminSubTab === "analytics"
                       ? "bg-amber-400 text-slate-950 shadow-xs"
                       : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  📈 Platform Intelligence
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Platform Intelligence</span>
+                </button>
+
+                <button
+                  onClick={() => setAdminSubTab("categories")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    adminSubTab === "categories"
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 text-amber-950" />
+                  <span>Category & Image Library</span>
                 </button>
               </div>
 
@@ -2894,6 +2910,296 @@ export default function SwabhimanApp() {
                     </div>
                   </div>
 
+                </div>
+              )}
+
+              {/* SUB-TAB 5: CATEGORY & VISUAL ASSET MANAGEMENT */}
+              {adminSubTab === "categories" && (
+                <div className="space-y-6">
+                  {/* Top Action & Stats Bar */}
+                  <div className="bg-white dark:bg-[#131C2E] p-6 rounded-2xl border border-slate-200 dark:border-[#24304A] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] mb-2 border border-[#E8E2D6] dark:border-[#24304A]">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#F2A900]" />
+                        <span>Central Image Architecture</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-[#1B1A17] dark:text-[#F3F5F9]">
+                        Universal Visual Asset & Category Management
+                      </h3>
+                      <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                        Manage high-resolution Indian workplace photography across all 10 universal categories, subcategories, and task types without modifying code.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-stretch sm:self-auto">
+                      <button
+                        onClick={() => {
+                          resetVisualCatalogToDefaults();
+                          setVisualCatalog(getVisualCatalog());
+                          showToast("Visual catalog restored to default curated photography", "info");
+                        }}
+                        className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Reset Defaults</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          saveVisualCatalog(visualCatalog);
+                          showToast("All visual assets and categories saved successfully!", "success");
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#F2A900] text-[#1B1A17] text-xs font-bold hover:bg-[#e09b00] flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <Check className="w-4 h-4 stroke-[2.5]" />
+                        <span>Save & Publish</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Switch between Categories and Task Types */}
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <button
+                      onClick={() => setAdminCategoryTab("categories")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        adminCategoryTab === "categories"
+                          ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-900"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                    >
+                      10 Universal Categories ({visualCatalog.categories.length})
+                    </button>
+                    <button
+                      onClick={() => setAdminCategoryTab("tasks")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        adminCategoryTab === "tasks"
+                          ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-900"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                    >
+                      9 Task Types ({visualCatalog.taskTypes.length})
+                    </button>
+                  </div>
+
+                  {adminCategoryTab === "categories" ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Left: Categories Grid List */}
+                      <div className="lg:col-span-7 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {visualCatalog.categories.map((cat: any) => {
+                            const isSelected = selectedAdminCategory?.id === cat.id;
+                            return (
+                              <div
+                                key={cat.id}
+                                onClick={() => {
+                                  setSelectedAdminCategory(cat);
+                                  setEditingImageUrl(cat.heroImage);
+                                  setEditingAltText(cat.alt);
+                                  setImagePreviewUrl(cat.heroImage);
+                                }}
+                                className={`rounded-[20px] overflow-hidden bg-white dark:bg-[#131C2E] border cursor-pointer transition-all ${
+                                  isSelected
+                                    ? "border-2 border-[#F2A900] shadow-md ring-2 ring-[#F2A900]/30"
+                                    : "border-[#E8E2D6] dark:border-[#24304A] hover:border-slate-400 shadow-2xs"
+                                }`}
+                              >
+                                <div className="relative h-32 w-full bg-slate-900">
+                                  <SafeImage
+                                    src={cat.heroImage}
+                                    alt={cat.alt}
+                                    fill
+                                    className="object-cover"
+                                    categoryIcon={cat.icon}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                  <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full text-[10px] font-bold text-white flex items-center gap-1">
+                                    <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                                    <span>{cat.badgeEn}</span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const updated = visualCatalog.categories.map((c: any) =>
+                                        c.id === cat.id ? { ...c, visible: !c.visible } : c
+                                      );
+                                      const newCatalog = { ...visualCatalog, categories: updated };
+                                      setVisualCatalog(newCatalog);
+                                      saveVisualCatalog(newCatalog);
+                                      showToast(`${cat.nameEn} visibility toggled`, "info");
+                                    }}
+                                    className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
+                                      cat.visible !== false ? "bg-emerald-500 text-white" : "bg-slate-600 text-white"
+                                    }`}
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                    <span>{cat.visible !== false ? "Visible" : "Hidden"}</span>
+                                  </button>
+                                </div>
+
+                                <div className="p-3.5">
+                                  <h4 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                                    {cat.nameEn}
+                                  </h4>
+                                  <p className="text-[11px] text-[#5A5448] dark:text-[#A7B1C4] mt-0.5">
+                                    {cat.nameMr}
+                                  </p>
+                                  <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+                                    <span>{cat.subcategories.length} Subcategories</span>
+                                    <span className="text-[#F2A900] font-bold">Click to edit image</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right: Asset Editor & Live Preview Panel */}
+                      <div className="lg:col-span-5">
+                        <div className="bg-white dark:bg-[#131C2E] p-6 rounded-[22px] border border-[#E8E2D6] dark:border-[#24304A] shadow-md sticky top-6 space-y-4">
+                          <h4 className="font-bold text-base text-[#1B1A17] dark:text-[#F3F5F9] flex items-center gap-2">
+                            <Camera className="w-5 h-5 text-[#F2A900]" />
+                            <span>Visual Asset Editor</span>
+                          </h4>
+
+                          {selectedAdminCategory ? (
+                            <div className="space-y-4">
+                              <div className="p-3 rounded-xl bg-[#FBF8F2] dark:bg-[#0B1220] border border-[#E8E2D6] dark:border-[#24304A]">
+                                <span className="text-[11px] font-bold text-[#5A5448] dark:text-[#A7B1C4] uppercase">Selected Category</span>
+                                <div className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">
+                                  {selectedAdminCategory.nameEn} ({selectedAdminCategory.nameMr})
+                                </div>
+                              </div>
+
+                              {/* Live Preview Container */}
+                              <div>
+                                <label className="block text-xs font-bold text-[#1B1A17] dark:text-[#F3F5F9] mb-1.5">
+                                  Live Image Preview
+                                </label>
+                                <div className="relative h-44 w-full rounded-xl overflow-hidden border border-[#E8E2D6] dark:border-[#24304A] bg-slate-900 shadow-inner">
+                                  <SafeImage
+                                    src={imagePreviewUrl || editingImageUrl}
+                                    alt={editingAltText}
+                                    fill
+                                    className="object-cover"
+                                    categoryIcon={selectedAdminCategory.icon}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Image URL Input */}
+                              <div>
+                                <label className="block text-xs font-bold text-[#1B1A17] dark:text-[#F3F5F9] mb-1">
+                                  Image URL (Unsplash / Pexels / CDN / Local)
+                                </label>
+                                <input
+                                  type="url"
+                                  value={editingImageUrl}
+                                  onChange={(e) => {
+                                    setEditingImageUrl(e.target.value);
+                                    setImagePreviewUrl(e.target.value);
+                                  }}
+                                  placeholder="https://images.unsplash.com/..."
+                                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                                />
+                              </div>
+
+                              {/* Alt Text Input */}
+                              <div>
+                                <label className="block text-xs font-bold text-[#1B1A17] dark:text-[#F3F5F9] mb-1">
+                                  Accessibility Alt Text (SEO & Screen Readers)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editingAltText}
+                                  onChange={(e) => setEditingAltText(e.target.value)}
+                                  placeholder="Describe the Indian professional & task..."
+                                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                                />
+                              </div>
+
+                              {/* Apply Button */}
+                              <div className="pt-2 flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    const updated = visualCatalog.categories.map((c: any) =>
+                                      c.id === selectedAdminCategory.id
+                                        ? { ...c, heroImage: editingImageUrl, alt: editingAltText }
+                                        : c
+                                    );
+                                    const newCatalog = { ...visualCatalog, categories: updated };
+                                    setVisualCatalog(newCatalog);
+                                    saveVisualCatalog(newCatalog);
+                                    showToast(`Image updated for ${selectedAdminCategory.nameEn}!`, "success");
+                                  }}
+                                  className="flex-1 py-2.5 rounded-xl bg-[#F2A900] text-[#1B1A17] font-bold text-xs hover:bg-[#e09b00] shadow-sm flex items-center justify-center gap-1.5"
+                                >
+                                  <Upload className="w-3.5 h-3.5" />
+                                  <span>Apply Image to Category</span>
+                                </button>
+                              </div>
+
+                              {/* Subcategories preview in editor */}
+                              <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+                                <span className="text-[11px] font-bold text-slate-500 block mb-2">Subcategories in this sector:</span>
+                                <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                  {selectedAdminCategory.subcategories.map((sub: any) => (
+                                    <div key={sub.id} className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between text-xs">
+                                      <span className="font-semibold">{sub.nameEn} ({sub.nameMr})</span>
+                                      <span className="text-[10px] text-slate-400">{sub.sampleOccupations?.length || 0} tasks</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 text-slate-400">
+                              <ImageIcon className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                              <p className="text-xs">Select any category on the left to preview, replace image URL, or edit alt text.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Task Types Editor */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {visualCatalog.taskTypes.map((task: any) => (
+                        <div key={task.id} className="p-4 rounded-2xl bg-white dark:bg-[#131C2E] border border-[#E8E2D6] dark:border-[#24304A] space-y-3 shadow-2xs">
+                          <div className="relative h-32 w-full rounded-xl overflow-hidden bg-slate-900">
+                            <SafeImage src={task.image} alt={task.alt} fill className="object-cover" categoryIcon={task.icon} />
+                            <div className="absolute top-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-bold text-white">
+                              {task.tagEn}
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-[#1B1A17] dark:text-[#F3F5F9]">{task.titleEn} ({task.titleMr})</h4>
+                            <p className="text-xs text-[#5A5448] dark:text-[#A7B1C4] mt-0.5 line-clamp-2">{task.descEn}</p>
+                          </div>
+                          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <label className="text-[10px] font-bold text-slate-400 block mb-1">Image URL</label>
+                            <input
+                              type="url"
+                              defaultValue={task.image}
+                              onBlur={(e) => {
+                                const newUrl = e.target.value.trim();
+                                if (newUrl && newUrl !== task.image) {
+                                  const updated = visualCatalog.taskTypes.map((t: any) =>
+                                    t.id === task.id ? { ...t, image: newUrl } : t
+                                  );
+                                  const newCatalog = { ...visualCatalog, taskTypes: updated };
+                                  setVisualCatalog(newCatalog);
+                                  saveVisualCatalog(newCatalog);
+                                  showToast(`Image updated for ${task.titleEn}`, "success");
+                                }
+                              }}
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

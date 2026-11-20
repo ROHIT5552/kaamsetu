@@ -62,6 +62,7 @@ export const SKILLS = {
         avail: "now",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
         phone: "9822104521",
         bio: "Specialist in emergency pipe leaks, bathroom fixtures, RO fitting, and water motor setups.",
         bioMr: "तातडीची पाईप गळती, बाथरुम फिटिंग्ज, आरओ व पाण्याचा मोटर बसविण्यात ८ वर्षांचा दांडगा अनुभव.",
@@ -88,6 +89,7 @@ export const SKILLS = {
         avail: "now",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop&q=80",
         phone: "9823456711",
         bio: "Licensed wireman. Master in short circuit troubleshooting, fans, geysers, and MCB installs.",
         bioMr: "परवानाधारक इलेक्ट्रिशियन. शॉर्ट सर्किट फॉल्ट, गिझर, फॅन व नवीन वायरिंगमध्ये निष्णात.",
@@ -113,6 +115,7 @@ export const SKILLS = {
         avail: "today",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80",
         phone: "9765123980",
         bio: "Custom modular furniture, door hinge alignment, Godrej lock installations, and modular kitchen fixes.",
         bioMr: "फर्निचर दुरुस्ती, दरवाजा दुरुस्ती, लॉक्स बसवणे आणि मॉड्यूलर किचनच्या कामात ११ वर्षे निष्णात.",
@@ -120,7 +123,7 @@ export const SKILLS = {
           { user: "Anand D.", text: "Flawless repair for our wooden sliding door.", rating: 5, date: "1 week ago" }
         ],
         workSamples: [
-          "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&auto=format&fit=crop&q=80"
+          "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80"
         ]
       },
       {
@@ -137,6 +140,7 @@ export const SKILLS = {
         avail: "week",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
         phone: "9422987654",
         bio: "Interior/Exterior wall touch-ups, texture, Asian Paints expert, waterproofing, and putty work.",
         bioMr: "इंटिरिअर व एक्स्टिरिअर रंगकाम, पुट्टी व वॉटरप्रूफिंग कामात अनुभवी कारागीर.",
@@ -161,6 +165,7 @@ export const SKILLS = {
         avail: "today",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&auto=format&fit=crop&q=80",
         phone: "9890123412",
         bio: "Tile breaking, wall repairs, brick work, bathroom renovation, and waterproofing masonry.",
         bioMr: "टाईल्स काम, भिंत दुरुस्ती, प्लॅस्टर व गवंडी कामात १५ वर्षांचा प्रत्यक्ष अनुभव.",
@@ -185,6 +190,7 @@ export const SKILLS = {
         avail: "now",
         verified: true,
         status: "approved",
+        avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&auto=format&fit=crop&q=80",
         phone: "9970112233",
         bio: "Reliable helper for home shifting, furniture loading, garden cleaning, and renovation debris handling.",
         bioMr: "घर शिफ्टिंग, जड सामान हलवणे, बागकाम व इतर मदतीसाठी विश्वासू व मेहनती मदतनीस.",
@@ -192,7 +198,57 @@ export const SKILLS = {
           { user: "Sanjay N.", text: "Super energetic and cooperative helper.", rating: 5, date: "3 days ago" }
         ],
         workSamples: [
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80"
+          "https://images.unsplash.com/photo-1541888946425-d0fbb18615f8?w=600&auto=format&fit=crop&q=80"
+        ]
+      },
+      {
+        id: 107,
+        name: "Dnyaneshwar Patil",
+        nameMr: "ज्ञानेश्वर पाटील",
+        skill: "helper",
+        exp: 9,
+        area: "Harsul",
+        rate: 350,
+        visit: 100,
+        rating: 4.9,
+        jobs: 215,
+        avail: "now",
+        verified: true,
+        status: "approved",
+        avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&auto=format&fit=crop&q=80",
+        phone: "9822765410",
+        bio: "Agricultural harvesting supervisor, tractor operator, drip line maintenance, and farm workforce organizer.",
+        bioMr: "शेती पीक काढणी, ठिबक सिंचन जोडणी, ट्रॅक्टर चालवणे व शेतमजूर व्यवस्थापनात ९ वर्षांचा अनुभव.",
+        reviews: [
+          { user: "Vilasrao J.", text: "Managed our whole pomegranate harvest without single damage.", rating: 5, date: "5 days ago" }
+        ],
+        workSamples: [
+          "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?w=600&auto=format&fit=crop&q=80"
+        ]
+      },
+      {
+        id: 108,
+        name: "Pooja Deshmukh",
+        nameMr: "पूजा देशमुख",
+        skill: "electrician",
+        exp: 5,
+        area: "Osmanpura",
+        rate: 500,
+        visit: 150,
+        rating: 4.9,
+        jobs: 160,
+        avail: "today",
+        verified: true,
+        status: "approved",
+        avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80",
+        phone: "9766442211",
+        bio: "Certified electronics and appliance repair specialist, inverter wiring, and smart home lighting setup.",
+        bioMr: "प्रमाणित इलेक्ट्रॉनिक्स तंत्रज्ञ, स्मार्ट होम लायटिंग, इन्व्हर्टर वायरिंग व उपकरण दुरुस्ती तज्ज्ञ.",
+        reviews: [
+          { user: "Pooja K.", text: "Very precise and quick setup of our modular inverter system.", rating: 5, date: "2 days ago" }
+        ],
+        workSamples: [
+          "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop&q=80"
         ]
       }
     ];
@@ -445,6 +501,17 @@ export const SKILLS = {
         why2Desc: "100% of your service fee goes directly to the local craftsman. No hidden commissions.",
         why3Title: "15-Min Emergency Dispatch",
         why3Desc: "Immediate response for electrical short circuits, burst pipes, and door lock emergencies.",
+        universalCategoriesTitle: "10 Core Universal Categories",
+        universalCategoriesSub: "From home repair and agriculture to IT and education — all skills in one platform",
+        waysToWorkTitle: "Ways to Work & Hire",
+        waysToWorkSub: "Every engagement model supported: quick 15-min tasks, hourly, daily wages, shifts, contracts, or permanent employment",
+        featuredJobsTitle: "Recent & Featured Work Opportunities",
+        featuredJobsSub: "Active requirements across Chhatrapati Sambhajinagar with direct hirer contact",
+        adminCategoryTab: "Visual Assets & Categories",
+        dualModeWorkerTitle: "Looking for Work?",
+        dualModeWorkerSub: "Register your trade or profession with zero commission and get booked by verified households and businesses.",
+        dualModeHirerTitle: "Hiring for Home or Business?",
+        dualModeHirerSub: "Post any job or book verified local professionals on demand with upfront visiting charges.",
         why4Title: "Digital Invoices & Direct UPI",
         why4Desc: "Transparent itemized billing breakdown with instant UPI QR payments."
       },
@@ -695,6 +762,17 @@ export const SKILLS = {
         why2Desc: "तुमचे सर्व पैसे थेट हातावर पोट असणाऱ्या स्थानिक कारागिराला मिळतात. कोणताही छुपा चार्ज नाही.",
         why3Title: "१५ मिनिटांत तातडीची सेवा",
         why3Desc: "पाईप फुटणे, शॉर्ट सर्किट किंवा दरवाजा लॉक झाल्यास तातडीने मदत.",
+        universalCategoriesTitle: "१० प्रमुख सार्वत्रिक कार्य श्रेणी",
+        universalCategoriesSub: "घरगुती दुरुस्ती आणि शेतीपासून ते आयटी आणि शिक्षणापर्यंत — सर्व कौशल्ये एकाच मंचावर",
+        waysToWorkTitle: "काम करण्याचे व कामावर ठेवण्याचे विविध प्रकार",
+        waysToWorkSub: "प्रत्येक कामाचे स्वरूप उपलब्ध: तातडीचे काम, तासानुसार, रोजंदारी, शिफ्ट, कंत्राट किंवा कायम नोकरी",
+        featuredJobsTitle: "नुकत्याच पोस्ट झालेल्या स्थानिक कामाच्या संधी",
+        featuredJobsSub: "छत्रपती संभाजीनगरातील थेट संपर्क असणाऱ्या कामाच्या गरजा",
+        adminCategoryTab: "प्रतिमा व श्रेणी व्यवस्थापन",
+        dualModeWorkerTitle: "काम शोधत आहात का?",
+        dualModeWorkerSub: "शून्य कमिशनवर तुमची नोंदणी करा आणि थेट घरगुती व व्यावसायिक ग्राहकांकडून काम मिळवा.",
+        dualModeHirerTitle: "घरासाठी किंवा व्यवसायासाठी कामगार हवेत?",
+        dualModeHirerSub: "कोणतेही काम पोस्ट करा किंवा पारदर्शक भेट शुल्कावर थेट पडताळलेले स्थानिक तंत्रज्ञ बुक करा.",
         why4Title: "डिजिटल बिल व थेट यूपीआय",
         why4Desc: "पारदर्शक दर, जीएसटी नियम पालन आणि सुरक्षित यूपीआय पेमेंट पावती."
       }

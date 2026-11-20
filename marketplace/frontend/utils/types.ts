@@ -39,6 +39,8 @@ export interface WorkerProfile {
   avail: AvailabilityStatus | string;
   verified: boolean;
   status?: 'approved' | 'pending' | 'rejected' | string;
+  avatar?: string;
+  categoryId?: string;
   bio: string;
   bioMr?: string;
   tools?: string[];

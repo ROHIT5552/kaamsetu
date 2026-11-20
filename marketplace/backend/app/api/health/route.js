@@ -8,7 +8,7 @@ export async function GET() {
   try {
     await pool().query('SELECT 1');
     return Response.json(
-      { ok: true, status: 'healthy', db: 'connected', service: 'kaamsetu-backend' },
+      { ok: true, status: 'healthy', db: 'connected', service: 'swabhiman-backend' },
       { headers }
     );
   } catch (err) {

@@ -356,7 +356,7 @@ export default function KaamSetuApp() {
         window.addEventListener('appinstalled', () => {
           setIsAppInstalled(true);
           setDeferredInstallPrompt(null);
-          showToast(lang === 'en' ? '🎉 KaamSetu app installed to Home Screen!' : '🎉 कामसेतू अ‍ॅप होम स्क्रीनवर इन्स्टॉल झाले!');
+          showToast(lang === 'en' ? '🎉 SWABHIMAN app installed to Home Screen!' : '🎉 स्वाभिमान अ‍ॅप होम स्क्रीनवर इन्स्टॉल झाले!');
         });
 
         return () => window.removeEventListener('beforeinstallprompt', handlePrompt);
@@ -367,7 +367,7 @@ export default function KaamSetuApp() {
           deferredInstallPrompt.prompt();
           deferredInstallPrompt.userChoice.then((res) => {
             if (res.outcome === 'accepted') {
-              showToast(lang === 'en' ? 'Installing KaamSetu...' : 'कामसेतू अ‍ॅप इन्स्टॉल होत आहे...');
+              showToast(lang === 'en' ? 'Installing SWABHIMAN...' : 'स्वाभिमान अ‍ॅप इन्स्टॉल होत आहे...');
             }
             setDeferredInstallPrompt(null);
           });
@@ -450,15 +450,15 @@ export default function KaamSetuApp() {
       // WhatsApp Link Generators
       const getWhatsAppOrderUrl = (b) => {
         const text = lang === "mr"
-          ? `*कामसेतू सेवा बुकिंग स्लिप (#${b.id})*\n\nनमस्ते ${b.workerName},\nमी ${b.customerName} आहे. कामसेतू अ‍ॅपवरून तुमच्यासाठी काम बुक केले आहे:\n\n📍 *पत्ता:* ${b.customerAddress}\n📅 *दिनांक व वेळ:* ${b.date} (${b.slot})\n🔧 *कामाचे स्वरूप:* ${b.jobNote || "दुरुस्ती व देखभाल"}\n💰 *अंदाजे शुल्क:* ₹${b.estimatedAmt || 550}\n\nकृपया या मेसेजला होकार देऊन वेळ कन्फर्म करा!`
-          : `*KaamSetu Work Order Slip (#${b.id})*\n\nHello ${b.workerName},\nI am ${b.customerName}. I have booked your service on KaamSetu:\n\n📍 *Address:* ${b.customerAddress}\n📅 *Date & Slot:* ${b.date} (${b.slot})\n🔧 *Task Details:* ${b.jobNote || "General Repair Work"}\n💰 *Est. Amount:* ₹${b.estimatedAmt || 550}\n\nPlease reply to this message to confirm your arrival time!`;
+          ? `*स्वाभिमान सेवा बुकिंग स्लिप (#${b.id})*\n\nनमस्ते ${b.workerName},\nमी ${b.customerName} आहे. कामसेतू अ‍ॅपवरून तुमच्यासाठी काम बुक केले आहे:\n\n📍 *पत्ता:* ${b.customerAddress}\n📅 *दिनांक व वेळ:* ${b.date} (${b.slot})\n🔧 *कामाचे स्वरूप:* ${b.jobNote || "दुरुस्ती व देखभाल"}\n💰 *अंदाजे शुल्क:* ₹${b.estimatedAmt || 550}\n\nकृपया या मेसेजला होकार देऊन वेळ कन्फर्म करा!`
+          : `*SWABHIMAN Work Order Slip (#${b.id})*\n\nHello ${b.workerName},\nI am ${b.customerName}. I have booked your service on KaamSetu:\n\n📍 *Address:* ${b.customerAddress}\n📅 *Date & Slot:* ${b.date} (${b.slot})\n🔧 *Task Details:* ${b.jobNote || "General Repair Work"}\n💰 *Est. Amount:* ₹${b.estimatedAmt || 550}\n\nPlease reply to this message to confirm your arrival time!`;
         return `https://wa.me/91${b.workerPhone}?text=${encodeURIComponent(text)}`;
       };
 
       const getWorkerInquiryWhatsAppUrl = (w) => {
         const text = lang === "mr"
-          ? `नमस्ते ${w.nameMr || w.name}, मी कामसेतू (छत्रपती संभाजीनगर) वर तुमचे प्रोफाईल पाहिले. मला ${SKILLS[w.skill]?.mr || w.skill} कामासाठी चौकशी करायची आहे. तुम्ही उपलब्ध आहात का?`
-          : `Hello ${w.name}, I found your profile on KaamSetu (Chhatrapati Sambhajinagar). I would like to inquire about ${SKILLS[w.skill]?.en || w.skill} service. Are you available?`;
+          ? `नमस्ते ${w.nameMr || w.name}, मी स्वाभिमान (छत्रपती संभाजीनगर) वर तुमचे प्रोफाईल पाहिले. मला ${SKILLS[w.skill]?.mr || w.skill} कामासाठी चौकशी करायची आहे. तुम्ही उपलब्ध आहात का?`
+          : `Hello ${w.name}, I found your profile on SWABHIMAN (Chhatrapati Sambhajinagar). I would like to inquire about ${SKILLS[w.skill]?.en || w.skill} service. Are you available?`;
         return `https://wa.me/91${w.phone}?text=${encodeURIComponent(text)}`;
       };
 
@@ -676,7 +676,7 @@ export default function KaamSetuApp() {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `kaamsetu_bookings_${Date.now()}.csv`);
+        link.setAttribute("download", `swabhiman_bookings_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -853,7 +853,7 @@ export default function KaamSetuApp() {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `kaamsetu_payout_ledger_${Date.now()}.csv`);
+        link.setAttribute("download", `swabhiman_payout_ledger_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1832,7 +1832,7 @@ export default function KaamSetuApp() {
                 <div className="lg:col-span-5 space-y-4">
                   <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 p-6 rounded-3xl shadow-lg">
                     <h3 className="font-display font-extrabold text-xl mb-2">
-                      Why Join KaamSetu?
+                      Why Join SWABHIMAN?
                     </h3>
                     <ul className="space-y-3 text-xs sm:text-sm font-semibold">
                       <li className="flex items-start gap-2">
@@ -1852,7 +1852,7 @@ export default function KaamSetuApp() {
 
                   <div className="bg-white dark:bg-[#1a2c36] p-6 rounded-3xl border border-slate-200 dark:border-[#293d49] text-xs text-slate-500 dark:text-slate-400 space-y-2">
                     <div className="font-bold text-slate-700 dark:text-slate-200 text-sm">Need Help Registering?</div>
-                    <p>Visit our KaamSetu Helpdesk in Cidco or contact our worker onboarding helpline at <strong>+91 98221 00000</strong>.</p>
+                    <p>Visit our SWABHIMAN Helpdesk in Cidco or contact our worker onboarding helpline at <strong>+91 98221 00000</strong>.</p>
                   </div>
                 </div>
 
@@ -3285,7 +3285,7 @@ export default function KaamSetuApp() {
                     <div className="inline-block p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-md">
                       <img
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                          `upi://pay?pa=kaamsetu.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`
+                          `upi://pay?pa=swabhiman.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`
                         )}`}
                         alt="UPI QR Code"
                         className="w-40 h-40 mx-auto block"
@@ -3295,30 +3295,30 @@ export default function KaamSetuApp() {
                         }}
                       />
                       <div style={{ display: 'none' }} className="w-40 h-40 items-center justify-center bg-slate-100 rounded-xl text-center text-xs p-2">
-                        <span>UPI: kaamsetu.{paymentBooking.workerPhone}@upi</span>
+                        <span>UPI: swabhiman.{paymentBooking.workerPhone}@upi</span>
                       </div>
                     </div>
 
                     <div className="mt-2.5 text-[11px] text-slate-500 dark:text-slate-400">
-                      VPA: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">kaamsetu.{paymentBooking.workerPhone}@upi</code>
+                      VPA: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">swabhiman.{paymentBooking.workerPhone}@upi</code>
                     </div>
 
                     {/* Quick App Launch Buttons for Mobile */}
                     <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
                       <a
-                        href={`upi://pay?pa=kaamsetu.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
+                        href={`upi://pay?pa=swabhiman.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1 transition-colors"
                       >
                         ⚡ Google Pay
                       </a>
                       <a
-                        href={`upi://pay?pa=kaamsetu.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
+                        href={`upi://pay?pa=swabhiman.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
                         className="px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1 transition-colors"
                       >
                         ⚡ PhonePe
                       </a>
                       <a
-                        href={`upi://pay?pa=kaamsetu.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
+                        href={`upi://pay?pa=swabhiman.${paymentBooking.workerPhone}@upi&pn=${encodeURIComponent(paymentBooking.workerName)}&am=${paymentBooking.estimatedAmt || 550}&cu=INR&tn=${encodeURIComponent('KaamSetu-' + paymentBooking.id)}`}
                         className="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1 transition-colors"
                       >
                         ⚡ Paytm / BHIM
@@ -3379,7 +3379,7 @@ export default function KaamSetuApp() {
                     </div>
 
                     <div className="text-[10px] text-slate-400 italic pt-1 text-center">
-                      * GST Exempt under local artisan service threshold. Direct peer-to-peer settlement verified by KaamSetu Technologies.
+                      * GST Exempt under local artisan service threshold. Direct peer-to-peer settlement verified by SWABHIMAN Technologies.
                     </div>
                   </div>
 
@@ -3891,7 +3891,7 @@ export default function KaamSetuApp() {
                   🛡️ {t.navAdmin}
                 </button>
                 <span>•</span>
-                <span>© 2026 KaamSetu Technologies</span>
+                <span>© 2026 SWABHIMAN Technologies</span>
                 <span>•</span>
                 <span>Aurangabad, MH</span>
               </div>

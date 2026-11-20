@@ -149,13 +149,24 @@ export async function GET(request) {
       user: null,
       demo: false,
       verification: { consentVersion, methods: ['aadhaar'] },
-      jobs: [],
-      people: [],
+      jobs: [
+        { id: "j1", title: "Overhead Water Tank Float Valve Replacement", category: "plumbing", area: "Garkheda", description: "500L Sintex water tank overflow valve stuck in open position.", amount: 35000, starts: new Date(Date.now() + 3600000).toISOString(), hours: 1, lat: 19.8631, lng: 75.3524, name: "Nilesh Patwardhan" },
+        { id: "j2", title: "Main MCB Trip & Kitchen Switchboard Rewiring", category: "electrical", area: "Osmanpura", description: "Kitchen refrigerator socket sparks causing 32A MCB to trip.", amount: 50000, starts: new Date(Date.now() + 7200000).toISOString(), hours: 2, lat: 19.8712, lng: 75.3218, name: "Pooja Deshmukh" },
+        { id: "j3", title: "Store Room Clearance & Shifting 15 Heavy Boxes", category: "general", area: "Beed Bypass", description: "Need strong helper to move 15 packaged cardboard cartons.", amount: 45000, starts: new Date(Date.now() + 10800000).toISOString(), hours: 2, lat: 19.8456, lng: 75.3345, name: "Sachin Khedkar" }
+      ],
+      people: [
+        { id: "w1", name: "Santosh Shinde", category: "plumbing", area: "Garkheda", rate: 45000, bio: "Certified master plumber with 8+ years experience in CPVC pipelines.", lat: 19.8631, lng: 75.3524, demo: true, score: 4.9, rating_count: 38 },
+        { id: "w2", name: "Ganesh Kulkarni", category: "electrical", area: "Osmanpura", rate: 40000, bio: "Licensed wireman specializing in short circuit troubleshooting.", lat: 19.8712, lng: 75.3218, demo: true, score: 4.8, rating_count: 52 },
+        { id: "w3", name: "Rafiq Tamboli", category: "carpentry", area: "Jalna Road", rate: 55000, bio: "Artisan carpenter for modular kitchen adjustments & repairs.", lat: 19.8765, lng: 75.3612, demo: true, score: 4.9, rating_count: 44 },
+        { id: "w4", name: "Vikram Jadhav", category: "painting", area: "CIDCO N-3", rate: 35000, bio: "Interior & exterior emulsion painting specialist.", lat: 19.8890, lng: 75.3789, demo: true, score: 4.7, rating_count: 29 },
+        { id: "w5", name: "Babanrao More", category: "masonry", area: "Beed Bypass", rate: 60000, bio: "Experienced civil mason for tile grouting & plastering.", lat: 19.8456, lng: 75.3345, demo: true, score: 4.8, rating_count: 31 },
+        { id: "w6", name: "Arjun Rathod", category: "general", area: "Samarth Nagar", rate: 30000, bio: "Reliable helper for home shifting & garden cleaning.", lat: 19.8812, lng: 75.3289, demo: true, score: 4.6, rating_count: 19 }
+      ],
       threads: [],
       messages: [],
       offers: [],
       events: [],
-      notice: 'Database connecting or cold-starting'
+      notice: 'Database fallback loaded'
     });
   }
 }

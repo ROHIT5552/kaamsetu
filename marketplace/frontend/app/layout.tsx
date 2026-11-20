@@ -12,14 +12,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kaamsetu-dun.vercel
 export const metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'KaamSetu (कामसेतू) – Verified Local Skilled Workers & Small Jobs',
-    template: '%s | KaamSetu Chhatrapati Sambhajinagar',
+    default: 'SWABHIMAN (स्वाभिमान) – Verified Local Skilled Workers & Small Jobs',
+    template: '%s | SWABHIMAN Chhatrapati Sambhajinagar',
   },
   description:
     'On-demand hyper-local marketplace connecting households and businesses with verified skilled workers: plumbers, electricians, carpenters, painters, masons, and helpers across Chhatrapati Sambhajinagar (Aurangabad). Direct contacts, upfront rates, zero middleman markups.',
   keywords: [
-    'KaamSetu',
-    'कामसेतू',
+    'SWABHIMAN',
+    'स्वाभिमान',
     'plumber Aurangabad',
     'electrician Chhatrapati Sambhajinagar',
     'carpenter Sambhajinagar',
@@ -30,9 +30,9 @@ export const metadata = {
     'verified technicians',
     'emergency plumber Aurangabad',
   ],
-  authors: [{ name: 'KaamSetu Team' }],
-  creator: 'KaamSetu',
-  publisher: 'KaamSetu Platform',
+  authors: [{ name: 'SWABHIMAN Team' }],
+  creator: 'SWABHIMAN',
+  publisher: 'SWABHIMAN Platform',
   alternates: {
     canonical: '/',
     languages: {
@@ -45,22 +45,22 @@ export const metadata = {
     locale: 'en_IN',
     alternateLocale: ['mr_IN'],
     url: siteUrl,
-    title: 'KaamSetu (कामसेतू) – Skilled Local Workers on Demand',
+    title: 'SWABHIMAN (स्वाभिमान) – Skilled Local Workers on Demand',
     description:
       'Connect directly with verified local tradespeople in Chhatrapati Sambhajinagar. Upfront visiting charges, fair hourly rates, and 1-click WhatsApp/Call bookings.',
-    siteName: 'KaamSetu',
+    siteName: 'SWABHIMAN',
     images: [
       {
         url: '/icons/icon.svg',
         width: 512,
         height: 512,
-        alt: 'KaamSetu Logo - Verified Local Tradespeople',
+        alt: 'SWABHIMAN Logo - Verified Local Tradespeople',
       },
     ],
   },
   twitter: {
     card: 'summary',
-    title: 'KaamSetu (कामसेतू) – Local Skilled Workers on Demand',
+    title: 'SWABHIMAN (स्वाभिमान) – Local Skilled Workers on Demand',
     description:
       'Verified plumbers, electricians, carpenters, and helpers in Chhatrapati Sambhajinagar. Direct contact, zero commissions.',
     images: ['/icons/icon.svg'],
@@ -90,7 +90,7 @@ const jsonLd = {
     {
       '@type': 'LocalBusiness',
       '@id': `${siteUrl}/#organization`,
-      name: 'KaamSetu (कामसेतू)',
+      name: 'SWABHIMAN (स्वाभिमान)',
       url: siteUrl,
       logo: `${siteUrl}/icons/icon.svg`,
       description:
@@ -118,7 +118,7 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
-      name: 'KaamSetu',
+      name: 'SWABHIMAN',
       inLanguage: ['en-IN', 'mr-IN'],
       potentialAction: {
         '@type': 'SearchAction',

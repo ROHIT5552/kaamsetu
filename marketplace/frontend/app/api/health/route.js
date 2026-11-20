@@ -7,7 +7,7 @@ export async function GET() {
     ok: true,
     status: 'healthy',
     edge: true,
-    platform: 'kaamsetu-frontend',
+    platform: 'swabhiman-frontend',
     timestamp: new Date().toISOString()
   }, { headers });
 }

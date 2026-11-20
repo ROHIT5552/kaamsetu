@@ -1,5 +1,5 @@
 /**
- * KaamSetu Domain Types & Interfaces
+ * SWABHIMAN (स्वाभिमान) Domain Types & Interfaces
  * Hyper-local marketplace connecting households with verified local tradespeople.
  */
 

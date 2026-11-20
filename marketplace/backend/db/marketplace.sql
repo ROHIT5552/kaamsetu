@@ -26,10 +26,4 @@ CREATE TABLE IF NOT EXISTS thread_reads (
  seen_message bigint NOT NULL,
  PRIMARY KEY(account,application)
 );
-ALTER TABLE jobs ADD COLUMN IF NOT EXISTS work_details text CHECK(char_length(work_details)<=1200);
-ALTER TABLE jobs ADD COLUMN IF NOT EXISTS photo text;
-ALTER TABLE jobs ADD COLUMN IF NOT EXISTS photo_key text GENERATED ALWAYS AS (md5(photo)) STORED;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS work_details text CHECK(char_length(work_details)<=1200);
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS photo text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS photo_key text GENERATED ALWAYS AS (md5(photo)) STORED;
 COMMIT;

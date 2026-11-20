@@ -1,16 +1,30 @@
 # Deploy SWABHIMAN
 
-Use marketplace as the project root for deployments from this branch. It contains both the Next.js frontend and the API.
+SWABHIMAN is split into separate frontend and backend applications under `marketplace/` for independent hosting on Vercel and Render:
 
-| Setting | Vercel | Render Node Web Service |
+| Setting | Render Backend | Vercel Frontend |
 | --- | --- | --- |
-| Root directory | marketplace | marketplace |
-| Build command | npm run build | npm ci && npm run build |
-| Start command | Managed by Vercel | node scripts/migrate.mjs && npm exec -- next start --hostname 0.0.0.0 |
-| Health check | /api/health | /api/health |
+| Repository root directory | `marketplace/backend` | `marketplace/frontend` |
+| Framework/runtime | Node | Next.js |
+| Build command | `npm ci && npm run build` | `npm run build` |
+| Start command | `npm run db:migrate:hosted && npm start` | Managed by Vercel |
+| Health check | `/api/health` | `/api/health` (rewritten to Render) |
 
-Configure DATABASE_URL with a dedicated PostgreSQL connection string. Use Render's internal database URL for a service in the same Render workspace and region. Use an external connection string on Vercel. Set APP_ORIGIN to the exact HTTPS origin users open and DEMO_MODE=false. Run the database migrations against the hosted database before serving traffic. The Render start command above runs them for a single instance. Keep database credentials and verification secrets in host environment settings.
+### Render Backend (`marketplace/backend`)
+1. Create a PostgreSQL database on Render.
+2. Create a Web Service with Root Directory `marketplace/backend`.
+3. Configure Environment Variables:
+   - `DATABASE_URL`: Dedicated Postgres internal URL.
+   - `APP_ORIGIN`: Exact HTTPS origin of the Vercel frontend (e.g. `https://kaamsetu.vercel.app`).
+   - `DEMO_MODE`: `false` in production.
+   - `VERIFICATION_WEBHOOK_SECRET`: 32-byte hex secret for worker verification callbacks.
+   - `VERIFICATION_ALTERNATIVE_URL`: HTTPS URL of verification provider adapter.
+   - `VERIFICATION_TRADE_URL`: HTTPS URL of trade credential adapter.
 
-Check that /api/health returns HTTP 200 with {"ok":true}, then test sign-in through the public app URL. See the [marketplace guide](marketplace/README.md) for verification setup.
+### Vercel Frontend (`marketplace/frontend`)
+1. Create/import project on Vercel with Root Directory `marketplace/frontend`.
+2. Configure Environment Variables:
+   - `SWABHIMAN_API_ORIGIN`: The Render backend HTTPS origin (e.g. `https://swabhiman.onrender.com`).
+3. Deploy frontend. The build rewrites `/api/market` and `/api/health` to `SWABHIMAN_API_ORIGIN`.
 
-The separate frontend/backend deployment roots belong to the split-deployments branch. Change hosting roots when that branch is merged and ready for cutover.
+See [marketplace/README.md](marketplace/README.md#separate-hosting-on-vercel-and-render) for detailed instructions, local testing, and review queue operations.

@@ -4,17 +4,27 @@ SWABHIMAN is a local trades marketplace for Chhatrapati Sambhajinagar. Employers
 
 ## Run locally
 
-Use Node.js 22 or later and PostgreSQL 16 or later. Create an empty database and a PostgreSQL role for the project. Copy .env.example to .env.local, set DATABASE_URL to your database credentials and keep APP_ORIGIN at http://localhost:3000 for the local commands.
+Use Node.js 22 or later and PostgreSQL 16 or later. In marketplace/backend, copy .env.example to .env.local and set DATABASE_URL for a dedicated local database. APP_ORIGIN is the browser-facing frontend origin, normally http://localhost:3000. To try the seeded demo, set DEMO_MODE=true in this local file.
+
+In the backend terminal:
 
 ```powershell
+cd marketplace/backend
 npm ci
 npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-Open http://localhost:3000. For the demo, set DEMO_MODE=true before starting the server and run npm run db:seed after migrating. Use the same demo room in two independent browser profiles. Demo accounts are shared by room name and anyone who knows the name can enter. Use sample data only and keep the server bound to localhost.
+Run the seed command only in localhost demo mode. The API listens on port 3001. In another terminal:
 
-To run a production build locally, use npm run build and npm start. If a local database is already configured, keep its PostgreSQL service running when starting the app. The smoke test runs with npm run test:smoke against the local demo and creates sample records.
+```powershell
+cd marketplace/frontend
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000. The frontend proxies /api/market and /api/health to the local backend. Use the same demo room in two separate browser profiles to try both roles. Run npm run test:smoke from marketplace/backend while both apps are running.
 
 ## Seeded demo accounts
 
@@ -44,17 +54,29 @@ The booking inbox shows dated milestones from confirmation through completion. A
 ## Architecture
 
 - Next.js App Router serves the responsive marketplace. The Node.js route handler owns validation, sessions, permissions and transactions. PostgreSQL backs profiles, jobs, conversations, offers, bookings, verification requests and rate limits.
-- The marketplace API lives at /api/market. GET returns public discovery and authenticated participant views. POST uses a validated action and payload. Queries are parameterized and private responses use no-store.
+- The frontend calls /api/market on its own origin. The frontend rewrites that path to the Render backend, where session and origin checks run. GET returns public discovery and authenticated participant views. POST uses a validated action and payload. Queries are parameterized and private responses use no-store.
 - A single transaction locks the job before its application and booking. One accepted offer creates one booking and declines competing offers. Offer versions prevent stale or self-acceptance, and the history records each offer. Monetary amounts are integer paise. No exchange of funds occurs within the app.
 - Public matching combines trade, locality, search and optional straight-line distance. Rounded discovery coordinates support approximate ordering. Exact booking coordinates are participant-only, visible for up to 60 seconds, overwritten on updates and cleared on arrival, cancellation or explicit stop. Browser background suspension can interrupt sharing.
 - Booking rules are role-specific. Workers mark departure and arrival, while employers mark work started and completed. Either participant can cancel before arrival or flag a dispute afterward. Booking changes are recorded, and dispute resolution currently requires a future operations workflow.
 - Passwords are salted with scrypt. Session secrets are random, stored as hashes and sent through HttpOnly SameSite cookies. Mutations check Origin, schema, role and ownership. Authentication and writes have database-backed rate limits.
 
-## Hosting the standalone app
+## Separate hosting on Vercel and Render
 
-In the GitHub repository, use marketplace as the service root. For a Render Node web service, use npm ci && npm run build as the build command. Run node scripts/migrate.mjs against the new database before first launch. For a single test instance, the start command can be node scripts/migrate.mjs && npm exec -- next start --hostname 0.0.0.0. Use /api/health for the health check. On a multi-instance deployment, apply migrations once through the release process before starting instances.
+Deploy the backend first and use its HTTPS origin when configuring the frontend. Both apps are independently installable and have their own lockfiles.
 
-Set DATABASE_URL using the host's secret environment settings and APP_ORIGIN to the exact HTTPS service origin. Set DEMO_MODE=false. Set the verification adapter URLs and signing key through secret configuration as applicable. Keep database access private and run the health check after deploying. Do not run the local demo seed against a public database.
+| Setting | Render backend | Vercel frontend |
+| --- | --- | --- |
+| Repository root directory | marketplace/backend | marketplace/frontend |
+| Framework/runtime | Node | Next.js |
+| Build command | npm ci && npm run build | npm run build |
+| Start command | npm run db:migrate:hosted && npm start | Managed by Vercel |
+| Health check | /api/health | /api/health, forwarded to Render |
+
+- Render: configure DATABASE_URL with the dedicated Postgres internal URL, APP_ORIGIN with the exact HTTPS origin of the Vercel frontend (without a trailing slash), and DEMO_MODE=false. Keep the database in the same workspace and region as the backend. Render supplies PORT. The start command above runs idempotent migrations for a single instance. For multiple instances, run migrations once during release and use npm start for the service.
+- Vercel: set SWABHIMAN_API_ORIGIN to the backend HTTPS origin, such as https://swabhiman.onrender.com, and redeploy. The build reads this setting to create same-origin rewrites. Set it in each deployment environment you intend to use. Do not copy DATABASE_URL or verification secrets to the frontend.
+- If the frontend uses a preview URL, use a test backend with APP_ORIGIN matching that preview and a test database. Each backend accepts writes from one configured frontend origin.
+- Verify /api/health on both URLs, then sign in using the Vercel domain to verify origin checks and session cookies. Provider callbacks go directly to the Render backend at /api/verification/provider.
+- To migrate existing deployments, update Render's Root Directory and commands first. Verify its health, then update Vercel's Root Directory and redeploy the frontend. The legacy repository-level Vercel and Render configurations are for the older KaamSetu stack.
 
 ## Production boundaries
 
@@ -63,7 +85,7 @@ Production checks use the hosted verification workflow and reviewer queue below.
 Before public launch, configure and validate a live verification adapter and its deletion process. Protect reviewer access with MFA or an identity-aware gateway covering both the page and API. Add account recovery and email verification or mobile OTP, configure HTTPS and PostgreSQL backups, and review monitoring, retention and abuse handling. Demo mode must be disabled. Escrow, UPI collection, tax receipts, WhatsApp dispatch, voice workflows, multi-day contracts, background tracking and payment disputes are outside this implementation.
 ## Worker verification and review
 
-Run npm run db:migrate before starting the updated app. Production verification is separate from the localhost demo. Production approvals require a signed provider result and a reviewer decision. The demo continues to use simulated results and cannot access the production callback or review queue.
+From marketplace/backend, run npm run db:migrate before starting the updated backend. Production verification is separate from the localhost demo. Production approvals require a signed provider result and a reviewer decision. The demo continues to use simulated results and cannot access the production callback or review queue.
 
 Configure VERIFICATION_ALTERNATIVE_URL and VERIFICATION_TRADE_URL with HTTPS entry points to your approved hosted verification adapter. Add VERIFICATION_AADHAAR_URL only after confirming the legal and provider arrangement for the Aadhaar flow. SWABHIMAN offers Aadhaar only when the alternative ID route is configured. The organization operating the actual identity check must validate the document, bind the result to the person who completed the provider journey, document which government IDs are supported, handle local-language notices, and implement consent withdrawal and deletion. For electrical trade checks, confirm the issuer, matching holder, trade scope and expiry. The app requires electrical credentials for the electrical category.
 
@@ -86,6 +108,6 @@ SWABHIMAN provides the adapter contract and a tested local signed-callback flow.
 
 ### Test the review queue without live identity documents
 
-Use a separate local database and set DEMO_MODE=false, KS_VERIFICATION_TEST=true and APP_ORIGIN=http://localhost:3000. Set the alternative and trade URLs to HTTPS example.invalid placeholders and generate a throwaway webhook secret with node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))". Run npm run db:migrate and start the app.
+Use a separate local database and set DEMO_MODE=false, KS_VERIFICATION_TEST=true and APP_ORIGIN=http://localhost:3000. Set VERIFICATION_CALLBACK_ORIGIN=http://127.0.0.1:3001 in the backend local environment. Set the alternative and trade URLs to HTTPS example.invalid placeholders and generate a throwaway webhook secret with node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))". Run npm run db:migrate and start both apps.
 
 Run npm run test:verification for the automated path. To exercise the admin UI manually, create an employer account and grant it reviewer access using its database UUID. In a separate browser profile create a worker, request a check, and copy the case UUID from the verification link's case query parameter. Simulate a result with npm run verification:fixture -- CASE_UUID alternative passed, then open Verification review from the employer account and approve it. Use trade to exercise the electrical flow. The fixture does not open or contact the placeholder provider.

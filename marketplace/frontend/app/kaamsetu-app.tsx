@@ -20,6 +20,7 @@ import {
   Briefcase,
   ShieldCheck,
   Check,
+  QrCode,
   Phone,
   MessageCircle,
   Volume2,
@@ -194,8 +195,8 @@ function LiveTrackingModal({ booking, onClose, onOpenReview, onOpenPayment, t, l
                   <g transform={`translate(${currentPos.x}, ${currentPos.y})`}>
                     <circle r="16" fill="#3b82f6" className="animate-ping opacity-50" />
                     <circle r="14" fill="#1d4ed8" />
-                    <text textAnchor="middle" y="5" fontSize="13">
-                      {SKILLS[booking.workerSkill]?.icon || "🔧"}
+                    <text textAnchor="middle" y="4" fontSize="11" fill="#FFFFFF" fontWeight="bold">
+                      ✓
                     </text>
                   </g>
                 </svg>
@@ -1897,8 +1898,8 @@ export default function SwabhimanApp() {
                         className="bg-white dark:bg-[#1a2c36] rounded-2xl border border-slate-200 dark:border-[#293d49] p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
                       >
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-2xl flex items-center justify-center flex-none">
-                            {skillObj.icon}
+                          <div className="w-14 h-14 rounded-[16px] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#F2A900] flex items-center justify-center flex-none border border-[#E8E2D6] dark:border-[#24304A]">
+                            {getCategoryIcon(b.workerSkill, "w-7 h-7 stroke-[2]")}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
@@ -1922,21 +1923,23 @@ export default function SwabhimanApp() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                                                <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
                           {/* Payment / Receipt Trigger */}
                           {b.status === "paid" ? (
                             <button
                               onClick={() => setPaymentBooking(b)}
-                              className="px-3 py-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors"
+                              className="min-h-[40px] px-3.5 py-2 bg-[#E3F4EA] dark:bg-[#12351F] border border-[#0B6B3A]/30 text-[#0B6B3A] dark:text-[#6EE7A0] rounded-[13px] text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:bg-[#d4edd8] transition-colors"
                             >
-                              ✅ Paid • Receipt
+                              <Check className="w-4 h-4 stroke-[3]" />
+                              <span>Paid • Receipt</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => setPaymentBooking(b)}
-                              className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                              className="min-h-[40px] px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-[13px] shadow-2xs transition-all flex items-center gap-1.5"
                             >
-                              💳 {t.payUpiBtn}
+                              <QrCode className="w-4 h-4" />
+                              <span>{t.payUpiBtn}</span>
                             </button>
                           )}
 
@@ -1945,15 +1948,17 @@ export default function SwabhimanApp() {
                             href={getWhatsAppOrderUrl(b)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1"
+                            className="min-h-[40px] px-3.5 py-2 bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#0B6B3A] dark:text-[#6EE7A0] border border-[#E8E2D6] dark:border-[#24304A] font-bold text-xs rounded-[13px] shadow-2xs transition-colors flex items-center gap-1.5"
                             title="Send dispatch work order slip via WhatsApp"
                           >
-                            <span>💬</span> {t.whatsappOrder}
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{t.whatsappOrder}</span>
                           </a>
 
                           {b.reviewed ? (
-                            <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm">
-                              ★ Rated {b.userRating}/5
+                            <span className="min-h-[40px] px-3.5 py-2 bg-[#F4EEE0] dark:bg-[#1F2A44] border border-[#E8E2D6] dark:border-[#24304A] text-[#1B1A17] dark:text-[#F3F5F9] rounded-[13px] text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                              <Star className="w-4 h-4 fill-[#F2A900] text-[#F2A900]" />
+                              <span>Rated {b.userRating}/5</span>
                             </span>
                           ) : (
                             <button
@@ -1961,22 +1966,27 @@ export default function SwabhimanApp() {
                                 const w = workers.find(x => x.id === b.workerId) || { id: b.workerId, name: b.workerName, skill: b.workerSkill };
                                 handleOpenReview(w, b.id, b.customerName);
                               }}
-                              className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-200 font-bold text-xs rounded-xl border border-amber-300 dark:border-amber-700 transition-colors flex items-center gap-1.5"
+                              className="min-h-[40px] px-3.5 py-2 bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-bold text-xs rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] transition-colors flex items-center gap-1.5"
                             >
-                              ★ {t.leaveReview}
+                              <Star className="w-4 h-4 text-[#F2A900]" />
+                              <span>{t.leaveReview}</span>
                             </button>
                           )}
+
                           <button
                             onClick={() => setTrackingBooking(b)}
-                            className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                            className="min-h-[40px] px-4 py-2 bg-[#F2A900] hover:bg-[#e09c00] active:scale-98 text-[#1B1A17] font-bold text-xs rounded-[13px] shadow-2xs transition-colors flex items-center gap-1.5"
                           >
-                            🗺️ {t.trackLiveBtn}
+                            <MapPin className="w-4 h-4" />
+                            <span>{t.trackLiveBtn}</span>
                           </button>
+
                           <a
                             href={`tel:${b.workerPhone}`}
-                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
+                            className="min-h-[40px] px-4 py-2 bg-white dark:bg-[#131C2E] hover:bg-[#F4EEE0] dark:hover:bg-[#1F2A44] text-[#1B1A17] dark:text-[#F3F5F9] font-semibold text-xs rounded-[13px] border border-[#E8E2D6] dark:border-[#24304A] transition-colors flex items-center gap-1.5"
                           >
-                            📞 {t.callWorker}
+                            <Phone className="w-4 h-4" />
+                            <span>{t.callWorker}</span>
                           </a>
                         </div>
                       </div>
@@ -2054,7 +2064,7 @@ export default function SwabhimanApp() {
                           className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-400"
                         >
                           {Object.entries(SKILLS).map(([k, s]) => (
-                            <option key={k} value={k}>{s.icon} {s.en} ({s.mr})</option>
+                            <option key={k} value={k}>{s.en} ({s.mr})</option>
                           ))}
                         </select>
                       </div>
@@ -2416,7 +2426,7 @@ export default function SwabhimanApp() {
                                   </div>
                                 </td>
                                 <td className="p-3.5 font-medium capitalize">
-                                  {SKILLS[w.skill]?.icon} {SKILLS[w.skill]?.en}
+                                  <div className="flex items-center gap-2">{getCategoryIcon(w.skill, "w-4 h-4")} <span>{SKILLS[w.skill]?.en}</span></div>
                                 </td>
                                 <td className="p-3.5 text-slate-600 dark:text-slate-300">
                                   {w.area}
@@ -2600,7 +2610,7 @@ export default function SwabhimanApp() {
                         return (
                           <div key={k}>
                             <div className="flex justify-between text-xs font-semibold mb-1">
-                              <span>{s.icon} {s.en}</span>
+                              <span className="flex items-center gap-1.5">{getCategoryIcon(k, "w-4 h-4")} <span>{s.en}</span></span>
                               <span>{count} workers ({pct}%)</span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
@@ -2801,7 +2811,7 @@ export default function SwabhimanApp() {
                                   <td className="p-3.5">
                                     <div className="flex items-center gap-2.5">
                                       <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-950 font-bold flex items-center justify-center text-xs flex-none">
-                                        {SKILLS[w.skill]?.icon || "🔧"}
+                                        {getCategoryIcon(w.skill, "w-4 h-4")}
                                       </div>
                                       <div>
                                         <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -3255,8 +3265,8 @@ export default function SwabhimanApp() {
               <div className="bg-white dark:bg-[#1a2c36] text-slate-900 dark:text-slate-100 rounded-3xl max-w-md w-full h-[520px] flex flex-col shadow-2xl overflow-hidden border border-slate-200 dark:border-[#293d49]">
                 <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-amber-400 text-slate-950 font-bold flex items-center justify-center text-sm">
-                      {SKILLS[chatWorker.skill]?.icon}
+                    <div className="w-9 h-9 rounded-full bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#F2A900] flex items-center justify-center text-sm border border-[#E8E2D6] dark:border-[#24304A]">
+                      {getCategoryIcon(chatWorker.skill, "w-5 h-5")}
                     </div>
                     <div>
                       <h4 className="font-display font-bold text-sm">{chatWorker.name}</h4>
@@ -3747,8 +3757,8 @@ export default function SwabhimanApp() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 font-bold flex items-center justify-center text-xl shadow-md">
-                      {SKILLS[selectedLedgerWorker.worker.skill]?.icon || "🔧"}
+                    <div className="w-11 h-11 rounded-[14px] bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#F2A900] flex items-center justify-center text-xl shadow-xs border border-[#E8E2D6] dark:border-[#24304A]">
+                      {getCategoryIcon(selectedLedgerWorker.worker.skill, "w-6 h-6 stroke-[2]")}
                     </div>
                     <div>
                       <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">
@@ -3944,7 +3954,7 @@ export default function SwabhimanApp() {
                               : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-300"
                           }`}
                         >
-                          <div className="text-xl mb-1">{s.icon}</div>
+                          <div className="w-8 h-8 mx-auto flex items-center justify-center mb-1 text-[#F2A900]">{getCategoryIcon(k, "w-5 h-5")}</div>
                           <div className="text-[11px] font-semibold truncate">{lang === "en" ? s.en : s.mr}</div>
                         </button>
                       ))}
@@ -3969,7 +3979,7 @@ export default function SwabhimanApp() {
                                 : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-slate-300"
                             }`}
                           >
-                            <span className="text-2xl mt-0.5">{issue.icon}</span>
+                            <div className="w-8 h-8 rounded-lg bg-[#F4EEE0] dark:bg-[#1F2A44] text-[#F2A900] flex items-center justify-center flex-none mt-0.5">{getCategoryIcon(estimatorTrade, "w-4 h-4")}</div>
                             <div className="flex-1">
                               <div className="font-bold text-xs text-slate-900 dark:text-white">
                                 {lang === "en" ? issue.titleEn : issue.titleMr}
@@ -4295,14 +4305,24 @@ export default function SwabhimanApp() {
 
               {/* Four Columns Footer Links */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#24304A]/60">
-                {/* Col 1: Brand & Mission */}
+                {/* Col 1: Brand & Mission with Swabhiman Suit Guy Logo */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <img
-                      src="/swabhiman-logo.png"
-                      alt="SWABHIMAN"
-                      className="h-9 w-auto object-contain brightness-0 invert opacity-95"
+                      src="/swabhiman-suit-guy.png"
+                      alt="SWABHIMAN - Local Pride"
+                      className="w-14 h-14 rounded-[16px] object-cover border-2 border-[#F2A900] shadow-md flex-none"
                     />
+                    <div>
+                      <img
+                        src="/swabhiman-logo.png"
+                        alt="SWABHIMAN"
+                        className="h-7 sm:h-8 w-auto object-contain brightness-0 invert opacity-95"
+                      />
+                      <div className="text-[11px] text-[#F2A900] font-bold tracking-wider uppercase mt-1">
+                        छत्रपती संभाजीनगर • Aurangabad
+                      </div>
+                    </div>
                   </div>
                   <p className="text-slate-400 text-xs leading-relaxed">
                     Chhatrapati Sambhajinagar's dedicated peer-to-peer network connecting households with certified local craftsmen. Upfront rates, zero middleman commission.

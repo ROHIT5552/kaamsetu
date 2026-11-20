@@ -1,4 +1,5 @@
 // KaamSetu Hyper-local Marketplace Data & Translations
+import type { WorkerProfile, BookingRecord } from '../utils/types';
 
 export const SKILLS = {
       plumber: { icon: "🔧", en: "Plumber", mr: "प्लंबर", descEn: "Leaks, pipe fittings, taps & sanitary", descMr: "गळती, पाईप जोडणी, नळ व सॅनिटरी कामे" },
@@ -46,7 +47,7 @@ export const SKILLS = {
       ]
     };
 
-    export const INITIAL_WORKERS = [
+    export const INITIAL_WORKERS: WorkerProfile[] = [
       {
         id: 101,
         name: "Santosh Shinde",
@@ -200,8 +201,8 @@ export const SKILLS = {
       en: {
         brand: "Kaam",
         brandHighlight: "Setu",
-        tagline: "Skilled Workers for Small Jobs",
-        subtitle: "Verified local plumbers, electricians, carpenters, painters & helpers in Aurangabad. Transparent pricing, no middleman markups.",
+        tagline: "Verified Neighborhood Craftsmen, On-Demand",
+        subtitle: "Direct access to Chhatrapati Sambhajinagar's skilled plumbers, electricians, carpenters, painters & helpers. Upfront visiting charges, fair hourly rates, zero middleman commissions.",
         navFind: "Find Workers",
         navEmergency: "Emergency 15-Min",
         navBookings: "My Bookings",
@@ -292,8 +293,8 @@ export const SKILLS = {
         chatModalTitle: "Direct Chat with",
         typeMessage: "Type your message or landmark info...",
         send: "Send",
-        adminTitle: "KaamSetu Operations & Admin Console",
-        adminSubtitle: "Verify local worker profiles, oversee customer bookings, and monitor citywide fulfillment.",
+        adminTitle: "Executive Operations & Partner Settlement Command",
+        adminSubtitle: "Real-time technician KYC verification, active dispatch board, yield simulator, and instant UPI worker settlements across Chhatrapati Sambhajinagar.",
         statWorkers: "Active Pros",
         statPending: "KYC Pending",
         statBookings: "Total Bookings",
@@ -406,8 +407,8 @@ export const SKILLS = {
       mr: {
         brand: "काम",
         brandHighlight: "सेतू",
-        tagline: "छोट्या आणि महत्त्वाच्या कामांसाठी कुशल कारागीर",
-        subtitle: "छत्रपती संभाजीनगर (औरंगाबाद) मधील विश्वासू प्लंबर, इलेक्ट्रिशियन, सुतार, पेंटर आणि मदतनीस. पारदर्शक दर, थेट संपर्क.",
+        tagline: "छत्रपती संभाजीनगरमधील विश्वासू आणि कुशल स्थानिक कारागीर",
+        subtitle: "प्लंबर, इलेक्ट्रिशियन, सुतार, पेंटर व मदतनीस थेट तुमच्या सेवेत. पारदर्शक तपासणी फी, रास्त दर आणि शून्य मध्यस्थ कमिशन.",
         navFind: "कारागीर शोधा",
         navEmergency: "तातडीची सेवा (१५ मिनिटे)",
         navBookings: "माझी बुकिंग्स",
@@ -498,8 +499,8 @@ export const SKILLS = {
         chatModalTitle: "थेट संदेश –",
         typeMessage: "येथे तुमचा संदेश किंवा पत्त्याचा लँडमार्क टाका...",
         send: "पाठवा",
-        adminTitle: "कामसेतू प्रशासन व ऑपरेशन्स पॅनेल",
-        adminSubtitle: "कारागिरांची आधार/केवायसी पडताळणी, ग्राहकांच्या बुकिंग्स आणि शहराचे कामकाज व्यवस्थापन.",
+        adminTitle: "कामसेतू भागीदार ऑपरेशन्स व पेआउट लेजर",
+        adminSubtitle: "कारागीर पडताळणी, थेट बुकिंग व्यवस्थापन, नफा सिम्युलेटर व तात्काळ यूपीआय पेआउट सेटलमेंट.",
         statWorkers: "सक्रिय कारागीर",
         statPending: "पडताळणी प्रलंबित",
         statBookings: "एकूण बुकिंग्स",
@@ -612,7 +613,7 @@ export const SKILLS = {
     };
 
     // Sample initial demo bookings
-    export const INITIAL_BOOKINGS = [
+    export const INITIAL_BOOKINGS: BookingRecord[] = [
       {
         id: 1730001,
         workerId: 101,

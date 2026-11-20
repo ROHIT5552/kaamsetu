@@ -9,8 +9,41 @@ import {
   I18N,
   INITIAL_BOOKINGS,
 } from "../lib/kaamsetu-data";
+import Toaster from "../components/Toaster";
+import { ToastNotification, ToastType, WorkerProfile, BookingRecord, LedgerItem } from "../utils";
 
-function LiveTrackingModal({ booking, onClose, onOpenReview, onOpenPayment, t, lang }) {
+// React Error Boundary for isolated modal/widget protection
+class SafeBoundary extends React.Component<{ children?: React.ReactNode }, { hasError: boolean; error: any }> {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.warn("Recovered from component error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-center my-4">
+          <p className="text-xs text-amber-900 font-bold">⚠️ Component Notice</p>
+          <p className="text-[11px] text-slate-600 mt-1">This section encountered an issue. Click below to reload.</p>
+          <button
+            onClick={() => this.setState({ hasError: false })}
+            className="mt-2 px-3 py-1 bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow-xs"
+          >
+            Reload Section
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function LiveTrackingModal({ booking, onClose, onOpenReview, onOpenPayment, t, lang }: any) {
       const [progress, setProgress] = useState(0.2); // 0.0 to 1.0
 
       // Coordinate Waypoints along realistic city road network
@@ -184,8 +217,8 @@ export default function KaamSetuApp() {
       const [activeTab, setActiveTab] = useState("find");
 
       // App Data State
-      const [workers, setWorkers] = useState(INITIAL_WORKERS);
-      const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
+      const [workers, setWorkers] = useState<any[]>(INITIAL_WORKERS as any[]);
+      const [bookings, setBookings] = useState<any[]>(INITIAL_BOOKINGS as any[]);
 
       // Payout Ledger State
       const [commissionRate, setCommissionRate] = useState(5);
@@ -209,7 +242,7 @@ export default function KaamSetuApp() {
       });
       const [payoutSearch, setPayoutSearch] = useState("");
       const [payoutFilter, setPayoutFilter] = useState("all");
-      const [selectedLedgerWorker, setSelectedLedgerWorker] = useState(null);
+      const [selectedLedgerWorker, setSelectedLedgerWorker] = useState<any>(null);
 
       // Filter States
       const [selectedSkill, setSelectedSkill] = useState("all");
@@ -220,7 +253,7 @@ export default function KaamSetuApp() {
       const [sortBy, setSortBy] = useState("rating");
 
       // Saved Favorites State
-      const [favorites, setFavorites] = useState([101, 102]);
+      const [favorites, setFavorites] = useState<number[]>([101, 102]);
       const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
       useEffect(() => {
@@ -232,7 +265,7 @@ export default function KaamSetuApp() {
         setFavorites(prev => {
           const isFav = prev.includes(workerId);
           const next = isFav ? prev.filter(id => id !== workerId) : [...prev, workerId];
-          showToast(isFav ? t.favoriteRemovedToast : t.favoriteAddedToast);
+          showToast(isFav ? t.favoriteRemovedToast : t.favoriteAddedToast, isFav ? "info" : "success", isFav ? "Favorites Updated" : "Added to Saved Pros");
           return next;
         });
       };
@@ -293,24 +326,24 @@ export default function KaamSetuApp() {
       const [adminSearch, setAdminSearch] = useState("");
 
       // Interactive Modals State
-      const [compareList, setCompareList] = useState([]);
+      const [compareList, setCompareList] = useState<number[]>([]);
       const [showCompareModal, setShowCompareModal] = useState(false);
-      const [detailWorker, setDetailWorker] = useState(null);
-      const [bookingWorker, setBookingWorker] = useState(null);
-      const [trackingBooking, setTrackingBooking] = useState(null);
-      const [chatWorker, setChatWorker] = useState(null);
-      const [chatMessages, setChatMessages] = useState({});
+      const [detailWorker, setDetailWorker] = useState<any>(null);
+      const [bookingWorker, setBookingWorker] = useState<any>(null);
+      const [trackingBooking, setTrackingBooking] = useState<any>(null);
+      const [chatWorker, setChatWorker] = useState<any>(null);
+      const [chatMessages, setChatMessages] = useState<Record<string | number, any[]>>({});
       const [currentChatInput, setCurrentChatInput] = useState("");
-      const [toastMessage, setToastMessage] = useState(null);
+      const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
       // PWA Installation State
-      const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
+      const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
       const [showInstallModal, setShowInstallModal] = useState(false);
       const [isAppInstalled, setIsAppInstalled] = useState(false);
 
       useEffect(() => {
         if (typeof window === 'undefined') return;
-        if (window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches || window.navigator?.standalone)) {
+        if (window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any)?.standalone)) {
           setIsAppInstalled(true);
         }
 
@@ -344,7 +377,7 @@ export default function KaamSetuApp() {
       };
 
       // Review & Rating State
-      const [reviewTarget, setReviewTarget] = useState(null); // { worker, bookingId }
+      const [reviewTarget, setReviewTarget] = useState<any>(null); // { worker, bookingId }
       const [ratingStars, setRatingStars] = useState(5);
       const [reviewComment, setReviewComment] = useState("");
       const [reviewerName, setReviewerName] = useState("");
@@ -389,7 +422,7 @@ export default function KaamSetuApp() {
           setBookings(prev => prev.map(b => b.id === reviewTarget.bookingId ? { ...b, reviewed: true, userRating: ratingStars } : b));
         }
 
-        showToast(t.reviewSuccess);
+        showToast(t.reviewSuccess, "success", "Review & Rating Published");
         setReviewTarget(null);
       };
 
@@ -400,18 +433,18 @@ export default function KaamSetuApp() {
       const handleUpdateWorkerDuty = (workerId, newAvail) => {
         setWorkers(prev => prev.map(w => w.id === workerId ? { ...w, avail: newAvail } : w));
         const statusLabel = newAvail === "now" ? t.dutyOnline : newAvail === "busy" ? t.dutyBusy : t.dutyOffline;
-        showToast(`${t.dutyUpdatedToast} ${statusLabel}`);
+        showToast(`${t.dutyUpdatedToast} ${statusLabel}`, "info", "Duty Status Changed");
       };
 
       // UPI Payment & Digital Tax Invoice State
-      const [paymentBooking, setPaymentBooking] = useState(null);
+      const [paymentBooking, setPaymentBooking] = useState<any>(null);
 
       const handleMarkPaid = (bookingId) => {
         setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: "paid", paidAt: new Date().toLocaleTimeString() } : b));
         if (paymentBooking && paymentBooking.id === bookingId) {
           setPaymentBooking(prev => ({ ...prev, status: "paid", paidAt: new Date().toLocaleTimeString() }));
         }
-        showToast(t.paymentSuccessfulToast);
+        showToast(t.paymentSuccessfulToast, "success", "Payment Marked as Paid");
       };
 
       // WhatsApp Link Generators
@@ -516,10 +549,18 @@ export default function KaamSetuApp() {
         document.documentElement.lang = lang;
       }, [lang, mounted]);
 
-      // Show toast helper
-      const showToast = (msg) => {
-        setToastMessage(msg);
-        setTimeout(() => setToastMessage(null), 3800);
+      // Toaster Notification Helper (Supports Multi-Stack & Types)
+      const showToast = (message: string, type: ToastType = "info", title?: string) => {
+        const id = Math.random().toString(36).slice(2, 9);
+        const newToast: ToastNotification = { id, message, type, title };
+        setToasts((prev) => [newToast, ...prev].slice(0, 4));
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, 4200);
+      };
+
+      const dismissToast = (id: string) => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
       };
 
       // Filtered & Sorted Workers (For Customer Facing View: only show approved/verified)
@@ -787,7 +828,7 @@ export default function KaamSetuApp() {
           return next;
         });
 
-        showToast(t.allSettledToast);
+        showToast(t.allSettledToast, "success", "Batch UPI Settlement Executed");
       };
 
       const handleExportPayoutCSV = () => {
@@ -846,13 +887,8 @@ export default function KaamSetuApp() {
 
       return (
         <div className="flex flex-col min-h-screen">
-          {/* TOAST ALERT */}
-          {toastMessage && (
-            <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700 dark:border-amber-500 font-medium text-sm animate-bounce">
-              <span>🔔</span>
-              <span>{toastMessage}</span>
-            </div>
-          )}
+          {/* TOASTER NOTIFICATIONS */}
+          <Toaster toasts={toasts} onDismiss={dismissToast} />
 
           {/* HEADER / NAVIGATION */}
           <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs transition-colors">
@@ -1861,76 +1897,128 @@ export default function KaamSetuApp() {
                 </div>
               </div>
 
-              {/* STAT CARDS ROW */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 my-6">
-                <div className="bg-white dark:bg-[#1a2c36] p-5 rounded-2xl border border-slate-200 dark:border-[#293d49] shadow-sm">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.statWorkers}</span>
-                  <div className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white mt-1">
+              {/* EXECUTIVE BESPOKE STATS COMMAND STRIP */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-6">
+                {/* 1. Craftsmen Roster */}
+                <div className="bg-white p-5 rounded-3xl border border-amber-200/80 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-100/60 to-transparent rounded-bl-full pointer-events-none"></div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Verified Network
+                    </span>
+                    <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-sm">
+                      👷
+                    </span>
+                  </div>
+                  <div className="font-display font-black text-3xl sm:text-4xl text-slate-900 mt-2">
                     {adminStats.totalW}
                   </div>
-                  <span className="text-[11px] text-emerald-500 font-medium">● 100% Active in Aurangabad</span>
-                </div>
-
-                <div className="bg-white dark:bg-[#1a2c36] p-5 rounded-2xl border border-slate-200 dark:border-[#293d49] shadow-sm">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.statPending}</span>
-                  <div className="font-display font-extrabold text-2xl sm:text-3xl text-amber-500 mt-1">
-                    {adminStats.pendingW}
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>{workers.filter(w => w.verified).length} Approved • {adminStats.pendingW} Pending Review</span>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-medium">Awaiting Aadhaar / Police check</span>
                 </div>
 
-                <div className="bg-white dark:bg-[#1a2c36] p-5 rounded-2xl border border-slate-200 dark:border-[#293d49] shadow-sm">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.statBookings}</span>
-                  <div className="font-display font-extrabold text-2xl sm:text-3xl text-blue-500 mt-1">
-                    {adminStats.totalB}
+                {/* 2. Direct Service Volume */}
+                <div className="bg-white p-5 rounded-3xl border border-amber-200/80 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100/50 to-transparent rounded-bl-full pointer-events-none"></div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Gross Service Value
+                    </span>
+                    <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-sm">
+                      ₹
+                    </span>
                   </div>
-                  <span className="text-[11px] text-blue-400 font-medium">Customer requests served</span>
-                </div>
-
-                <div className="bg-white dark:bg-[#1a2c36] p-5 rounded-2xl border border-slate-200 dark:border-[#293d49] shadow-sm">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.statGMV}</span>
-                  <div className="font-display font-extrabold text-2xl sm:text-3xl text-emerald-500 mt-1">
+                  <div className="font-display font-black text-3xl sm:text-4xl text-slate-900 mt-2">
                     ₹{adminStats.totalGMV.toLocaleString()}
                   </div>
-                  <span className="text-[11px] text-emerald-500 font-medium">Direct Worker Earnings</span>
+                  <div className="mt-2 text-xs text-amber-800 font-semibold flex items-center gap-1">
+                    <span>100% Passed to Verified Pros</span>
+                  </div>
+                </div>
+
+                {/* 3. Disbursed Earnings */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Settled Payouts
+                    </span>
+                    <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 font-bold flex items-center justify-center text-sm">
+                      ✓
+                    </span>
+                  </div>
+                  <div className="font-display font-black text-3xl sm:text-4xl text-slate-900 mt-2">
+                    ₹{ledgerTotals.totalSettled.toLocaleString()}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500 font-medium">
+                    Instant UPI & IMPS transfers
+                  </div>
+                </div>
+
+                {/* 4. Pending Settlements */}
+                <div className="bg-gradient-to-br from-amber-50/80 via-white to-white p-5 rounded-3xl border-2 border-amber-300 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-950 uppercase tracking-wider">
+                      Pending Payouts
+                    </span>
+                    <span className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 font-bold flex items-center justify-center text-sm shadow-xs">
+                      ⚡
+                    </span>
+                  </div>
+                  <div className="font-display font-black text-3xl sm:text-4xl text-amber-950 mt-2">
+                    ₹{ledgerTotals.totalPending.toLocaleString()}
+                  </div>
+                  <div className="mt-2">
+                    {ledgerTotals.totalPending > 0 ? (
+                      <button
+                        onClick={handleDisburseAllPending}
+                        className="w-full mt-1 py-1.5 px-3 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5"
+                      >
+                        ⚡ 1-Click UPI Disburse All
+                      </button>
+                    ) : (
+                      <span className="text-xs text-emerald-700 font-semibold">● All worker accounts settled</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* ADMIN SUB-NAV */}
-              <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 mb-6">
+              {/* MINIMALIST BESPOKE DASHBOARD NAVIGATION */}
+              <div className="flex items-center gap-2 border-b border-amber-200/60 pb-3 mb-6 overflow-x-auto custom-scrollbar">
                 <button
                   onClick={() => setAdminSubTab("workers")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                     adminSubTab === "workers"
-                      ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  👷 {t.tabWorkersKYC} ({workers.length})
+                  👷 Craftsmen Roster ({workers.length})
                 </button>
 
                 <button
                   onClick={() => setAdminSubTab("bookings")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                     adminSubTab === "bookings"
-                      ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  📋 {t.tabMasterBookings} ({bookings.length})
+                  📋 Dispatch Board ({bookings.length})
                 </button>
 
                 <button
                   onClick={() => setAdminSubTab("payouts")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     adminSubTab === "payouts"
-                      ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  <span>💰</span> {t.tabPayouts}
+                  <span>💰</span> UPI Earnings Ledger
                   {ledgerTotals.totalPending > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-extrabold animate-pulse">
+                    <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-extrabold shadow-xs animate-pulse">
                       ₹{ledgerTotals.totalPending.toLocaleString()}
                     </span>
                   )}
@@ -1938,13 +2026,13 @@ export default function KaamSetuApp() {
 
                 <button
                   onClick={() => setAdminSubTab("analytics")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                     adminSubTab === "analytics"
-                      ? "bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 border border-slate-200"
                   }`}
                 >
-                  📈 {t.tabAnalytics}
+                  📈 Platform Intelligence
                 </button>
               </div>
 
@@ -2251,18 +2339,23 @@ export default function KaamSetuApp() {
                     <div className="bg-white dark:bg-[#1a2c36] p-4 rounded-2xl border border-slate-200 dark:border-[#293d49] shadow-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                          {t.statCommFee}
+                          {t.statCommFee} ({commissionRate}%)
                         </span>
-                        <select
-                          value={commissionRate}
-                          onChange={(e) => setCommissionRate(Number(e.target.value))}
-                          className="bg-slate-100 dark:bg-slate-800 text-[10px] font-bold rounded-lg px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 focus:outline-none"
-                        >
-                          <option value="0">0% (Promo)</option>
-                          <option value="5">5% (Std)</option>
-                          <option value="8">8%</option>
-                          <option value="10">10%</option>
-                        </select>
+                        <div className="flex gap-1">
+                          {[0, 5, 8, 10].map((rate) => (
+                            <button
+                              key={rate}
+                              onClick={() => setCommissionRate(rate)}
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                                commissionRate === rate
+                                  ? "bg-amber-400 text-slate-950 shadow-xs"
+                                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              }`}
+                            >
+                              {rate}%
+                            </button>
+                          ))}
+                        </div>
                       </div>
                       <div className="font-display font-extrabold text-xl sm:text-2xl text-blue-500 mt-1">
                         ₹{ledgerTotals.totalCommission.toLocaleString()}
@@ -3197,8 +3290,8 @@ export default function KaamSetuApp() {
                         alt="UPI QR Code"
                         className="w-40 h-40 mx-auto block"
                         onError={(e) => {
-                          e.target.style.display = 'none';
-                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          (e.currentTarget as any).style.display = 'none';
+                          if (((e.currentTarget as any).nextSibling as any)) ((e.currentTarget as any).nextSibling as any).style.display = 'flex';
                         }}
                       />
                       <div style={{ display: 'none' }} className="w-40 h-40 items-center justify-center bg-slate-100 rounded-xl text-center text-xs p-2">

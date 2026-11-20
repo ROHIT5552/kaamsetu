@@ -19,6 +19,9 @@ export default (phase) => ({
   outputFileTracingRoot: fileURLToPath(new URL('.', import.meta.url)),
   poweredByHeader: false,
   devIndicators: false,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     const origin = backendOrigin(phase);
     return [

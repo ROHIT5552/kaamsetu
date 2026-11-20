@@ -1493,37 +1493,6 @@ export default function SwabhimanApp() {
                         </h2>
                       </div>
 
-                      {/* 4-Pillar Universal Work Visual Grid (Authentic Indian Workplace Photography) */}
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {Object.entries(visualCatalog.hero || HERO_VISUAL_ASSETS).map(([key, item]: [string, any]) => (
-                          <div
-                            key={key}
-                            onClick={() => {
-                              if (key === "skilled") setSelectedSkill("electrician");
-                              else if (key === "agriculture") setSelectedSkill("helper");
-                              else if (key === "localServices") setSelectedSkill("carpenter");
-                              const el = document.getElementById("verified-pros");
-                              if (el) el.scrollIntoView({ behavior: "smooth" });
-                            }}
-                            className="group relative rounded-[18px] overflow-hidden border border-[#E8E2D6] dark:border-[#24304A] bg-slate-900 cursor-pointer shadow-2xs hover:shadow-md transition-all h-[110px] sm:h-[125px]"
-                          >
-                            <SafeImage
-                              src={item.image}
-                              alt={item.alt}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-2.5 sm:p-3 text-white">
-                              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#F2A900] line-clamp-1">
-                                {lang === "en" ? item.labelEn : item.labelMr}
-                              </span>
-                              <span className="text-[11px] font-bold leading-tight line-clamp-1 text-white">
-                                {lang === "en" ? item.subEn : item.subMr}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
 
                       {/* 3 Trust Cards with Stroke Icons */}
                       <div className="space-y-3">
@@ -1605,7 +1574,7 @@ export default function SwabhimanApp() {
                     </button>
 
                     {/* Dynamic Category Tiles rendered from SKILLS config */}
-                    {Object.entries(SKILLS).map(([key, item]: [string, any]) => {
+                    {Object.entries(SKILLS).slice(0, 5).map(([key, item]: [string, any]) => {
                       const isSelected = selectedSkill === key;
                       return (
                         <button
@@ -1675,6 +1644,38 @@ export default function SwabhimanApp() {
                   </div>
 
                   {/* 10 Categories Grid */}
+                  {/* 4-Pillar Visual Direction Showcase (Skilled Trades, Agriculture, Professional, Local Services) */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+                    {Object.entries(visualCatalog.hero || HERO_VISUAL_ASSETS).map(([key, item]: [string, any]) => (
+                      <div
+                        key={key}
+                        onClick={() => {
+                          if (key === "skilled") setSelectedSkill("electrician");
+                          else if (key === "agriculture") setSelectedSkill("helper");
+                          else if (key === "localServices") setSelectedSkill("carpenter");
+                          const el = document.getElementById("verified-pros");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className="group relative rounded-[20px] overflow-hidden border border-[#E8E2D6] dark:border-[#24304A] bg-slate-900 cursor-pointer shadow-2xs hover:shadow-md transition-all h-[130px] sm:h-[150px]"
+                      >
+                        <SafeImage
+                          src={item.image}
+                          alt={item.alt}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-95"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 text-white">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#F2A900] line-clamp-1">
+                            {lang === "en" ? item.labelEn : item.labelMr}
+                          </span>
+                          <span className="text-xs sm:text-sm font-bold leading-tight line-clamp-1 text-white">
+                            {lang === "en" ? item.subEn : item.subMr}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     {visualCatalog.categories.filter((c: any) => c.visible !== false).map((cat: any) => (
                       <div
@@ -2498,7 +2499,7 @@ export default function SwabhimanApp() {
                           name="wSkill"
                           className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-400"
                         >
-                          {Object.entries(SKILLS).map(([k, s]) => (
+                          {Object.entries(SKILLS).slice(0, 5).map(([k, s]) => (
                             <option key={k} value={k}>{s.en} ({s.mr})</option>
                           ))}
                         </select>
@@ -3055,7 +3056,7 @@ export default function SwabhimanApp() {
                       Top Services Breakdown
                     </h3>
                     <div className="space-y-3">
-                      {Object.entries(SKILLS).map(([k, s]) => {
+                      {Object.entries(SKILLS).slice(0, 5).map(([k, s]) => {
                         const count = workers.filter(w => w.skill === k).length;
                         const pct = Math.round((count / (workers.length || 1)) * 100);
                         return (
@@ -4682,7 +4683,7 @@ export default function SwabhimanApp() {
                       {t.stepSelectTrade}
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                      {Object.entries(SKILLS).map(([k, s]) => (
+                      {Object.entries(SKILLS).slice(0, 5).map(([k, s]) => (
                         <button
                           key={k}
                           onClick={() => {
@@ -5077,7 +5078,7 @@ export default function SwabhimanApp() {
                     {lang === 'mr' ? 'कुशल कामे' : 'Types of Work'}
                   </h4>
                   <ul className="space-y-2 text-slate-400 text-xs">
-                    {Object.entries(SKILLS).map(([key, item]: [string, any]) => (
+                    {Object.entries(SKILLS).slice(0, 5).map(([key, item]: [string, any]) => (
                       <li key={key}>
                         <button
                           onClick={() => { setSelectedSkill(key); setActiveTab('find'); window.scrollTo({ top: 400, behavior: 'smooth' }); }}

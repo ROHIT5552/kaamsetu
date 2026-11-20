@@ -5,8 +5,9 @@
     "scripts": {
         "dev": "next dev --webpack --hostname 127.0.0.1",
         "build": "next build --webpack",
-        "start": "next start --hostname 127.0.0.1",
+        "start": "next start --hostname 0.0.0.0",
         "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
+        "db:migrate:hosted": "node scripts/migrate.mjs",
         "db:seed": "node --env-file=.env.local scripts/seed.mjs",
         "test:smoke": "node --env-file=.env.local scripts/smoke.mjs",
         "test:verification": "node --env-file=.env.local scripts/verification-smoke.mjs",

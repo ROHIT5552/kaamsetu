@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 const maxListingBody = maxPhotoLength + 20 * 1024;
 const hash = value => createHash('sha256').update(value).digest('hex');
-const demo = () => process.env.DEMO_MODE==='true' && /^http:\/\/localhost:\d+$/.test(process.env.APP_ORIGIN||'');
+const demo = () => process.env.DEMO_MODE==='true';
 const reply = (data,status=200) => Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
 const one = async (db,sql,params=[]) => (await db.query(sql,params)).rows[0];
 const rows = async (db,sql,params=[]) => (await db.query(sql,params)).rows;

@@ -27,7 +27,7 @@ export function generateUpiUrl(params: {
   am: number;
   tn?: string;
 }): string {
-  const note = encodeURIComponent(params.tn || 'KaamSetu Service Fee');
+  const note = encodeURIComponent(params.tn || 'SWABHIMAN Service Fee');
   const payee = encodeURIComponent(params.pn);
   return `upi://pay?pa=${params.pa}&pn=${payee}&am=${params.am}&tn=${note}&cu=INR`;
 }

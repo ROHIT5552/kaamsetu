@@ -1,22 +1,19 @@
-const CACHE_NAME = 'kaamsetu-v1';
+const CACHE_NAME = 'swabhiman-v2';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon.svg',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/react@18/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone/babel.min.js'
+  '/',
+  '/manifest.json',
+  '/swabhiman-logo.png',
+  '/favicon.png',
+  '/icons/icon.png'
 ];
 
 // Install Event - Pre-cache core app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[KaamSetu SW] Pre-caching offline assets');
+      console.log('[SWABHIMAN SW] Pre-caching offline assets');
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        console.warn('[KaamSetu SW] Pre-cache non-fatal error:', err);
+        console.warn('[SWABHIMAN SW] Pre-cache non-fatal error:', err);
       });
     })
   );
@@ -30,7 +27,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[KaamSetu SW] Removing old cache:', key);
+            console.log('[SWABHIMAN SW] Removing old cache:', key);
             return caches.delete(key);
           }
         })

@@ -1,4 +1,4 @@
-import { INITIAL_BOOKINGS } from '../../../lib/kaamsetu-data';
+import { INITIAL_BOOKINGS } from '../../../lib/swabhiman-data';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

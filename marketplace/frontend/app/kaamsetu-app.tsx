@@ -8,7 +8,7 @@ import {
   INITIAL_WORKERS,
   I18N,
   INITIAL_BOOKINGS,
-} from "../lib/kaamsetu-data";
+} from "../lib/swabhiman-data";
 import Toaster from "../components/Toaster";
 import { ToastNotification, ToastType, WorkerProfile, BookingRecord, LedgerItem } from "../utils";
 
@@ -206,7 +206,7 @@ function LiveTrackingModal({ booking, onClose, onOpenReview, onOpenPayment, t, l
       );
     }
 
-export default function KaamSetuApp() {
+export default function SwabhimanApp() {
       // Preferences
       const [lang, setLang] = useState("en");
       const t = I18N[lang] || I18N.en;
@@ -898,19 +898,21 @@ export default function KaamSetuApp() {
                 {/* Brand Logo */}
                 <div 
                   onClick={() => setActiveTab("find")}
-                  className="flex items-center gap-2 cursor-pointer select-none group"
+                  className="flex items-center gap-2.5 cursor-pointer select-none group py-1"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition-transform">
-                    ⚡
-                  </div>
-                  <div>
-                    <span className="font-display font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white">
-                      {t.brand}<span className="text-amber-500">{t.brandHighlight}</span>
+                  <img
+                    src="/swabhiman-logo.png"
+                    alt="SWABHIMAN"
+                    className="h-8 sm:h-10 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
+                  />
+                  {lang === "mr" && (
+                    <span className="font-display font-bold text-base sm:text-lg text-amber-600 dark:text-amber-400 hidden xs:inline-block">
+                      (स्वाभिमान)
                     </span>
-                    <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-                      Verified Pros
-                    </span>
-                  </div>
+                  )}
+                  <span className="hidden xl:inline-block ml-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/50">
+                    {lang === 'mr' ? 'विश्वासू कारागीर' : 'Verified Pros'}
+                  </span>
                 </div>
 
                 {/* Nav Tabs */}
@@ -1458,6 +1460,127 @@ export default function KaamSetuApp() {
                     })}
                   </div>
                 )}
+
+                {/* --- SECTION: HOW HIRING ON SWABHIMAN WORKS (AMAZON / NOBROKER GRADE) --- */}
+                <section aria-label="How Hiring Works" className="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
+                  <div className="text-center max-w-3xl mx-auto mb-10">
+                    <span className="px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
+                      {lang === 'mr' ? 'सोपी व पारदर्शक पद्धत' : 'Simple & Transparent Process'}
+                    </span>
+                    <h2 className="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3">
+                      {t.howItWorksTitle}
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-2">
+                      {t.howItWorksSubtitle}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Step 1 */}
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-700 dark:text-amber-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-amber-300/50">
+                        01
+                      </div>
+                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                        {t.step1Title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {t.step1Desc}
+                      </p>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-400/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-emerald-300/50">
+                        02
+                      </div>
+                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                        {t.step2Title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {t.step2Desc}
+                      </p>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative group">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-400/20 text-blue-700 dark:text-blue-300 flex items-center justify-center font-display font-black text-xl mb-4 border border-blue-300/50">
+                        03
+                      </div>
+                      <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">
+                        {t.step3Title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {t.step3Desc}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* --- SECTION: WHY CHHATRAPATI SAMBHAJINAGAR TRUSTS SWABHIMAN --- */}
+                <section aria-label="Why Choose Swabhiman" className="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
+                  <div className="text-center max-w-3xl mx-auto mb-10">
+                    <span className="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                      {lang === 'mr' ? 'विश्वास व सुरक्षितता' : 'Trust & Safety Standards'}
+                    </span>
+                    <h2 className="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3">
+                      {t.whySwabhimanTitle}
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
+                      <div className="text-3xl mb-3">🛡️</div>
+                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why1Title}</h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why1Desc}</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
+                      <div className="text-3xl mb-3">💰</div>
+                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why2Title}</h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why2Desc}</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
+                      <div className="text-3xl mb-3">⚡</div>
+                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why3Title}</h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why3Desc}</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1a2c36] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-amber-400 transition-all">
+                      <div className="text-3xl mb-3">🧾</div>
+                      <h4 className="font-display font-bold text-base text-slate-900 dark:text-white">{t.why4Title}</h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{t.why4Desc}</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* --- SECTION: LOCALITY COVERAGE PILLS --- */}
+                <section aria-label="City Coverage" className="mt-14 p-6 sm:p-8 bg-amber-50/70 dark:bg-amber-950/20 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 text-center">
+                  <h3 className="font-display font-bold text-lg text-amber-950 dark:text-amber-200 mb-2">
+                    📍 {lang === 'mr' ? 'छत्रपती संभाजीनगरमधील सेवा क्षेत्र' : 'Covered Localities Across Chhatrapati Sambhajinagar'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-4">
+                    {lang === 'mr'
+                      ? 'सिडको, गारखेडा, उस्मानपुरा, बीड बायपास आणि वाळूजसह शहरातील सर्व भागांत कुशल कारागीर उपलब्ध.'
+                      : 'Verified local technicians dispatched across CIDCO, Cannaught, Garkheda, Osmanpura, Beed Bypass, Samarth Nagar, and Waluj.'}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {LOCALITIES.map((loc) => (
+                      <button
+                        key={loc}
+                        onClick={() => setSelectedArea(loc)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                          selectedArea === loc
+                            ? 'bg-amber-500 text-slate-950 shadow-md scale-105'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-amber-200 dark:border-slate-700 hover:border-amber-400'
+                        }`}
+                      >
+                        📍 {loc}
+                      </button>
+                    ))}
+                  </div>
+                </section>
 
               </div>
             </main>
@@ -3330,11 +3453,11 @@ export default function KaamSetuApp() {
                   <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3 bg-white dark:bg-[#1a2c36]">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div>
-                        <div className="font-display font-extrabold text-base text-slate-900 dark:text-white">
-                          Kaam<span className="text-amber-500">Setu</span> Digital Tax Invoice
+                        <div className="font-display font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-1.5">
+                          SWABHI<span className="text-amber-500">MAN</span> Digital Tax Invoice
                         </div>
                         <div className="text-[10px] text-slate-400">
-                          {t.invoiceNumber}: #KS-INV-2026-{paymentBooking.id}
+                          {t.invoiceNumber}: #SW-INV-2026-{paymentBooking.id}
                         </div>
                       </div>
                       <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
@@ -3873,27 +3996,124 @@ export default function KaamSetuApp() {
             </div>
           )}
 
-          {/* FOOTER */}
-          <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="font-display font-extrabold text-xl text-white">
-                  Kaam<span className="text-amber-400">Setu</span>
-                </span>
-                <span>•</span>
-                <span>Bridging Skilled Hands with Everyday Needs</span>
+          {/* PREMIER MULTI-COLUMN ENTERPRISE FOOTER */}
+          <footer className="bg-slate-950 text-slate-400 text-xs pt-16 pb-12 border-t border-slate-800/80 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800/60">
+                {/* Col 1: Brand & Mission */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="/swabhiman-logo.png"
+                      alt="SWABHIMAN"
+                      className="h-9 w-auto object-contain brightness-0 invert opacity-95"
+                    />
+                  </div>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    Chhatrapati Sambhajinagar's dedicated peer-to-peer network connecting households with certified local craftsmen. Upfront rates, zero middleman commission.
+                  </p>
+                  <div className="pt-1 space-y-1.5 text-[11px] text-slate-300">
+                    <div className="flex items-center gap-2 font-medium">
+                      <span className="text-emerald-400">●</span> 24/7 Worker Helpline: <strong>+91 98220 11223</strong>
+                    </div>
+                    <div className="text-slate-500">
+                      📍 Cidco N-3 Support Desk, Chhatrapati Sambhajinagar, MH 431003
+                    </div>
+                  </div>
+                </div>
+
+                {/* Col 2: Verified Trades */}
+                <div>
+                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
+                    {lang === 'mr' ? 'कुशल कामे' : 'Verified Trades'}
+                  </h4>
+                  <ul className="space-y-2 text-slate-400 text-xs">
+                    {Object.entries(SKILLS).map(([key, item]) => (
+                      <li key={key}>
+                        <button
+                          onClick={() => { setSelectedSkill(key); setActiveTab('find'); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                          className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                        >
+                          <span>{item.icon}</span>
+                          <span>{lang === 'mr' ? item.mr : item.en}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Col 3: Localities */}
+                <div>
+                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
+                    {lang === 'mr' ? 'सेवा क्षेत्र' : 'Service Areas'}
+                  </h4>
+                  <ul className="grid grid-cols-2 gap-x-2 gap-y-2 text-slate-400 text-xs">
+                    {LOCALITIES.slice(0, 8).map((loc) => (
+                      <li key={loc}>
+                        <button
+                          onClick={() => { setSelectedArea(loc); setActiveTab('find'); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                          className="hover:text-amber-400 transition-colors truncate text-left"
+                        >
+                          • {loc}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Col 4: Trust, Security & Compliance */}
+                <div className="space-y-3">
+                  <h4 className="font-display font-bold text-sm text-white mb-3 tracking-wide uppercase text-amber-400">
+                    {lang === 'mr' ? 'सुरक्षितता व नियम' : 'Trust & Compliance'}
+                  </h4>
+                  <div className="space-y-2 text-xs text-slate-400">
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-400 mt-0.5">✓</span>
+                      <span>100% Police & Identity Background Checks</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-400 mt-0.5">✓</span>
+                      <span>Zero Commission - 100% Direct P2P Settlement</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-400 mt-0.5">✓</span>
+                      <span>Statutory GST Exempt Under Local Threshold</span>
+                    </div>
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      onClick={handleTriggerInstall}
+                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs flex items-center gap-1.5 border border-slate-700"
+                    >
+                      <span>📲</span> Install SWABHIMAN App
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setActiveTab("admin")}
-                  className="text-amber-400 hover:underline font-semibold flex items-center gap-1"
-                >
-                  🛡️ {t.navAdmin}
-                </button>
-                <span>•</span>
-                <span>© 2026 SWABHIMAN Technologies</span>
-                <span>•</span>
-                <span>Aurangabad, MH</span>
+
+              {/* Bottom Copyright & Ledger Link */}
+              <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <div className="flex items-center gap-3">
+                  <span>© 2026 SWABHIMAN Technologies Pvt Ltd. All rights reserved.</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span className="hidden sm:inline">Chhatrapati Sambhajinagar, Maharashtra</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setActiveTab("admin")}
+                    className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1.5 transition-colors"
+                  >
+                    🛡️ {t.navAdmin}
+                  </button>
+                  <span>•</span>
+                  <a href="/sitemap.xml" className="hover:text-slate-300 transition-colors">
+                    Sitemap
+                  </a>
+                  <span>•</span>
+                  <a href="/robots.txt" className="hover:text-slate-300 transition-colors">
+                    Robots
+                  </a>
+                </div>
               </div>
             </div>
           </footer>

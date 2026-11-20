@@ -51,19 +51,19 @@ export const metadata = {
     siteName: 'SWABHIMAN',
     images: [
       {
-        url: '/icons/icon.svg',
-        width: 512,
-        height: 512,
+        url: '/swabhiman-logo.png',
+        width: 1200,
+        height: 400,
         alt: 'SWABHIMAN Logo - Verified Local Tradespeople',
       },
     ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'SWABHIMAN (स्वाभिमान) – Local Skilled Workers on Demand',
     description:
       'Verified plumbers, electricians, carpenters, and helpers in Chhatrapati Sambhajinagar. Direct contact, zero commissions.',
-    images: ['/icons/icon.svg'],
+    images: ['/swabhiman-logo.png'],
   },
   robots: {
     index: true,
@@ -78,9 +78,13 @@ export const metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/icons/icon.svg',
-    shortcut: '/icons/icon.svg',
-    apple: '/icons/icon.svg',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/icons/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
@@ -92,7 +96,7 @@ const jsonLd = {
       '@id': `${siteUrl}/#organization`,
       name: 'SWABHIMAN (स्वाभिमान)',
       url: siteUrl,
-      logo: `${siteUrl}/icons/icon.svg`,
+      logo: `${siteUrl}/swabhiman-logo.png`,
       description:
         'Hyper-local marketplace connecting households with verified local tradespeople in Chhatrapati Sambhajinagar.',
       address: {
@@ -135,10 +139,18 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link
           href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#f59e0b" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="SWABHIMAN" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -33,7 +33,7 @@ export default function NotFound() {
         </div>
 
         <p className="text-[11px] text-slate-400">
-          KaamSetu Chhatrapati Sambhajinagar
+          SWABHIMAN Chhatrapati Sambhajinagar
         </p>
       </div>
     </div>

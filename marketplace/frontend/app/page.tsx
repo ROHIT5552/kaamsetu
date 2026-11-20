@@ -1,5 +1,5 @@
-import KaamSetuApp from './kaamsetu-app';
+import SwabhimanApp from './swabhiman-app';
 
 export default function Page() {
-  return <KaamSetuApp />;
+  return <SwabhimanApp />;
 }

@@ -1,6 +1,6 @@
 import { openDatabase } from './connection.mjs';
 export function pool() {
-  return globalThis.kaamsetuPool ??= openDatabase();
+  return globalThis.swabhimanPool ??= openDatabase();
 }
 export async function transaction(action) {
   const db = await pool().connect();

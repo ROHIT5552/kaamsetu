@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 export default function ErrorBoundary({ error, reset }) {
   useEffect(() => {
-    console.error('KaamSetu Application Error:', error);
+    console.error('SWABHIMAN Application Error:', error);
   }, [error]);
 
   return (
@@ -45,7 +45,7 @@ export default function ErrorBoundary({ error, reset }) {
         </div>
 
         <p className="text-[11px] text-slate-400">
-          KaamSetu Chhatrapati Sambhajinagar • Error Boundary Active
+          SWABHIMAN Chhatrapati Sambhajinagar • Error Boundary Active
         </p>
       </div>
     </div>

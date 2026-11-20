@@ -76,7 +76,7 @@ Deploy the backend first and use its HTTPS origin when configuring the frontend.
 - Vercel: set SWABHIMAN_API_ORIGIN to the backend HTTPS origin, such as https://swabhiman.onrender.com, and redeploy. The build reads this setting to create same-origin rewrites. Set it in each deployment environment you intend to use. Do not copy DATABASE_URL or verification secrets to the frontend.
 - If the frontend uses a preview URL, use a test backend with APP_ORIGIN matching that preview and a test database. Each backend accepts writes from one configured frontend origin.
 - Verify /api/health on both URLs, then sign in using the Vercel domain to verify origin checks and session cookies. Provider callbacks go directly to the Render backend at /api/verification/provider.
-- To migrate existing deployments, update Render's Root Directory and commands first. Verify its health, then update Vercel's Root Directory and redeploy the frontend. The legacy repository-level Vercel and Render configurations are for the older KaamSetu stack.
+- To migrate existing deployments, update Render's Root Directory and commands first. Verify its health, then update Vercel's Root Directory and redeploy the frontend. The legacy repository-level Vercel and Render configurations are for the older SWABHIMAN stack.
 
 ## Production boundaries
 

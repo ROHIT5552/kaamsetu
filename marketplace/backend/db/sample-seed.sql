@@ -1,5 +1,5 @@
 -- =========================================================================
--- SWABHIMAN / KAAMSETU - PRODUCTION-READY DUMMY DATA FOR NEON SQL EDITOR
+-- SWABHIMAN - PRODUCTION-READY DUMMY DATA FOR NEON SQL EDITOR
 -- Paste and Run directly in the Neon Console (SQL Editor)
 -- =========================================================================
 

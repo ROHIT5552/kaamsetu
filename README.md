@@ -1,6 +1,6 @@
-# KaamSetu (कामसेतू) – Hyper-Local Work Marketplace & Admin Ops
+# SWABHIMAN (स्वाभिमान) – Hyper-Local Work Marketplace & Admin Ops
 
-KaamSetu is an on-demand hyper-local marketplace platform connecting households and businesses with verified skilled workers (plumbers, electricians, carpenters, painters, masons, and general helpers) across **Chhatrapati Sambhajinagar (Aurangabad)**.
+SWABHIMAN is an on-demand hyper-local marketplace platform connecting households and businesses with verified skilled workers (plumbers, electricians, carpenters, painters, masons, and general helpers) across **Chhatrapati Sambhajinagar (Aurangabad)**.
 
 Built with a modern, high-contrast **White & Yellow theme** (`#ffc21a`, `#f59e0b`, `#ffffff`, `#fffdf5`), full bilingual localization in **Marathi (मराठी)** and **English**, vernacular voice synthesis, cost estimation wizard, UPI QR tax invoices, live route simulation, and a full admin operations ledger.
 
@@ -16,7 +16,7 @@ kaamsetu/
 │   ├── frontend/               # Next.js App Router UI (Vercel deployment root)
 │   │   ├── app/
 │   │   │   ├── layout.js       # App shell, PWA metadata & Google Fonts
-│   │   │   ├── page.js         # Entry page rendering KaamSetuApp
+│   │   │   ├── page.js         # Entry page rendering SWABHIMANApp
 │   │   │   ├── kaamsetu-app.js # Transformed full Next.js interactive marketplace
 │   │   │   └── style.css       # Tailwind CSS & print styles
 │   │   ├── lib/
@@ -139,7 +139,7 @@ npx serve marketplace/frontend/public
 ## 🎨 Theme: Modern White & Sunny Yellow
 
 The platform uses a warm, high-contrast white and yellow theme:
-- **Primary Brand Yellow**: `#ffc21a` (KaamSetu Yellow)
+- **Primary Brand Yellow**: `#ffc21a` (SWABHIMAN Yellow)
 - **Warm Ambers & Accents**: `#f59e0b`, `#fbbf24`, `#d97706`
 - **Backgrounds**: Pure Crisp White (`#ffffff`), Warm Ivory (`#fffdf5`), Cream (`#fffbeb`, `#fef3c7`)
 - **Text**: High contrast Slate (`#0f172a`, `#1e293b`, `#334155`)

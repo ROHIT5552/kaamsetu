@@ -1,4 +1,4 @@
-import { INITIAL_WORKERS } from '../../../lib/kaamsetu-data';
+import { INITIAL_WORKERS } from '../../../lib/swabhiman-data';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

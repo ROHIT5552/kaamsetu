@@ -8,7 +8,7 @@ export default function GlobalError({ error, reset }) {
           <div className="text-4xl">⚡</div>
           <h1 className="text-2xl font-bold text-slate-900">System Recovery</h1>
           <p className="text-sm text-slate-600">
-            A critical interface error was intercepted by the KaamSetu global safety boundary.
+            A critical interface error was intercepted by the SWABHIMAN global safety boundary.
           </p>
           <button
             onClick={() => reset()}

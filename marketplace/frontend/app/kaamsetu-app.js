@@ -176,6 +176,7 @@ function LiveTrackingModal({ booking, onClose, onOpenReview, onOpenPayment, t, l
 export default function KaamSetuApp() {
       // Preferences
       const [lang, setLang] = useState("en");
+      const t = I18N[lang] || I18N.en;
       const [darkMode, setDarkMode] = useState(false);
       const [mounted, setMounted] = useState(false);
 
@@ -185,6 +186,30 @@ export default function KaamSetuApp() {
       // App Data State
       const [workers, setWorkers] = useState(INITIAL_WORKERS);
       const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
+
+      // Payout Ledger State
+      const [commissionRate, setCommissionRate] = useState(5);
+      const [payouts, setPayouts] = useState({
+        101: {
+          settledAmt: 4200,
+          lastPayoutDate: "28/10/2026",
+          lastTxRef: "UPI-SETTLE-88124",
+          history: [
+            { date: "28/10/2026", amount: 4200, txRef: "UPI-SETTLE-88124", mode: "Instant UPI Transfer" }
+          ]
+        },
+        102: {
+          settledAmt: 2450,
+          lastPayoutDate: "27/10/2026",
+          lastTxRef: "IMPS-PAY-44319",
+          history: [
+            { date: "27/10/2026", amount: 2450, txRef: "IMPS-PAY-44319", mode: "IMPS Bank Transfer" }
+          ]
+        }
+      });
+      const [payoutSearch, setPayoutSearch] = useState("");
+      const [payoutFilter, setPayoutFilter] = useState("all");
+      const [selectedLedgerWorker, setSelectedLedgerWorker] = useState(null);
 
       // Filter States
       const [selectedSkill, setSelectedSkill] = useState("all");
@@ -404,8 +429,7 @@ export default function KaamSetuApp() {
         return `https://wa.me/91${w.phone}?text=${encodeURIComponent(text)}`;
       };
 
-      // Translations helper
-      const t = I18N[lang];
+      // Translations helper (initialized at top of component)
 
       // Hydration & Storage Sync (SSR Safe)
       useEffect(() => {
@@ -637,34 +661,7 @@ export default function KaamSetuApp() {
         return { totalW, pendingW, totalB, totalGMV };
       }, [workers, bookings]);
 
-      // --- WORKER EARNINGS & PAYOUT LEDGER STATE & CALCULATIONS ---
-      const [commissionRate, setCommissionRate] = useState(5); // 5% default platform commission
-      const [payouts, setPayouts] = useState({
-        101: {
-          settledAmt: 4200,
-          lastPayoutDate: "28/10/2026",
-          lastTxRef: "UPI-SETTLE-88124",
-          history: [
-            { date: "28/10/2026", amount: 4200, txRef: "UPI-SETTLE-88124", mode: "Instant UPI Transfer" }
-          ]
-        },
-        102: {
-          settledAmt: 2450,
-          lastPayoutDate: "27/10/2026",
-          lastTxRef: "IMPS-PAY-44319",
-          history: [
-            { date: "27/10/2026", amount: 2450, txRef: "IMPS-PAY-44319", mode: "IMPS Bank Transfer" }
-          ]
-        }
-      });
-      const [payoutSearch, setPayoutSearch] = useState("");
-      const [payoutFilter, setPayoutFilter] = useState("all"); // 'all' | 'pending' | 'settled'
-      const [selectedLedgerWorker, setSelectedLedgerWorker] = useState(null);
-
-      // Sync payouts to storage
-      useEffect(() => {
-        localStorage.setItem("ks_payouts_ledger", JSON.stringify(payouts));
-      }, [payouts]);
+// Payout calculations continue below
 
       // Dynamic Ledger Calculation for each worker
       const workerLedgerData = useMemo(() => {

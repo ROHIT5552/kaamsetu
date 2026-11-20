@@ -215,6 +215,7 @@ export default function SwabhimanApp() {
 
       // Navigation View: 'find' | 'emergency' | 'bookings' | 'join' | 'admin'
       const [activeTab, setActiveTab] = useState("find");
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
       // App Data State
       const [workers, setWorkers] = useState<any[]>(INITIAL_WORKERS as any[]);
@@ -890,70 +891,77 @@ export default function SwabhimanApp() {
           {/* TOASTER NOTIFICATIONS */}
           <Toaster toasts={toasts} onDismiss={dismissToast} />
 
-          {/* HEADER / NAVIGATION */}
-          <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs transition-colors">
+          {/* HEADER / NAVIGATION (PREMIER REDESIGNED NAVBAR) */}
+          <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-[0_4px_24px_rgb(0,0,0,0.03)] transition-all">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between h-16 gap-4">
+              <div className="flex items-center justify-between h-18 sm:h-20 gap-4">
                 
-                {/* Brand Logo */}
-                <div 
-                  onClick={() => setActiveTab("find")}
-                  className="flex items-center gap-2.5 cursor-pointer select-none group py-1"
-                >
-                  <img
-                    src="/swabhiman-logo.png"
-                    alt="SWABHIMAN"
-                    className="h-8 sm:h-10 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
-                  />
-                  {lang === "mr" && (
-                    <span className="font-display font-bold text-base sm:text-lg text-amber-600 dark:text-amber-400 hidden xs:inline-block">
-                      (स्वाभिमान)
-                    </span>
-                  )}
-                  <span className="hidden xl:inline-block ml-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/50">
-                    {lang === 'mr' ? 'विश्वासू कारागीर' : 'Verified Pros'}
-                  </span>
+                {/* Brand Logo & City Hub */}
+                <div className="flex items-center gap-3">
+                  <div 
+                    onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); }}
+                    className="flex items-center gap-2 cursor-pointer select-none group py-1"
+                  >
+                    <img
+                      src="/swabhiman-logo.png"
+                      alt="SWABHIMAN"
+                      className="h-9 sm:h-11 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
+                    />
+                    {lang === "mr" && (
+                      <span className="font-display font-bold text-base sm:text-lg text-amber-600 dark:text-amber-400 hidden xs:inline-block">
+                        (स्वाभिमान)
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Locality Live Pill */}
+                  <div className="hidden 2xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Sambhajinagar</span>
+                  </div>
                 </div>
 
-                {/* Nav Tabs */}
-                <nav className="hidden lg:flex items-center gap-1">
+                {/* Center: Floating Capsule Segmented Navigation */}
+                <nav className="hidden lg:flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1.5 rounded-full border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
                   <button
                     onClick={() => setActiveTab("find")}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
                       activeTab === "find"
-                        ? "bg-amber-400 text-slate-950 font-semibold shadow-sm"
-                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
                     }`}
                   >
-                    🔍 {t.navFind}
+                    <span>🔍</span>
+                    <span>{t.navFind}</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("emergency")}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 ${
+                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
                       activeTab === "emergency"
-                        ? "bg-rose-500 text-white font-semibold shadow-sm"
-                        : "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                        ? "bg-rose-500 text-white shadow-md shadow-rose-500/25 scale-102"
+                        : "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                     }`}
                   >
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                     </span>
-                    {t.navEmergency}
+                    <span>{t.navEmergency}</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("bookings")}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all relative ${
+                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
                       activeTab === "bookings"
-                        ? "bg-amber-400 text-slate-950 font-semibold shadow-sm"
-                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
                     }`}
                   >
-                    📋 {t.navBookings}
+                    <span>📋</span>
+                    <span>{t.navBookings}</span>
                     {bookings.length > 0 && (
-                      <span className="ml-1.5 px-1.5 py-0.2 rounded-full text-xs bg-emerald-500 text-white font-bold">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500 text-white font-extrabold shadow-xs">
                         {bookings.length}
                       </span>
                     )}
@@ -961,126 +969,200 @@ export default function SwabhimanApp() {
 
                   <button
                     onClick={() => setActiveTab("join")}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
                       activeTab === "join"
-                        ? "bg-amber-400 text-slate-950 font-semibold shadow-sm"
-                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-amber-400 text-slate-950 shadow-md scale-102"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/80"
                     }`}
                   >
-                    👷 {t.navJoin}
+                    <span>👷</span>
+                    <span>{t.navJoin}</span>
                   </button>
+                </nav>
 
-                  {/* ADMIN TAB BUTTON */}
+                {/* Right: Actions, Language, Theme & Admin Console */}
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  {/* Admin Console Pill (Desktop) */}
                   <button
                     onClick={() => setActiveTab("admin")}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 ${
+                    className={`hidden xl:flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all border ${
                       activeTab === "admin"
-                        ? "bg-slate-900 text-amber-400 font-bold dark:bg-amber-400 dark:text-slate-950 shadow-sm"
-                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 ml-1"
+                        ? "bg-slate-900 text-amber-400 border-slate-900 dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400 shadow-md"
+                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-amber-400"
                     }`}
                   >
                     <span>🛡️</span>
                     <span>{t.navAdmin}</span>
                     {adminStats.pendingW > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-extrabold animate-pulse">
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-black animate-pulse">
                         {adminStats.pendingW}
                       </span>
                     )}
                   </button>
-                </nav>
 
-                {/* Right Actions: Duty Switch + PWA Install + Lang + Theme */}
-                <div className="flex items-center gap-2">
-                  {/* Worker Duty Quick Button */}
+                  {/* Worker Duty Quick Switch */}
                   <button
                     onClick={() => setShowDutyModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold shadow-sm hover:border-emerald-400 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold shadow-xs hover:border-emerald-500 transition-colors"
                     title={t.dutySwitch}
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="hidden md:inline">{t.dutySwitch}</span>
+                    <span className="hidden sm:inline">{t.dutySwitch}</span>
                   </button>
 
-                  {/* PWA Install Button */}
+                  {/* PWA Install */}
                   {!isAppInstalled && (
                     <button
                       onClick={handleTriggerInstall}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-sm transition-transform active:scale-95"
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-xs transition-transform active:scale-95"
                       title={t.installApp}
                     >
                       <span>📲</span>
-                      <span className="hidden sm:inline">{t.installApp}</span>
+                      <span>{t.installApp}</span>
                     </button>
                   )}
 
                   {/* Language Toggle Pill */}
                   <button
                     onClick={() => setLang(l => l === "en" ? "mr" : "en")}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs font-semibold hover:border-amber-400 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold hover:border-amber-400 transition-colors"
                     title="Toggle Language / भाषा बदला"
                   >
-                    <span>{lang === "en" ? "🇮🇳 मराठी" : "🇬🇧 English"}</span>
+                    <span className="text-sm">{lang === "en" ? "🇮🇳" : "🇬🇧"}</span>
+                    <span className="font-semibold">{lang === "en" ? "मराठी" : "English"}</span>
                   </button>
 
-                  {/* Theme Toggle */}
+                  {/* Theme Switcher */}
                   <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm hover:border-amber-400 transition-colors"
+                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm hover:border-amber-400 transition-colors"
                     title="Toggle Theme"
                   >
                     {darkMode ? "☀️" : "🌙"}
                   </button>
+
+                  {/* Mobile Hamburger Toggle Button */}
+                  <button
+                    onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                    className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-lg font-bold shadow-xs active:scale-95 transition-transform"
+                    aria-label="Toggle Navigation Menu"
+                  >
+                    {isMobileMenuOpen ? "✕" : "☰"}
+                  </button>
                 </div>
               </div>
-
-              {/* Mobile Navigation Row */}
-              <div className="flex lg:hidden items-center justify-between py-2 border-t border-slate-200 dark:border-[#293d49] text-xs font-medium overflow-x-auto gap-1">
-                <button
-                  onClick={() => setActiveTab("find")}
-                  className={`py-1 px-2.5 rounded whitespace-nowrap ${activeTab === "find" ? "bg-amber-400 text-slate-950 font-bold" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  🔍 {t.navFind}
-                </button>
-                <button
-                  onClick={() => setActiveTab("emergency")}
-                  className={`py-1 px-2.5 rounded whitespace-nowrap ${activeTab === "emergency" ? "bg-rose-500 text-white font-bold" : "text-rose-600 dark:text-rose-400"}`}
-                >
-                  ⚡ {t.navEmergency}
-                </button>
-                <button
-                  onClick={() => setActiveTab("bookings")}
-                  className={`py-1 px-2.5 rounded whitespace-nowrap ${activeTab === "bookings" ? "bg-amber-400 text-slate-950 font-bold" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  📋 {t.navBookings} ({bookings.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("join")}
-                  className={`py-1 px-2.5 rounded whitespace-nowrap ${activeTab === "join" ? "bg-amber-400 text-slate-950 font-bold" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  👷 {t.navJoin}
-                </button>
-                <button
-                  onClick={() => setActiveTab("admin")}
-                  className={`py-1 px-2.5 rounded whitespace-nowrap ${activeTab === "admin" ? "bg-slate-900 text-amber-400 font-bold dark:bg-amber-400 dark:text-slate-950" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  🛡️ {t.navAdmin} {adminStats.pendingW > 0 ? `(${adminStats.pendingW})` : ""}
-                </button>
-                <button
-                  onClick={() => setShowDutyModal(true)}
-                  className="py-1 px-2.5 rounded whitespace-nowrap bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 font-bold"
-                >
-                  ⚡ {t.dutySwitch}
-                </button>
-                {!isAppInstalled && (
-                  <button
-                    onClick={handleTriggerInstall}
-                    className="py-1 px-2.5 rounded whitespace-nowrap bg-amber-400 text-slate-950 font-bold"
-                  >
-                    📲 {t.installApp}
-                  </button>
-                )}
-              </div>
             </div>
+
+            {/* MOBILE SLIDE-DOWN DRAWER MENU (PREMIER DESIGN) */}
+            {isMobileMenuOpen && (
+              <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl px-4 py-5 shadow-2xl space-y-4 animate-in slide-in-from-top-3 duration-200">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); }}
+                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
+                      activeTab === "find"
+                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    <span className="text-2xl mb-1">🔍</span>
+                    <span className="font-bold text-sm">{t.navFind}</span>
+                    <span className="text-[11px] opacity-80">Browse Sambhajinagar Pros</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab("emergency"); setIsMobileMenuOpen(false); }}
+                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
+                      activeTab === "emergency"
+                        ? "bg-rose-500 text-white font-bold border-rose-500 shadow-sm"
+                        : "bg-rose-50/70 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900"
+                    }`}
+                  >
+                    <span className="text-2xl mb-1">⚡</span>
+                    <span className="font-bold text-sm">{t.navEmergency}</span>
+                    <span className="text-[11px] opacity-80">15-Min Fast Dispatch</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab("bookings"); setIsMobileMenuOpen(false); }}
+                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
+                      activeTab === "bookings"
+                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl mb-1">📋</span>
+                      {bookings.length > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500 text-white font-black">
+                          {bookings.length}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-bold text-sm">{t.navBookings}</span>
+                    <span className="text-[11px] opacity-80">Track Orders & Slips</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab("join"); setIsMobileMenuOpen(false); }}
+                    className={`p-3.5 rounded-2xl text-left border flex flex-col justify-between transition-all ${
+                      activeTab === "join"
+                        ? "bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    <span className="text-2xl mb-1">👷</span>
+                    <span className="font-bold text-sm">{t.navJoin}</span>
+                    <span className="text-[11px] opacity-80">Partner Onboarding</span>
+                  </button>
+                </div>
+
+                {/* Admin Console & Tools Row */}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                  <button
+                    onClick={() => { setActiveTab("admin"); setIsMobileMenuOpen(false); }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-amber-400 dark:bg-amber-400 dark:text-slate-950 font-bold text-xs flex items-center justify-between shadow-sm"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🛡️</span> {t.navAdmin}
+                    </span>
+                    {adminStats.pendingW > 0 && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-black animate-pulse">
+                        {adminStats.pendingW} Pending
+                      </span>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setShowDutyModal(true); setIsMobileMenuOpen(false); }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-emerald-300 dark:border-emerald-800"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span>{t.dutySwitch}</span>
+                    </button>
+
+                    {!isAppInstalled && (
+                      <button
+                        onClick={() => { handleTriggerInstall(); setIsMobileMenuOpen(false); }}
+                        className="flex-1 py-2 px-3 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                      >
+                        <span>📲</span>
+                        <span>{t.installApp}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 24/7 Support Helpline Direct Call */}
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-center text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <span className="block font-medium">Worker & Employer Helpline:</span>
+                  <a href="tel:+919822011223" className="font-bold text-amber-600 dark:text-amber-400 hover:underline text-sm">
+                    📞 +91 98220 11223
+                  </a>
+                </div>
+              </div>
+            )}
           </header>
 
           {/* VIEW: FIND WORKERS */}
@@ -4117,6 +4199,77 @@ export default function SwabhimanApp() {
               </div>
             </div>
           </footer>
+
+          {/* FLOATING MOBILE BOTTOM APP BAR (THUMB-ACCESSIBLE) */}
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-4px_20px_rgb(0,0,0,0.06)] px-2 py-1.5 flex items-center justify-around">
+            <button
+              onClick={() => { setActiveTab("find"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
+                activeTab === "find"
+                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <span className="text-lg">🔍</span>
+              <span>{t.navFind.split(" ")[0]}</span>
+            </button>
+
+            <button
+              onClick={() => { setActiveTab("emergency"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
+                activeTab === "emergency"
+                  ? "text-rose-600 dark:text-rose-400 font-extrabold"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <span className="text-lg">⚡</span>
+              <span>{t.navEmergency.split(" ")[0]}</span>
+            </button>
+
+            <button
+              onClick={() => { setActiveTab("bookings"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all relative ${
+                activeTab === "bookings"
+                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <div className="relative">
+                <span className="text-lg">📋</span>
+                {bookings.length > 0 && (
+                  <span className="absolute -top-1 -right-2 px-1 rounded-full text-[9px] bg-emerald-500 text-white font-black">
+                    {bookings.length}
+                  </span>
+                )}
+              </div>
+              <span>{t.navBookings.split(" ")[0]}</span>
+            </button>
+
+            <button
+              onClick={() => { setActiveTab("join"); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
+                activeTab === "join"
+                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <span className="text-lg">👷</span>
+              <span>{t.navJoin.split(" ")[0]}</span>
+            </button>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold transition-all ${
+                isMobileMenuOpen
+                  ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <span className="text-lg">{isMobileMenuOpen ? "✕" : "☰"}</span>
+              <span>Menu</span>
+            </button>
+          </div>
+
 
         </div>
       );

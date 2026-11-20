@@ -199,8 +199,8 @@ export const SKILLS = {
 
     export const I18N = {
       en: {
-        brand: "Kaam",
-        brandHighlight: "Setu",
+        brand: "SWABHI",
+        brandHighlight: "MAN",
         tagline: "Verified Neighborhood Craftsmen, On-Demand",
         subtitle: "Direct access to Chhatrapati Sambhajinagar's skilled plumbers, electricians, carpenters, painters & helpers. Upfront visiting charges, fair hourly rates, zero middleman commissions.",
         navFind: "Find Workers",
@@ -405,8 +405,8 @@ export const SKILLS = {
         audioSpeechError: "Audio synthesis not supported or muted in browser."
       },
       mr: {
-        brand: "काम",
-        brandHighlight: "सेतू",
+        brand: "स्वाभि",
+        brandHighlight: "मान",
         tagline: "छत्रपती संभाजीनगरमधील विश्वासू आणि कुशल स्थानिक कारागीर",
         subtitle: "प्लंबर, इलेक्ट्रिशियन, सुतार, पेंटर व मदतनीस थेट तुमच्या सेवेत. पारदर्शक तपासणी फी, रास्त दर आणि शून्य मध्यस्थ कमिशन.",
         navFind: "कारागीर शोधा",

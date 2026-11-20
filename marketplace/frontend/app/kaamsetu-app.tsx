@@ -450,8 +450,8 @@ export default function KaamSetuApp() {
       // WhatsApp Link Generators
       const getWhatsAppOrderUrl = (b) => {
         const text = lang === "mr"
-          ? `*स्वाभिमान सेवा बुकिंग स्लिप (#${b.id})*\n\nनमस्ते ${b.workerName},\nमी ${b.customerName} आहे. कामसेतू अ‍ॅपवरून तुमच्यासाठी काम बुक केले आहे:\n\n📍 *पत्ता:* ${b.customerAddress}\n📅 *दिनांक व वेळ:* ${b.date} (${b.slot})\n🔧 *कामाचे स्वरूप:* ${b.jobNote || "दुरुस्ती व देखभाल"}\n💰 *अंदाजे शुल्क:* ₹${b.estimatedAmt || 550}\n\nकृपया या मेसेजला होकार देऊन वेळ कन्फर्म करा!`
-          : `*SWABHIMAN Work Order Slip (#${b.id})*\n\nHello ${b.workerName},\nI am ${b.customerName}. I have booked your service on KaamSetu:\n\n📍 *Address:* ${b.customerAddress}\n📅 *Date & Slot:* ${b.date} (${b.slot})\n🔧 *Task Details:* ${b.jobNote || "General Repair Work"}\n💰 *Est. Amount:* ₹${b.estimatedAmt || 550}\n\nPlease reply to this message to confirm your arrival time!`;
+          ? `*स्वाभिमान सेवा बुकिंग स्लिप (#${b.id})*\n\nनमस्ते ${b.workerName},\nमी ${b.customerName} आहे. स्वाभिमान अ‍ॅपवरून तुमच्यासाठी काम बुक केले आहे:\n\n📍 *पत्ता:* ${b.customerAddress}\n📅 *दिनांक व वेळ:* ${b.date} (${b.slot})\n🔧 *कामाचे स्वरूप:* ${b.jobNote || "दुरुस्ती व देखभाल"}\n💰 *अंदाजे शुल्क:* ₹${b.estimatedAmt || 550}\n\nकृपया या मेसेजला होकार देऊन वेळ कन्फर्म करा!`
+          : `*SWABHIMAN Work Order Slip (#${b.id})*\n\nHello ${b.workerName},\nI am ${b.customerName}. I have booked your service on SWABHIMAN:\n\n📍 *Address:* ${b.customerAddress}\n📅 *Date & Slot:* ${b.date} (${b.slot})\n🔧 *Task Details:* ${b.jobNote || "General Repair Work"}\n💰 *Est. Amount:* ₹${b.estimatedAmt || 550}\n\nPlease reply to this message to confirm your arrival time!`;
         return `https://wa.me/91${b.workerPhone}?text=${encodeURIComponent(text)}`;
       };
 

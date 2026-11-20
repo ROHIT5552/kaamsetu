@@ -1,6 +1,7 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
+import { listingPhoto, maxPhotoLength } from '../../../lib/listing-photo.mjs';
 import { pool, transaction } from '../../../lib/db';
 import { activeCheck,consentVersion,rejectionReasons } from '../../../lib/verification';
 import { enabled,workerChecks,submitCheck,withdrawCheck,reviewQueue,decideCheck,verifiedKinds } from '../../../lib/review';
@@ -8,6 +9,7 @@ import { categories, areas, requiredCredential, transitions, distance } from '..
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+const maxListingBody = maxPhotoLength + 20 * 1024;
 const hash = value => createHash('sha256').update(value).digest('hex');
 const demo = () => process.env.DEMO_MODE==='true' && /^http:\/\/localhost:\d+$/.test(process.env.APP_ORIGIN||'');
 const reply = (data,status=200) => Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
@@ -23,14 +25,18 @@ const area = z.enum(areas);
 const money = z.number().int().min(5000).max(100000000);
 const point = z.object({lat:z.number().min(-90).max(90),lng:z.number().min(-180).max(180)});
 const email = z.email().max(254).transform(s=>s.toLowerCase());
+const workSample={
+  workDetails:z.string().trim().max(1200).optional(),
+  photo:z.string().max(maxPhotoLength).refine(value=>value==='' || listingPhoto(value)!==null).optional()
+};
 const jobDetails=z.object({title:text(90),category,area,description:text(1400),amount:money,
-  starts:z.iso.datetime(),hours:z.number().int().min(1).max(48),point:point.optional()});
+  starts:z.iso.datetime(),hours:z.number().int().min(1).max(48),point:point.optional(),...workSample});
 const schemas = {
   signup:z.object({email,name:text(70),password:z.string().min(12).max(128),role:z.enum(['worker','employer'])}),
   login:z.object({email,password:z.string().min(1).max(128)}),
   demo:z.object({role:z.enum(['worker','employer']),room:z.string().regex(/^[a-zA-Z0-9-]{8,50}$/)}),
   logout:z.object({}),
-  profile:z.object({category,area,rate:money,bio:text(400),available:z.boolean(),point:point.optional()}),
+  profile:z.object({category,area,rate:money,bio:text(400),available:z.boolean(),point:point.optional(),...workSample}),
   verify:z.object({kind:z.enum(['identity','electrical-license']),method:z.enum(['aadhaar','alternative','trade']),consent:z.literal(true),consentVersion:z.string().max(25).optional()}),
   withdrawCheck:z.object({id}),
   reviewCheck:z.object({id,decision:z.enum(['approve','reject','revoke']),reason:z.enum(rejectionReasons).optional()}),
@@ -80,10 +86,48 @@ async function throttle(scope,max,seconds) {
   requireThat(row.hits<=max,'limited',429);
 }
 
+const publicJob = "j.starts>now() AND j.closed_at IS NULL AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.job=j.id)";
+function publicWorker() {
+  const table=demo()?'credentials':'verification_cases';
+  const active=demo()?'c.verified_at IS NOT NULL':activeCheck;
+  const verified=kind=>`EXISTS (SELECT 1 FROM ${table} c WHERE c.account=a.id AND c.kind='${kind}' AND ${active})`;
+  return `p.available AND ${verified('identity')}
+    AND (p.category<>'electrical' OR ${verified('electrical-license')})`;
+}
+
+function withPhoto(kind,record,photoId=record.id) {
+  const {photo_key,...item}=record;
+  const photo=photo_key ? `/api/market?photo=${kind}&id=${photoId}&version=${photo_key}` : null;
+  return {...item,photo};
+}
+
+async function readPhoto(db,user,params) {
+  const kind=z.enum(['job','worker']).parse(params.get('photo'));
+  const listingId=id.parse(params.get('id'));
+  const version=z.string().regex(/^[a-f0-9]{32}$/).parse(params.get('version'));
+  let listing;
+  if (kind==='job') {
+    listing=await one(db,`SELECT j.photo FROM jobs j JOIN accounts a ON a.id=j.employer
+      WHERE j.id=$1 AND j.photo_key=$2 AND a.demo=$3
+      AND (j.employer=$4 OR EXISTS(SELECT 1 FROM applications x WHERE x.job=j.id AND x.worker=$4)
+        OR (${publicJob}))`,
+      [listingId,version,demo(),user?.id??null]);
+  } else {
+    listing=await one(db,`SELECT p.photo FROM profiles p JOIN accounts a ON a.id=p.account
+      WHERE p.account=$1 AND p.photo_key=$2 AND a.demo=$3 AND (p.account=$4 OR (${publicWorker()}))`,
+      [listingId,version,demo(),user?.id??null]);
+  }
+  const image=listingPhoto(listing?.photo);
+  requireThat(image,'missing',404);
+  return new Response(image.bytes,{headers:{'Content-Type':image.type,'Content-Length':image.bytes.length,
+    'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
+
 export async function GET(request) {
   try {
     const db=pool(), user=await viewer(await cookies());
     const coords=new URL(request.url).searchParams;
+    if (coords.has('photo')) return await readPhoto(db,user,coords);
     if (coords.has('review')) {
       requireThat(user?.reviewer);
       const status=z.enum(['submitted','ready','approved','rejected','withdrawn']).parse(coords.get('review'));
@@ -91,10 +135,9 @@ export async function GET(request) {
     }
     const near=coords.has('lat') && coords.has('lng') ? point.safeParse({lat:Number(coords.get('lat')),lng:Number(coords.get('lng'))}) : null;
     const [jobs,people,profile,checks,threads,owned,saved]=await Promise.all([
-      rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,j.lat,j.lng,a.name
-        FROM jobs j JOIN accounts a ON a.id=j.employer WHERE a.demo=$1 AND j.starts>now() AND j.closed_at IS NULL
-        AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.job=j.id) ORDER BY j.created DESC LIMIT 100`,[demo()]),
-      rows(db,`SELECT a.id,a.name,p.category,p.area,p.rate,p.bio,p.lat,p.lng,a.demo,
+      rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,j.lat,j.lng,j.work_details,j.photo_key,a.name
+        FROM jobs j JOIN accounts a ON a.id=j.employer WHERE a.demo=$1 AND ${publicJob} ORDER BY j.created DESC LIMIT 100`,[demo()]),
+      rows(db,`SELECT a.id,a.name,p.category,p.area,p.rate,p.bio,p.lat,p.lng,p.work_details,p.photo_key,a.demo,
         ratings.score,ratings.count AS rating_count,recent.reviews
         FROM profiles p JOIN accounts a ON a.id=p.account
         LEFT JOIN LATERAL (SELECT round(avg(score),1) AS score,count(*)::int AS count
@@ -103,15 +146,11 @@ export async function GET(request) {
           (SELECT r.score,r.note,r.created_at,j.category FROM worker_ratings r
             JOIN bookings b ON b.application=r.application JOIN jobs j ON j.id=b.job
             WHERE r.worker=a.id AND r.note IS NOT NULL ORDER BY r.created_at DESC,r.application DESC LIMIT 3) entry) recent ON true
-        WHERE p.available AND a.demo=$1
-        AND EXISTS (SELECT 1 FROM ${demo()?'credentials':'verification_cases'} c
-          WHERE c.account=a.id AND c.kind='identity' AND ${demo()?'c.verified_at IS NOT NULL':activeCheck})
-        AND (p.category<>'electrical' OR EXISTS (SELECT 1 FROM ${demo()?'credentials':'verification_cases'} c
-          WHERE c.account=a.id AND c.kind='electrical-license' AND ${demo()?'c.verified_at IS NOT NULL':activeCheck})) ORDER BY a.name LIMIT 100`,[demo()]),
-      user ? one(db,'SELECT category,area,rate,bio,available,lat,lng FROM profiles WHERE account=$1',[user.id]) : null,
+        WHERE a.demo=$1 AND ${publicWorker()} ORDER BY a.name LIMIT 100`,[demo()]),
+      user ? one(db,'SELECT category,area,rate,bio,available,lat,lng,work_details,photo_key FROM profiles WHERE account=$1',[user.id]) : null,
       workerChecks(db,user),
       user ? rows(db,`SELECT x.id,x.worker,j.employer,x.author,x.amount,x.note,x.version,x.state,
-        j.id AS job,j.title,j.starts,w.name AS worker_name,e.name AS employer_name,b.state AS booking,r.score AS rating,
+        j.id AS job,j.title,j.starts,j.description,j.work_details,j.photo_key,w.name AS worker_name,e.name AS employer_name,b.state AS booking,r.score AS rating,
         (SELECT count(*)::int FROM messages m WHERE m.application=x.id AND m.id>coalesce(cursor.seen_message,0) AND m.author<>$1) AS unread,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lat END AS lat,
         CASE WHEN b.state='en_route' AND b.located_at>now()-interval '60 seconds' THEN b.lng END AS lng,
@@ -121,7 +160,7 @@ export async function GET(request) {
         LEFT JOIN worker_ratings r ON r.application=x.id
         LEFT JOIN thread_reads cursor ON cursor.application=x.id AND cursor.account=$1
         WHERE x.worker=$1 OR j.employer=$1 ORDER BY j.created DESC LIMIT 100`,[user.id]) : [],
-      user?.role==='employer' ? rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,
+      user?.role==='employer' ? rows(db,`SELECT j.id,j.title,j.category,j.area,j.description,j.amount,j.starts,j.hours,j.work_details,j.photo_key,
         CASE WHEN b.state IS NOT NULL THEN b.state WHEN j.closed_at IS NOT NULL THEN 'closed'
           WHEN j.starts<=now() THEN 'expired' ELSE 'open' END AS status,
         count(x.id)::int AS offer_count,count(x.id) FILTER (WHERE x.state='pending')::int AS pending_count,
@@ -138,10 +177,12 @@ export async function GET(request) {
       rows(db,'SELECT version,author,amount,note,created FROM offer_history WHERE application=$1 ORDER BY version DESC LIMIT 30',[thread]),
       rows(db,'SELECT state,created FROM booking_events WHERE application=$1 ORDER BY id',[thread])
     ]) : [[],[],[]];
-    const publicCards = list => list.map(({lat,lng,...item})=>({...item,
+    const publicCards = (kind,list) => list.map(({lat,lng,...item})=>({...withPhoto(kind,item),
       km:near?.success && lat!=null && lng!=null ? Math.round(distance(near.data,{lat,lng})*10)/10 : null
     })).sort((a,b)=>(a.km??Infinity)-(b.km??Infinity));
-    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards(jobs),people:publicCards(people),profile,checks,threads,messages,offers,events,owned,saved,thread:selected?.id});
+    return reply({user,demo:demo(),verification:{consentVersion,methods:['alternative','aadhaar','trade'].filter(enabled)},jobs:publicCards('job',jobs),
+      people:publicCards('worker',people),profile:profile ? withPhoto('worker',profile,user.id) : null,checks,
+      threads:threads.map(row=>withPhoto('job',row,row.job)),messages,offers,events,owned:owned.map(row=>withPhoto('job',row)),saved,thread:selected?.id});
   } catch(error) { return failure(error); }
 }
 
@@ -162,13 +203,14 @@ export async function POST(request) {
         const {done,value}=await reader.read();
         if (done) break;
         bytes+=value.byteLength;
-        requireThat(bytes<=8192,'invalid',413);
+        requireThat(bytes<=maxListingBody,'invalid',413);
         payload+=decoder.decode(value,{stream:true});
       }
     } finally { await reader.cancel(); }
     const raw=JSON.parse(payload+decoder.decode());
     const action=raw?.action;
     requireThat(typeof action==='string' && Object.hasOwn(schemas,action),'invalid',400);
+    if (!['profile','job','editJob'].includes(action)) requireThat(bytes<=8192,'invalid',413);
     const input=schemas[action].strict().parse(raw.input);
     const jar=await cookies(), db=pool(), user=await viewer(jar);
     if (action==='signup' || action==='login' || action==='demo') {
@@ -206,10 +248,13 @@ export async function POST(request) {
     const result=await transaction(async tx=>{
       if (['profile','apply','verify','withdrawCheck'].includes(action)) requireThat(user.role==='worker');
       if (action==='profile') {
-        const {category,area,rate,bio,available,point}=input;
-        await tx.query(`INSERT INTO profiles VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(account) DO UPDATE SET
-          category=excluded.category,area=excluded.area,rate=excluded.rate,bio=excluded.bio,available=excluded.available,lat=excluded.lat,lng=excluded.lng`,
-          [user.id,category,area,rate,bio,available,point?.lat??null,point?.lng??null]);
+        const {category,area,rate,bio,available,point,workDetails,photo}=input;
+        await tx.query(`INSERT INTO profiles(account,category,area,rate,bio,available,lat,lng,work_details,photo)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,nullif($9,''),nullif($10,'')) ON CONFLICT(account) DO UPDATE SET
+          category=excluded.category,area=excluded.area,rate=excluded.rate,bio=excluded.bio,available=excluded.available,lat=excluded.lat,lng=excluded.lng,
+          work_details=CASE WHEN $9::text IS NULL THEN profiles.work_details ELSE excluded.work_details END,
+          photo=CASE WHEN $10::text IS NULL THEN profiles.photo ELSE excluded.photo END`,
+          [user.id,category,area,rate,bio,available,point?.lat??null,point?.lng??null,workDetails??null,photo??null]);
       }
       if (action==='verify') await submitCheck(tx,user,input);
       if (action==='withdrawCheck') await withdrawCheck(tx,user,input.id);
@@ -244,20 +289,23 @@ export async function POST(request) {
         } else {
           requireThat(!(await one(tx,'SELECT id FROM applications WHERE job=$1 LIMIT 1',[input.id])),'jobHasOffers',409);
           requireThat(Date.parse(input.starts)>Date.now(),'future',400);
-          const {title,category,area,description,amount,starts,hours,point}=input;
+          const {title,category,area,description,amount,starts,hours,point,workDetails,photo}=input;
           await tx.query(`UPDATE jobs SET title=$2,category=$3,area=$4,description=$5,amount=$6,starts=$7,hours=$8,
             lat=CASE WHEN $4<>area OR $9::float8 IS NOT NULL THEN $9 ELSE lat END,
-            lng=CASE WHEN $4<>area OR $10::float8 IS NOT NULL THEN $10 ELSE lng END WHERE id=$1`,
-          [input.id,title,category,area,description,amount,starts,hours,point?.lat??null,point?.lng??null]);
+            lng=CASE WHEN $4<>area OR $10::float8 IS NOT NULL THEN $10 ELSE lng END,
+            work_details=CASE WHEN $11::text IS NULL THEN work_details ELSE nullif($11,'') END,
+            photo=CASE WHEN $12::text IS NULL THEN photo ELSE nullif($12,'') END WHERE id=$1`,
+          [input.id,title,category,area,description,amount,starts,hours,point?.lat??null,point?.lng??null,workDetails??null,photo??null]);
         }
         return {};
       }
       if (action==='job') {
         requireThat(user.role==='employer');
         requireThat(Date.parse(input.starts)>Date.now(),'future',400);
-        const {title,category,area,description,amount,starts,hours,point}=input;
-        await tx.query('INSERT INTO jobs(employer,title,category,area,description,amount,starts,hours,lat,lng) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
-          [user.id,title,category,area,description,amount,starts,hours,point?.lat??null,point?.lng??null]);
+        const {title,category,area,description,amount,starts,hours,point,workDetails,photo}=input;
+        await tx.query(`INSERT INTO jobs(employer,title,category,area,description,amount,starts,hours,lat,lng,work_details,photo)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,nullif($11,''),nullif($12,''))`,
+          [user.id,title,category,area,description,amount,starts,hours,point?.lat??null,point?.lng??null,workDetails??null,photo??null]);
       }
       if (action==='apply' || action==='invite') {
         const invite=action==='invite';

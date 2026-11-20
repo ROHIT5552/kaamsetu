@@ -1,3 +1,0 @@
-# SWABHIMAN interface
-
-Warm white surfaces and charcoal text keep listings and forms easy to scan. Burnt orange marks actions and the current step. The home page pairs a calm editorial introduction with a saturated orange trade board. Six cream trade tiles sit on a perspective stage and double as discovery filters. On desktop they respond to the pointer. On touch and with reduced motion they keep stable targets. Trade icons, status labels and role-specific walkthroughs stay consistent across desktop and mobile.

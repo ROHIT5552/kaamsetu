@@ -1,12 +1,17 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Bookmark, Handshake, ShieldCheck, ClipboardPlus, ClipboardList, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { ArrowRight, ArrowUp, ChevronRight, Pause, Play, Bookmark, Handshake, ShieldCheck, ClipboardPlus, Crosshair, HardHat, MapPin, MessageSquare, PaintRoller, PlugZap, Search, Star, UsersRound, Droplets, Hammer, BrickWall } from 'lucide-react';
 import { areas, categories, transitions } from '../lib/domain';
 import { translate } from './copy';
 import BookingProgress from './booking-progress';
+import { WorkPhoto,WorkPhotoField } from './work-photo';
 import { WorkerVerification,VerificationReview } from './verification-panel';
 
 const icons={plumbing:Droplets,electrical:PlugZap,carpentry:Hammer,painting:PaintRoller,masonry:BrickWall,general:HardHat};
+const journeys={
+  howHire:[[ClipboardPlus,'stepPost'],[MessageSquare,'stepCompare'],[Handshake,'stepBook']],
+  howWork:[[ShieldCheck,'stepVerify'],[Search,'stepFind'],[Handshake,'stepAgree']]
+};
 const initial={jobs:[],people:[],threads:[],messages:[],offers:[],checks:[]};
 const localInput=value=>{
   if(!value)return '';
@@ -18,18 +23,41 @@ const paise=value=>Math.round(Number(value)*100);
 const coordinates=position=>({lat:position.coords.latitude,lng:position.coords.longitude});
 const fields=event=>Object.fromEntries(new FormData(event.currentTarget));
 
-function tiltTrades(event){
-  if(event.pointerType!=='mouse'||!matchMedia('(prefers-reduced-motion: no-preference)').matches)return;
-  const stage=event.currentTarget;
-  const box=stage.getBoundingClientRect();
-  const x=(event.clientX-box.left)/box.width-.5;
-  const y=(event.clientY-box.top)/box.height-.5;
-  stage.style.setProperty('--pitch',(-y*12).toFixed(2)+'deg');
-  stage.style.setProperty('--yaw',(x*16).toFixed(2)+'deg');
+function MotionBackdrop({paused}){
+  return <div className="motion-backdrop" aria-hidden="true">
+    <div className="motion-orbit" data-paused={paused}>
+      <span className="motion-ring"/><span className="motion-ring"/><span className="motion-ring"/>
+    </div>
+  </div>;
 }
-function resetTilt(event){
-  event.currentTarget.style.removeProperty('--pitch');
-  event.currentTarget.style.removeProperty('--yaw');
+
+function WorkBriefFields({t, listing, sample=false, disabled, onPreparingChange}){
+  const [photoEdit,setPhotoEdit]=useState(null);
+  const detailsId=useId();
+  const detailsHintId=detailsId+"-hint";
+
+  return <fieldset className="work-brief-fields stack">
+    <legend>{t(sample?'sampleWork':'jobBrief')} <small>{t('optional')}</small></legend>
+    <div className="work-brief-entry">
+      <label htmlFor={detailsId}>{t(sample?'sampleDescription':'jobChecklist')}</label>
+      <small id={detailsHintId}>{t(sample?'sampleHint':'jobChecklistHint')}</small>
+      <textarea id={detailsId} name="workDetails" maxLength={1200} defaultValue={listing?.work_details} aria-describedby={detailsHintId}/>
+    </div>
+    <WorkPhotoField t={t} label={t(sample?'samplePhoto':'jobPhoto')} value={photoEdit??listing?.photo??''}
+      onChange={setPhotoEdit} disabled={disabled} onPreparingChange={onPreparingChange}/>
+    {photoEdit!==null&&<input type="hidden" name="photo" value={photoEdit}/>}
+  </fieldset>;
+}
+
+function WorkBrief({listing, t, sample=false, includeDescription=false, heading:Heading='h3'}){
+  if(!listing.photo&&!listing.work_details&&!(includeDescription&&listing.description))return null;
+
+  return <section className="work-brief">
+    <Heading className="work-brief-title">{t(sample?'sampleWork':'jobBrief')}</Heading>
+    {includeDescription&&listing.description&&<p>{listing.description}</p>}
+    <WorkPhoto src={listing.photo} alt={t(sample?'sampleWork':'jobPhotoAlt')}/>
+    {listing.work_details&&<p>{listing.work_details}</p>}
+  </section>;
 }
 
 export default function Marketplace(){
@@ -41,6 +69,9 @@ export default function Marketplace(){
   const [signupRole,setSignupRole]=useState('employer');
   const [sort,setSort]=useState('default'),[editing,setEditing]=useState(null);
   const [savedOnly,setSavedOnly]=useState(false);
+  const [motionPaused,setMotionPaused]=useState(false);
+  const [helpTopic,setHelpTopic]=useState('howHire');
+  const [photoPreparing,setPhotoPreparing]=useState(false);
   const sharingRef=useRef(null),requestVersion=useRef(0),readAttempt=useRef('');
   const t=key=>translate(locale,key);
   const cash=value=>new Intl.NumberFormat(locale+'-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(value)/100);
@@ -117,7 +148,7 @@ export default function Marketplace(){
   const list=(view==='find'?data.people:data.jobs).filter(item=>
     (!savedOnly||savedIds.has(item.id))&&
     (!trade||item.category===trade)&&(!areaFilter||item.area===areaFilter)&&
-    [item.name,item.title,item.area,t(item.category),item.bio,item.description].join(' ').toLowerCase().includes(search.toLowerCase()));
+    [item.name,item.title,item.area,t(item.category),item.bio,item.description,item.work_details].join(' ').toLowerCase().includes(search.toLowerCase()));
   const role=data.user?.role;
   const browse=view==='find'||view==='work';
   const invites=(data.owned||[]).filter(job=>job.status==='open');
@@ -129,8 +160,16 @@ export default function Marketplace(){
   const areaField=(value)=> <label>{t('area')}<select name="area" defaultValue={value}>{areas.map(a=><option key={a}>{a}</option>)}</select></label>;
   const quoteFields=(value)=> <><label>{t('amount')}<input required name="amount" type="number" min="50" max="1000000" step=".01" defaultValue={value}/></label><label>{t('note')}<textarea name="note" required maxLength={500}/></label></>;
 
+  const motionToggle=<div className="motion-controls">
+    <button className="scene-toggle" type="button" aria-label={t(motionPaused?'playMotion':'pauseMotion')}
+      title={t(motionPaused?'playMotion':'pauseMotion')} onClick={()=>setMotionPaused(paused=>!paused)}>
+      {motionPaused?<Play size={16} aria-hidden="true"/>:<Pause size={16} aria-hidden="true"/>}
+    </button>
+  </div>;
+
   return <>
-    <header className="top"><div className="top-inner">
+    <a className="skip-main" href="#page-start">{t('skipMain')}</a>
+    <header className="top" id="site-top" tabIndex={-1}><div className="top-inner">
       <button className="brand" onClick={()=>go('find')}><span aria-hidden="true"/>SWABHIMAN</button>
       <nav aria-label={t('find')}>
         <button aria-current={view==='find'?'page':undefined} onClick={()=>go('find')}>{t('find')}</button>
@@ -145,8 +184,8 @@ export default function Marketplace(){
       </div>
     </div></header>
 
-    <main>
-      {browse&&<section className="hero"><div className="hero-content">
+    <main id="page-start" tabIndex={-1}>
+      {browse&&<section className="hero scene-surface"><MotionBackdrop paused={motionPaused}/><div className="hero-content">
         <h1>{t(view==='work'?'workerHero':'hero')}</h1>
         <div className="place"><MapPin size={16}/> {t('city')}</div>
         <p>{t(view==='work'?'workerIntro':'intro')}</p>
@@ -156,20 +195,18 @@ export default function Marketplace(){
         </div>
       </div><section className="hero-trades" aria-labelledby="trade-title">
         <h2 id="trade-title">{t('browseTrades')}</h2>
-        <div className="trade-stage" onPointerMove={tiltTrades} onPointerLeave={resetTilt}>
-          <div className="trade-grid">{categories.map(category=>{
+        <div className="trade-grid">{categories.map(category=>{
           const Icon=icons[category];
           return <button key={category} data-trade={category} aria-pressed={trade===category} aria-controls="market-results"
-            onClick={()=>setTrade(trade===category?'':category)}><span className="icon" aria-hidden="true"><Icon size={29} strokeWidth={1.75}/></span><span>{t(category)}</span></button>;
-          })}</div>
-        </div>
-      </section></section>}
+            onClick={()=>setTrade(trade===category?'':category)}><span className="icon" aria-hidden="true"><Icon size={19} strokeWidth={1.8}/></span><span>{t(category)}</span><ChevronRight className="trade-arrow" size={15} aria-hidden="true"/></button>;
+        })}</div>
+      </section>{motionToggle}</section>}
       {browse&&<section className="journey" aria-labelledby="journey-title">
         <h2 id="journey-title">{t(view==='find'?'howHire':'howWork')}</h2>
-        <ol>{(view==='find'?[[ClipboardPlus,'stepPost'],[MessageSquare,'stepCompare'],[Handshake,'stepBook']]:[[ShieldCheck,'stepVerify'],[Search,'stepFind'],[Handshake,'stepAgree']]).map(([Icon,key])=>
+        <ol>{journeys[view==='find'?'howHire':'howWork'].map(([Icon,key])=>
           <li key={key}><Icon size={20} aria-hidden="true"/><div><strong>{t(key)}</strong><small>{t(key+'Detail')}</small></div></li>)}</ol>
       </section>}
-      {!browse&&<div className="page-heading"><h1>{t(view==='auth'?(signup?'signup':'login'):view==='post'&&editing?'editJob':view)}</h1>{data.user&&<p>{data.user.name} · {t(role)}</p>}</div>}
+      {!browse&&<div className="page-heading scene-surface"><MotionBackdrop paused={motionPaused}/><h1>{t(view==='auth'?(signup?'signup':'login'):view==='post'&&editing?'editJob':view==='help'?'supportLabel':view)}</h1>{data.user&&<p>{data.user.name} · {t(role)}</p>}{motionToggle}</div>}
       {error&&<div role="alert" className="feedback error">{t(error)} {pausedError.includes(error)&&<button className="quiet" onClick={error==='geoError'?locate:refresh}>{error==='geoError'?t('nearby'):t('loading')}</button>}</div>}
       {notice&&<div role="status" className="feedback">{t(notice)}</div>}
       {!loaded&&<p role="status">{t('loading')}</p>}
@@ -193,6 +230,7 @@ export default function Marketplace(){
               onClick={()=>send('saveListing',{id:item.id,kind:savedKind,saved:!savedIds.has(item.id)})}><Bookmark size={19}/></button>}
           </div>
           <p className="description">{item.description||item.bio}</p>
+          <WorkBrief listing={item} t={t} sample={view==='find'} heading="h4"/>
           {item.rating_count>0&&<small className="rating"><Star size={16} aria-hidden="true"/>{item.score} · {item.rating_count} {t('ratings')}</small>}
           {item.reviews?.length>0&&<details className="reviews"><summary>{t('reviews')}</summary>
             {item.reviews.map((review,index)=><blockquote key={review.created_at+'-'+index}><p>{review.note}</p><small>{t(review.category)} · {review.score}/5{item.demo?' · '+t('demoReview'):''}</small></blockquote>)}
@@ -209,6 +247,16 @@ export default function Marketplace(){
         </article>;})}</div>
       </section>}
 
+      {view==='help'&&<section className="help-topics narrow" key={helpTopic} aria-label={t('supportLabel')}>
+        {Object.entries(journeys).map(([topic,steps])=><details className="panel" key={topic} open={helpTopic===topic||undefined}>
+          <summary>{t(topic)}</summary>
+          <ol>{steps.map(([,key])=><li key={key}><strong>{t(key)}</strong><p>{t(key+'Detail')}</p></li>)}</ol>
+        </details>)}
+        <details className="panel" open={helpTopic==='safeWork'||undefined}>
+          <summary>{t('safeWork')}</summary>
+          <p>{t('identityHelp')}</p>
+        </details>
+      </section>}
       {view==='auth'&&<div className="auth-grid"><form className="panel stack" onSubmit={e=>{e.preventDefault();const f=fields(e);send(signup?'signup':'login',f,()=>go('find'));}}>
         {signup&&<label>{t('name')}<input name="name" required maxLength={70} autoComplete="name"/></label>}
         <label>{t('email')}<input name="email" required type="email" maxLength={254} autoComplete="email"/></label>
@@ -232,31 +280,34 @@ export default function Marketplace(){
             {job.thread&&<button className="quiet" onClick={()=>{select(job.thread);go('inbox');}}>{t('booking')}</button>}
             {!job.thread&&job.offer_count>0&&<button className="quiet" onClick={()=>{const match=data.threads.find(item=>item.job===job.id&&item.state==='pending')||data.threads.find(item=>item.job===job.id);if(match)select(match.id);go('inbox');}}>{t('inbox')} · {job.pending_count}</button>}
           </div>
+          <WorkBrief listing={job} t={t}/>
           {job.status==='open'&&<details><summary>{t('closeJob')}</summary><p>{t('closeJobHelp')}</p>
             <button className="quiet" disabled={busy} onClick={()=>send('closeJob',{id:job.id})}>{t('closeJob')}</button></details>}
         </article>)}
       </section>}
       {view==='post'&&role==='employer'&&<form className="panel stack narrow" key={editing?.id||'new'} onSubmit={e=>{
-        e.preventDefault();const f=fields(e);send(editing?'editJob':'job',{...f,...(editing?{id:editing.id}:{}),
+        e.preventDefault();if(photoPreparing)return;const f=fields(e);send(editing?'editJob':'job',{...f,...(editing?{id:editing.id}:{}),
           amount:paise(f.amount),hours:Number(f.hours),starts:new Date(f.starts).toISOString(),
           ...(near?{point:{lat:Number(near.lat.toFixed(2)),lng:Number(near.lng.toFixed(2))}}:{})},()=>go('myJobs'));
       }}>
         <label>{t('draft')}<input name="title" required maxLength={90} defaultValue={editing?.title}/></label>
         <div className="pair">{categoryField(editing?.category)}{areaField(editing?.area)}</div>
         <label>{t('description')}<textarea name="description" required maxLength={1400} defaultValue={editing?.description}/></label>
+        <WorkBriefFields t={t} listing={editing} disabled={busy} onPreparingChange={setPhotoPreparing}/>
         <div className="pair"><label>{t('amount')}<input required name="amount" type="number" min="50" max="1000000" step=".01" defaultValue={editing?Number(editing.amount)/100:''}/></label>
           <label>{t('hours')}<input required name="hours" type="number" min="1" max="48" defaultValue={editing?.hours}/></label></div>
         <label>{t('starts')}<input required name="starts" type="datetime-local" defaultValue={localInput(editing?.starts)}/></label>
-        <div className="buttons"><button className="primary" disabled={busy}>{t(editing?'saveJob':'submit')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
+        <div className="buttons"><button className="primary" disabled={busy||photoPreparing}>{t(editing?'saveJob':'submit')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
       </form>}
 
       {view==='profile'&&role==='worker'&&<div className="auth-grid">
-        <form className="panel stack" key={data.user.id} onSubmit={e=>{e.preventDefault();const f=fields(e);send('profile',{...f,available:f.available==='on',rate:paise(f.rate),point:near?{lat:Number(near.lat.toFixed(2)),lng:Number(near.lng.toFixed(2))}:data.profile?.lat!=null?{lat:data.profile.lat,lng:data.profile.lng}:undefined});}}>
+        <form className="panel stack" key={data.user.id} onSubmit={e=>{e.preventDefault();if(photoPreparing)return;const f=fields(e);send('profile',{...f,available:f.available==='on',rate:paise(f.rate),point:near?{lat:Number(near.lat.toFixed(2)),lng:Number(near.lng.toFixed(2))}:data.profile?.lat!=null?{lat:data.profile.lat,lng:data.profile.lng}:undefined});}}>
           <div className="pair">{categoryField(data.profile?.category)}{areaField(data.profile?.area)}</div>
           <label>{t('bio')}<textarea name="bio" required maxLength={400} defaultValue={data.profile?.bio}/></label>
+          <WorkBriefFields t={t} listing={data.profile} sample disabled={busy} onPreparingChange={setPhotoPreparing}/>
           <label>{t('rate')}<input name="rate" required type="number" min="50" max="1000000" step=".01" defaultValue={data.profile?Number(data.profile.rate)/100:''}/></label>
           <label className="check"><input type="checkbox" name="available" defaultChecked={data.profile?.available??true}/>{t('available')}</label>
-          <div className="buttons"><button className="primary" disabled={busy}>{t('save')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
+          <div className="buttons"><button className="primary" disabled={busy||photoPreparing}>{t('save')}</button><button className="quiet" type="button" onClick={locate}>{t(near?'nearbyOn':'nearby')}</button></div>
         </form>
         <WorkerVerification data={data} t={t} date={date} send={send} busy={busy}/>
       </div>}
@@ -268,6 +319,7 @@ export default function Marketplace(){
           <h2>{selected.title}</h2><p>{date(selected.starts)} · {t(selected.booking||selected.state)}</p>
           {booking&&conversationCurrent&&<BookingProgress state={booking} events={data.events||[]} t={t} date={date}/>}
           <div className="quote"><strong>{cash(selected.amount)}</strong><p>{selected.note}</p></div>
+          <WorkBrief listing={selected} t={t} includeDescription/>
           {selected.state==='pending'&&selected.author!==data.user.id&&<>
             <div className="buttons"><button className="primary" disabled={busy} onClick={()=>send('decide',{id:thread,decision:'accept',version:selected.version})}>{t('accept')}</button><button className="quiet" disabled={busy} onClick={()=>send('decide',{id:thread,decision:'decline',version:selected.version})}>{t('decline')}</button></div>
             <details><summary>{t('counter')}</summary><form className="stack inline" onSubmit={e=>{e.preventDefault();const f=fields(e);send('counter',{id:thread,amount:paise(f.amount),note:f.note,version:selected.version});}}>{quoteFields(Number(selected.amount)/100)}<button className="primary" disabled={busy}>{t('counter')}</button></form></details>
@@ -288,6 +340,36 @@ export default function Marketplace(){
         </section>:<div className="panel empty">{t('choose')}</div>}
       </div>}
     </main>
-    <div className="foot"><ClipboardList size={16}/> SWABHIMAN · {t('city')}</div>
+    <footer className="site-footer">
+      <div className="footer-inner">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <a className="brand" href="#page-start" onClick={()=>go('find')}><span aria-hidden="true"/>SWABHIMAN</a>
+            <p>{t('intro')}</p>
+          </div>
+          <nav className="footer-links" aria-label={t('marketplaceLabel')}>
+            <h2>{t('marketplaceLabel')}</h2>
+            <a href="#page-start" onClick={()=>go('find')}>{t('find')}</a>
+            <a href="#page-start" onClick={()=>go('work')}>{t('work')}</a>
+          </nav>
+          <nav className="footer-links" aria-label={t('accountLabel')}>
+            <h2>{t('accountLabel')}</h2>
+            {role?<><a href="#page-start" onClick={()=>go(role==='worker'?'profile':'myJobs')}>{t(role==='worker'?'profile':'myJobs')}</a>
+              <a href="#page-start" onClick={()=>go('inbox')}>{t('inbox')}</a></>:<>
+              <a href="#page-start" onClick={()=>{setSignup(false);go('auth');}}>{t('login')}</a>
+              <a href="#page-start" onClick={startJourney}>{t('signup')}</a></>}
+          </nav>
+          <nav className="footer-links" aria-label={t('supportLabel')}>
+            <h2>{t('supportLabel')}</h2>
+            {['howHire','howWork','safeWork'].map(topic=><a key={topic} href="#page-start"
+              onClick={()=>{setHelpTopic(topic);go('help');}}>{t(topic)}</a>)}
+          </nav>
+        </div>
+        <div className="footer-end">
+          <span><MapPin size={16} aria-hidden="true"/>{t('city')}</span>
+          <a href="#site-top"><ArrowUp size={16} aria-hidden="true"/>{t('backTop')}</a>
+        </div>
+      </div>
+    </footer>
   </>;
 }

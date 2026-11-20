@@ -1,2 +1,0 @@
-import { fileURLToPath } from 'node:url';
-export default { outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)), poweredByHeader: false, devIndicators: false, experimental: { cpus: 1 } };

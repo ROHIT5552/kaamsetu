@@ -3,10 +3,6 @@ import { createHmac,randomUUID } from 'node:crypto';
 import { openDatabase } from '../lib/connection.mjs';
 
 const origin=process.env.APP_ORIGIN;
-const callbackOrigin=process.env.VERIFICATION_CALLBACK_ORIGIN || 'http://127.0.0.1:3001';
-if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(callbackOrigin)) {
-  throw new Error('Use a local verification callback origin.');
-}
 const key=process.env.VERIFICATION_WEBHOOK_SECRET;
 if (process.env.KS_VERIFICATION_TEST!=='true' || !/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin||'') ||
     process.env.DEMO_MODE==='true' || !key) throw Error('Use a dedicated local verification test environment.');
@@ -15,7 +11,7 @@ const suffix=randomUUID();
 let worker='',employer='';
 function sign(value) {return createHmac('sha256',Buffer.from(key,'hex')).update(value).digest('hex');}
 async function json(path,options,status) {
-  const response=await fetch(path.startsWith("http://")?path:origin+path,options);
+  const response=await fetch(origin+path,options);
   const data=await response.json();
   assert.equal(response.status,status,path+': '+JSON.stringify(data));
   return {data,cookie:response.headers.get('set-cookie')?.split(';')[0]};
@@ -29,7 +25,7 @@ function action(cookie,action,input,status=200) {
 }
 function notify(payload,status=200,{timestamp=Math.floor(Date.now()/1000),valid=true}={}) {
   const body=JSON.stringify(payload);
-  return json(callbackOrigin+'/api/verification/provider',{method:'POST',body,headers:{
+  return json('/api/verification/provider',{method:'POST',body,headers:{
     'Content-Type':'application/json','x-ks-timestamp':String(timestamp),
     'x-ks-signature':valid?sign(timestamp+'.'+body):'0'.repeat(64)}},status);
 }

@@ -64,7 +64,7 @@ try {
       name=EXCLUDED.name,password=EXCLUDED.password WHERE accounts.demo RETURNING id`,
     ['sample'+i+'@demo.invalid',name,hashPassword(demoPasswords[i])]);
     workerIds.push(account.id);
-    await db.query('INSERT INTO profiles VALUES ($1,$2,$3,$4,$5,true,$6,$7) ON CONFLICT(account) DO NOTHING',
+    await db.query('INSERT INTO profiles(account,category,area,rate,bio,available,lat,lng) VALUES ($1,$2,$3,$4,$5,true,$6,$7) ON CONFLICT(account) DO NOTHING',
       [account.id,category,area,rate*100,bio,lat,lng]);
     for(const kind of category==='electrical'?['identity','electrical-license']:['identity']){
       await db.query("INSERT INTO credentials VALUES ($1,$2,$3,'seed',now()) ON CONFLICT DO NOTHING",

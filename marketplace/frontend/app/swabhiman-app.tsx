@@ -1078,10 +1078,17 @@ export default function SwabhimanApp() {
                 aria-label="SWABHIMAN Home"
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setActiveTab("find"); setSelectedSkill("all"); } }}
               >
+                {/* Light Theme Logo */}
                 <img
                   src="/swabhiman-logo.png"
                   alt="SWABHIMAN"
-                  className="h-11 sm:h-12 md:h-13 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102"
+                  className="h-9 sm:h-11 md:h-12 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102 dark:hidden"
+                />
+                {/* Dark / Black Theme Logo */}
+                <img
+                  src="/swabhiman-logo-dark.png"
+                  alt="SWABHIMAN"
+                  className="h-9 sm:h-11 md:h-12 w-auto object-contain drop-shadow-xs transition-transform group-hover:scale-102 hidden dark:block"
                 />
               </div>
 
@@ -5051,9 +5058,9 @@ export default function SwabhimanApp() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <img
-                      src="/swabhiman-logo.png"
+                      src="/swabhiman-logo-dark.png"
                       alt="SWABHIMAN"
-                      className="h-11 sm:h-12 w-auto object-contain drop-shadow-xs"
+                      className="h-11 sm:h-12 w-auto object-contain drop-shadow-md brightness-105"
                     />
                   </div>
                   <div className="text-[11px] text-[#F2A900] font-bold tracking-wider uppercase">
